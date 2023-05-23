@@ -7,7 +7,8 @@ import earlyLung from "@/views/lung/earlyLung";
 import connectMining from "@/components/tab/connectMining.vue";
 import dangePredict from "@/components/tab/dangePredict.vue";
 import dataManage from "@/components/tab/dataManage.vue";
-import modelManage from "@/components/tab/modelManage.vue"
+import modelManage from "@/components/tab/modelManage.vue";
+import userManage from "@/components/tab/userManage.vue";
 import importModel from "@/components/tab/importModel";
 Vue.use(VueRouter)
 
@@ -49,6 +50,11 @@ const routes = [
           path:'/modelManage',
           name:'modelManage',
           component:modelManage,
+        },
+        {
+            path: '/userManage',
+            name: 'userManage',
+            component:userManage,
         },
         {
           path:'/importModel',

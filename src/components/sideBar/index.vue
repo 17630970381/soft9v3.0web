@@ -4,7 +4,7 @@
       <el-header class="header">
         <el-menu class="el-menu-demo" mode="horizontal" @select="handleSelect">
           <el-menu-item index="1" style="color: cornflowerblue"
-            ><i class="el-icon-box"></i>多病种关联关系挖掘工具软件</el-menu-item
+            ><i class="el-icon-box"></i>基于多任务学习的多病种疾病风险预测</el-menu-item
           >
           <!--            <template slot="title">当前服务器：</template>-->
           <el-menu-item index="2" style="float: right"
@@ -32,16 +32,24 @@
               <i class="el-icon-menu"></i>
               <span slot="title">首页</span>
             </el-menu-item>
-            <el-submenu index="2">
+            <!-- <el-submenu index="2">
               <template slot="title">
                 <i class="el-icon-location"></i>
-                <span>肺癌</span>
+                <span>用户管理</span>
               </template>
               <el-menu-item-group>
                 <el-menu-item index="/earlyLung">肺癌早期风险预测</el-menu-item>
                 <el-menu-item index="/metastasis">肺癌转移预测</el-menu-item>
               </el-menu-item-group>
-            </el-submenu>
+            </el-submenu> -->
+            <el-menu-item index="/dataManage">
+                  <i class="el-icon-menu"></i>
+                  <span slot="title">数据管理</span>
+            </el-menu-item>
+            <el-menu-item index="/userManage">
+                  <i class="el-icon-menu"></i>
+                  <span slot="title">用户管理</span>
+            </el-menu-item>
           </el-menu>
         </el-aside>
         <el-main class="main">
