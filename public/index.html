@@ -3,8 +3,11 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- 开启移动端理想视口 -->
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!-- base-url写法是推荐写法，等效目录是public，防止进入服务器后出现路径错误 -->
     <link rel="icon" href="<%= BASE_URL %>favicon.ico">
+    <!-- 该写法是webpack的插件功能，从package.json文件中找name属性放过来 -->
     <title><%= htmlWebpackPlugin.options.title %></title>
   </head>
   <body>

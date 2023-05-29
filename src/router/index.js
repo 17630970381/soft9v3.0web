@@ -3,7 +3,7 @@ import VueRouter from 'vue-router'
 import SideBar from '@/components/sideBar/index.vue'
 import dash from '@/views/dash/index.vue'
 import metastasis from "@/views/lung/metastasis";
-import earlyLung from "@/views/lung/earlyLung";
+// import earlyLung from "@/views/lung/earlyLung";
 import connectMining from "@/components/tab/connectMining.vue";
 import dangePredict from "@/components/tab/dangePredict.vue";
 import dataManage from "@/components/tab/dataManage.vue";
@@ -27,15 +27,11 @@ const routes = [
         path : '/metastasis',
         name: 'metastasis',
         component : metastasis
-      },
+        },
       {
-        path : '/earlyLung',
-        name: 'earlyLung',
-        component : earlyLung,
-        children:[{
-          path:'/connectMining',
-          name:'connectMining',
-          component:connectMining,
+        path:'/connectMining',
+        name:'connectMining',
+        component:connectMining,
         },{
           path:'/dangePredict',
           name:'dangePredict',
@@ -44,7 +40,8 @@ const routes = [
         {
           path:'/dataManage',
           name:'dataManage',
-          component:dataManage,
+            component: dataManage,
+            
         },
         {
           path:'/modelManage',
@@ -61,8 +58,6 @@ const routes = [
           name:'importModel',
           component:importModel,
         }
-      ]
-      },
     ]
   },
 ]

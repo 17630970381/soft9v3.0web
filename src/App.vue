@@ -7,6 +7,7 @@
     <router-view v-if="isRouterAlive"/>
   </div>
 </template>
+
 <script>
 export default {
   data () {
@@ -16,6 +17,7 @@ export default {
   },
 }
 </script>
+
 <style lang="scss">
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
