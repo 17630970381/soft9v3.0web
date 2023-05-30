@@ -127,21 +127,21 @@ export default {
           router: "/dataManage",
         },
         {
-          title: "模型管理",
-          img: require("../../assets/ModelManage.png"),
-          router: "/modelManage",
+          title: "用户管理",
+          img: require("../../assets/UserManage.png"),
+          router: "/userManage",
         },
-        {
-          title: "多病种关联关系挖掘",
-          img: require("../../assets/mutipile.png"),
-          router: "/connectMining",
-        },
-        {
-          title: "疾病预测",
-          img: require("../../assets/feiai.png"),
-          router: "/dangePredict",
-        },
-        { title: "其他功能", img: require("../../assets/other.png") },
+        // {
+        //   title: "多病种关联关系挖掘",
+        //   img: require("../../assets/mutipile.png"),
+        //   router: "/connectMining",
+        // },
+        // {
+        //   title: "疾病预测",
+        //   img: require("../../assets/feiai.png"),
+        //   router: "/dangePredict",
+        // },
+        // { title: "其他功能", img: require("../../assets/other.png") },
       ],
       diseaseData: [
         {
@@ -170,7 +170,7 @@ export default {
   methods: {
     quickLink(index) {
       console.log(this.quickEntry[index].router);
-      this.$router.replace(this.quickEntry[index].router);
+      this.$router.push(this.quickEntry[index].router);
     },
     chart1() {
       var chartDom = document.getElementById('login');
