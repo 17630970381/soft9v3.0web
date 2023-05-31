@@ -10,7 +10,7 @@ export default {
     name:'LogIN',
     methods: {
         toUser(){
-            this.$router.push('/Predict');
+            this.$router.push('/UserSideBar');
         },
         toManage(){
             this.$router.push('/sideBar');

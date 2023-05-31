@@ -10,8 +10,9 @@ import dataManage from "@/components/tab/dataManage.vue";
 import modelManage from "@/components/tab/modelManage.vue";
 import userManage from "@/components/tab/userManage.vue";
 import LogIn from "@/views/LogIn.vue"
+import UserSideBar from "@/components/user/UserSideBar.vue"
 import Predict from "@/components/user/Predict.vue"
-// import importModel from "@/components/tab/importModel";
+import DieaseIntro from "@/components/user/DieaseIntro.vue"
 Vue.use(VueRouter)
 
 const routes = [
@@ -50,9 +51,18 @@ const routes = [
         ]
     },
     {
-        path: '/Predict',
-        name: 'Predict',
-        component: Predict,
+        path: '/UserSideBar',
+        name: 'UserSideBar',
+        component: UserSideBar,
+        children: [{
+            path: 'Predict',
+            name: 'Predict',
+            component: Predict
+        }, {
+            path: 'DieaseIntro',
+            name: 'DieaseIntro',
+            component: DieaseIntro
+        }]
     },
         
             // {
