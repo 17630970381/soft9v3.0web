@@ -1,5 +1,5 @@
 <template>
-    <el-container>
+    <el-container style="height: 100vh; border: 1px solid #eee">
         <el-header id="Header">
             <el-menu class="el-menu-demo" mode="horizontal" @select="handleSelect">
                 <el-menu-item index="1" style="color: cornflowerblue"
@@ -19,7 +19,7 @@
         </el-header>
 
         <el-container>
-            <el-aside width="200px" id="Aside">
+            <el-aside width="200px" id="Aside"  style="height: 100vh; background-color: rgb(238, 241, 246)" >
                 <el-menu
                     default-active="1"
                     router
