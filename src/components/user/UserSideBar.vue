@@ -34,7 +34,7 @@
                         <i class="el-icon-menu"></i>
                         <span slot="title">健康咨询</span>
                     </el-menu-item>
-                    <el-menu-item index="/#">
+                    <el-menu-item index="/##">
                         <i class="el-icon-menu"></i>
                         <span slot="title">个人信息</span>
                     </el-menu-item>
@@ -43,16 +43,6 @@
 
             <el-main id="Main">
                 <router-view></router-view>
-                    <!-- <div id="PartList">
-                        <div v-for="(p) of part" :key="p.index">
-                            <span class="partName">{{p.name}}</span>
-                            <el-switch 
-                            v-model="p.active"
-                            @change="swtch(p.index)" 
-                            ></el-switch>
-                            <br/><br/>
-                        </div>
-                    </div> -->
             </el-main>
         </el-container>
     </el-container>
@@ -60,65 +50,29 @@
 </template>
 
 <script>
-import dangePredictVue from '../tab/dangePredict.vue';
 export default {
     name:"Predict",
-    components:{dangePredictVue},
     data() {
         return {
-            part:[{
-                index:'back',
-                name:'背部',
-                active: false
-            },{
-                index:'arms',
-                name:'四肢',
-                active: false
-            },{
-                index:'five',
-                name:'五官',
-                active: false
-            },{
-                index:'digest',
-                name:'消化系统',
-                active: false
-            },{
-                index:'urinary',
-                name:'泌尿系统',
-                active: false
-            },{
-                index:'liver',
-                name:'肝脏',
-                active: false
-            },{
-                index:'heart',
-                name:'心脏',
-                active: false
-            },{
-                index:'head',
-                name:'神经头部',
-                active: false
-            },{
-                index:'body',
-                name:'身体控制',
-                active: false
-            },{
-                index:'skin',
-                name:'皮肤',
-                active: false
-            }
-            ],
             
-            value3: true,
         }
     },
     methods:{
-        swtch(index){
-            for(var i = 0;i<this.part.length;i++){
-                if(this.part[i].index != index){
-                    this.part[i].active = false;
-                }
+        handleSelect(key) {
+            if (key == 4) {
+                this.$alert("多病种之间具有复杂关联关系，同时多种疾病可能存在某些相同的病征。本软件采用机器学习方法来挖掘多病种之间的复杂关联关系。本软件根据不同疾病的不同使用场景，能够完成数据选择，数据处理，特征选择，模型设置，模型预测等功能。", "软件介绍", {
+                confirmButtonText: "确定",
+                callback: (action) => {
+                    this.$message({
+                    type: "info",
+                    message: `action: ${action}`,
+                    });
+                },
+                });
             }
+        },
+        handleOpen(key, keyPath) {
+            console.log(key, keyPath);
         },
     }
 
@@ -126,22 +80,10 @@ export default {
 </script>
 
 <style scoped>
-    .partName{
-        display: inline-block;
-        width: 80px;
-        text-align: center;
-    }
-
-    #Header{
-        /* background-color: aquamarine; */
-    }
+    
 
     #Aside{
         /* background-color: rgb(150, 73, 73); */
         height: 200px;
-    }
-
-    #Main{
-        /* background-color: blueviolet; */
     }
 </style>
