@@ -8,82 +8,72 @@
         </el-steps>
       </div>
     </el-header>
-    
+
     <el-divider></el-divider>
 
     <!-- -------------------------------------症状选择页面---------------------------------------------- -->
-    <el-main  v-show="symptom.isShow">
-        <el-collapse v-model="symptom.activeNames" id="select">
-            <el-collapse-item v-for="(p,index1) of symptom.part" :key="p.code" :name="p.code">
-                <template slot="title">
-                    <span id="part">{{p.name}} {{p.code}}</span>
-                </template>
-                <span v-for="(symp,index2) of p.symp" :key="symp.code">
-                    <span class="sympName">{{symp.name}}</span>
-                    <el-switch 
-                    v-model="symp.isGet"
-                    @change="changeGetted(index1,index2)" 
-                    ></el-switch>
-                </span>
-            </el-collapse-item>
-            <div style="height: 50px;">
-                <el-tag
-                    class="tag"
-                    v-for="tag in symptom.getted"
-                    :key="tag.code"
-                    closable
-                    @close="delTag(tag.code)"
-                    >
-                    {{tag.name}}
-                </el-tag>
-            </div>
-        </el-collapse>
-        <el-button id="next" type="primary" @click="submitPredict" style="margin-left: 45%;margin-top: 50px;" round>
-            提交预测
-        </el-button>
+    <el-main v-show="symptom.isShow">
+      <el-collapse v-model="symptom.activeNames" id="select">
+        <el-collapse-item v-for="(p,index1) of symptom.part" :key="p.code" :name="p.code">
+          <template slot="title">
+            <span id="part">{{p.name}} {{p.code}}</span>
+          </template>
+          <span v-for="(symp,index2) of p.symp" :key="symp.code">
+            <span class="sympName">{{symp.name}}</span>
+            <el-switch v-model="symp.isGet" @change="changeGetted(index1,index2)"></el-switch>
+          </span>
+        </el-collapse-item>
+        <div style="height: 50px;">
+          <el-tag
+            class="tag"
+            v-for="tag in symptom.getted"
+            :key="tag.code"
+            closable
+            @close="delTag(tag.code)"
+          >{{tag.name}}</el-tag>
+        </div>
+      </el-collapse>
+      <el-button id="next" type="primary" @click="submitPredict" style="margin-left: 45%;margin-top: 50px;" round>提交预测</el-button>
     </el-main>
 
     <!-- -------------------------------------疾病预测页面---------------------------------------------- -->
     <el-main v-show="predict.isShow">
-        <h1 id="title">预诊结果</h1>
-        <el-row id="cardList" :gutter="30" type="flex" justify="center">
-            <el-col :span="6" v-for="(disease,index) of predict.disease" :key="index">
-                <el-card :body-style="{ padding: '10px'}" class="card">
-                    <!-- 卡片头 -->
-                    <div slot="header" id="cardHead">
-                        <i class="el-icon-warning changecolor"></i>
-                        <span>{{disease.name}}</span>
-                    </div>
-                    <!-- 卡片内容 -->
-                    <div style="padding: 14px;" id="cardContent">
-                        <div>
-                            <span class="changecolor">推荐就诊科室：</span>
-                            <span>{{disease.dptment}}</span>
-                        </div>
-                        
-                        <div>
-                            <div class="changecolor">本疾病或有以下症状：</div>
-                            <div>{{disease.symp}}</div>
-                        </div>
+      <h1 id="title">预诊结果</h1>
+      <el-row id="cardList" :gutter="30" type="flex" justify="center">
+        <el-col :span="6" v-for="(disease,index) of predict.disease" :key="index">
+          <el-card :body-style="{ padding: '10px'}" class="card">
+            <!-- 卡片头 -->
+            <div slot="header" id="cardHead">
+              <i class="el-icon-warning changecolor"></i>
+              <span>{{disease.name}}</span>
+            </div>
+            <!-- 卡片内容 -->
+            <div style="padding: 14px;" id="cardContent">
+              <div>
+                <span class="changecolor">推荐就诊科室：</span>
+                <span>{{disease.dptment}}</span>
+              </div>
 
-                        <div>
-                            <div class="changecolor">建议采取下列预防措施：</div>
-                            <div>{{disease.prevent}}</div>
-                        </div>
-                    </div>
+              <div>
+                <div class="changecolor">本疾病或有以下症状：</div>
+                <div>{{disease.symp}}</div>
+              </div>
 
-                </el-card>
-            </el-col>
-        </el-row>
-        <el-button type="success" @click="done" style="margin-left: 45%;margin-top: 50px;" round>
-            完成
-        </el-button>
+              <div>
+                <div class="changecolor">建议采取下列预防措施：</div>
+                <div>{{disease.prevent}}</div>
+              </div>
+            </div>
+          </el-card>
+        </el-col>
+      </el-row>
+      <el-button type="success" @click="done" style="margin-left: 45%;margin-top: 50px;" round>完成</el-button>
     </el-main>
-    
   </div>
 </template>
 
 <script>
+import parts from './js/predict'
 export default {
     name: 'Predict',
     data(){
@@ -92,110 +82,8 @@ export default {
             symptom: {
                 isShow: true,
                 activeNames:[],
-                part:[{
-                        code:'face',
-                        name:'五官',
-                        symp:[{
-                            code:'puffy_face_and_eyes',
-                            name:'脸和眼睛浮肿',
-                            isGet:false,
-                        },{
-                            code:'drying_and_tingling_lips',
-                            name:'嘴唇干燥',
-                            isGet:false,
-                        },{
-                            code:'sinus_pressure',
-                            name:'鼻窦炎',
-                            isGet:false,
-                        },{
-                            code:'runny_nose',
-                            name:'流鼻涕',
-                            isGet:false,
-                        },{
-                            code:'visual_disturbances',
-                            name:'视觉障碍',
-                            isGet:false,
-                        }]
-                    },{
-                        code:'back',
-                        name:'背部',
-                        symp:[{
-                            code:'back_pain',
-                            name:'背痛',
-                            isGet:false,
-                        },{
-                            code:'scurring',
-                            name:'脱皮',
-                            isGet:false,
-                        },{
-                            code:'red_spots_over_body',
-                            name:'小疹子',
-                            isGet:false,
-                        },{
-                            code:'muscle_weakness',
-                            name:'肌肉无力',
-                            isGet:false,
-                        }]
-                    },{
-                        code:'arms',
-                        name:'四肢',
-                        symp:[{
-                            code:'weakness_in_limbs',
-                            name:'四肢无力',
-                            isGet:false,
-                        },{
-                            code:'swollen_extremeties',
-                            name:'四肢肿胀',
-                            isGet:false,
-                        },{
-                            code:'knee_pain',
-                            name:'膝盖疼痛',
-                            isGet:false,
-                        },{
-                            code:'prominent_veins_on_calf',
-                            name:'小腿静脉突出',
-                            isGet:false,
-                        },{
-                            code:'hip_joint_pain',
-                            name:'髋关节疼痛',
-                            isGet:false,
-                        }]
-                    },{
-                        code:'belly',
-                        name:'腹部',
-                        symp:[{
-                            code:'abdominal_pain',
-                            name:'腹痛',
-                            isGet:false,
-                        },{
-                            code:'diarrhoea',
-                            name:'腹泻',
-                            isGet:false,
-                        },{
-                            code:'swelling_of_stomach',
-                            name:'胃部肿胀',
-                            isGet:false,
-                        },{
-                            code:'palpitations',
-                            name:'心悸',
-                            isGet:false,
-                        }]
-                    },{
-                        code:'head',
-                        name:'头部',
-                        symp:[{
-                            code:'dizziness',
-                            name:'头晕',
-                            isGet:false,
-                        },{
-                            code:'depression',
-                            name:'抑郁',
-                            isGet:false,
-                        }]
-                    }
-                ],
-                getted:[
-                ]
+                part:JSON.parse(JSON.stringify(parts)),
+                getted:[]
             },
             predict: {
                 isShow: false,
@@ -265,10 +153,8 @@ export default {
         },
 
         done(){
-            console.log(this.symptom.getted)
-            for(let tag in this.symptom.getted){//清空症状选择
-                this.delTag(this.symptom.getted[tag].code);
-            }
+            this.symptom.getted=[]
+            this.symptom.part=JSON.parse(JSON.stringify(parts))
             this.symptom.getted = [];
             this.symptom.activeNames = [];
             this.predict.isShow = false;//切换页面
@@ -281,93 +167,91 @@ export default {
 </script>
 
 <style scoped>
-    #step{
-        margin-top: 20px;
-    }
+#step {
+  margin-top: 20px;
+}
 
-    .sympName{
-        font-size: 15px;
-        display: inline-block;
-        margin-right: 8px;
-        margin-left: 25px;
-        text-align: center;
-        position: relative;
-        top: 2px;
-    }
+.sympName {
+  font-size: 15px;
+  display: inline-block;
+  margin-right: 8px;
+  margin-left: 25px;
+  text-align: center;
+  position: relative;
+  top: 2px;
+}
 
-    #select{
-        width: 70%;
-        margin-left: auto;
-        margin-right: auto;
-    }
+#select {
+  width: 70%;
+  margin-left: auto;
+  margin-right: auto;
+}
 
-    .tag{
-        margin-top: 5px;
-        margin-bottom: 5px;
-        margin-left: 8px;
-    }
+.tag {
+  margin-top: 5px;
+  margin-bottom: 5px;
+  margin-left: 8px;
+}
 
-    #part{
-        font-size: 18px;
-        font-weight: bold;
-    }
+#part {
+  font-size: 18px;
+  font-weight: bold;
+}
 
-    #symp{
-        font-size: 15px;
-    }
+#symp {
+  font-size: 15px;
+}
 
-    #title{
-        text-align: center;
-        font-size: 25px;
-    }
+#title {
+  text-align: center;
+  font-size: 25px;
+}
 
-    #cardList{
-        margin-top: 50px;
-    }
+#cardList {
+  margin-top: 50px;
+}
 
-    .card{
-        width: 100%;
-    }
+.card {
+  width: 100%;
+}
 
-    #cardHead{
-        display: flex;
-        justify-content: center; /* 水平居中 */
-        align-items: center; /* 垂直居中 */
-    }
+#cardHead {
+  display: flex;
+  justify-content: center; /* 水平居中 */
+  align-items: center; /* 垂直居中 */
+}
 
-    #cardContent > div{
-        margin-bottom: 10px;
-    }
+#cardContent > div {
+  margin-bottom: 10px;
+}
 
-    .titleImg{
-        max-width: 30%;
-    }
+.titleImg {
+  max-width: 30%;
+}
 
-    h3{
-        text-align: center;
-    }
+h3 {
+  text-align: center;
+}
 
-    i{
-        font-size: 30px;
-        
-    }
+i {
+  font-size: 30px;
+}
 
-    .changecolor{
-        color: #2fcbb6;
-    }
+.changecolor {
+  color: #2fcbb6;
+}
 
 /* 文字与icon对齐 */
-    #cardHead > span{
-        text-align: center;
-        font-size: 25px;
-        font-weight: bold;
-        position: relative;
-        top: -1px;
-        margin-left: 5px;
-    }
+#cardHead > span {
+  text-align: center;
+  font-size: 25px;
+  font-weight: bold;
+  position: relative;
+  top: -1px;
+  margin-left: 5px;
+}
 
-    #dptment{
-        color: #2fcbb6;
-
-    }
+#dptment {
+  color: #2fcbb6;
+}
 </style>
