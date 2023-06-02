@@ -3,52 +3,60 @@ import { Message } from 'element-ui'
 import router from '../router'
 
 const server = axios.create({
-    // 过期时间
-    timeout: 20000,
-    headers: {
-      'Content-Type': 'application/json;charset=UTF-8',
-    },
-  })
-server.defaults.baseURL='/api'
+  // 过期时间
+  timeout: 20000,
+  headers: {
+    'Content-Type': 'application/json;charset=UTF-8',
+  },
+})
 
-//   请求拦截器
+server.defaults.baseURL = '/api'
+
+// 请求拦截器
 server.interceptors.request.use(
-    config => {
-        // 在发送请求之前做些什么
-      return config;
-    },
-  )
+  config => {
+    // 在发送请求之前可以进行一些处理，例如添加认证信息等
+    // config.headers['Authorization'] = 'Bearer ' + getToken();
+    return config
+  },
+  error => {
+    // 请求错误处理
+    return Promise.reject(error)
+  }
+)
 
-//   响应拦截器
-  server.interceptors.response.use(
-    (res) => {
-      // 2xx 范围内的状态码都会触发该函数。
-      // 对响应数据做点什么
-      let msg = res.data['msg'] || '未知错误，请联系管理员'
-      switch (res.code) {
-        case 401:{
-          msg = '认证失败，无法访问系统资源'
-          router.replace('/');
-          break
-        }
-          //......
-        case 'default':
-          msg = '系统未知错误'
-          break
-      }
-      if (res.code === 200) {
-        return Promise.resolve(msg)
-      } else {
-        Message.error(msg)
-        return Promise.reject(msg)
-      }
-    },
-    (error) => {
-      // 超出 2xx 范围的状态码都会触发该函数
-      // 对响应错误做点什么
-      return Promise.reject(error)
+// 响应拦截器
+server.interceptors.response.use(
+  response => {
+    // 对响应数据进行处理
+    const res = response.data
+    let msg = res.msg || '未知错误，请联系管理员'
+    switch (res.code) {
+      case 401:
+        msg = '认证失败，无法访问系统资源'
+        router.replace('/')
+        break
+    
+      default:
+        msg = '系统未知错误'
+        break
     }
-  )
+    if (res.code === 200) {
+      return Promise.resolve(msg)
+    } else {
+      Message.error(msg)
+      return Promise.reject(msg)
+    }
+  },
+  error => {
+    // 响应错误处理
+    if (error.code === 'ECONNABORTED') {
+        // 请求超时
+        console.log('请求超时');
+        
+    }
+    return Promise.reject('请求超时')
+  }
+)
 
-
-export default server;
+export default server
