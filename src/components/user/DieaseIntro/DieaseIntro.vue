@@ -7,7 +7,7 @@
       <Body :selectName="selectName" @select="select" :hoverName="hoverName" @hover="hover"></Body>
     </div>
     <div class="right">
-      <Info :selectName="selectName" @hover="hover"></Info>
+      <Info :selectName="selectName" @hover="hover"  @select="select"></Info>
     </div>
   </div>
 </template>
@@ -34,10 +34,10 @@ export default {
     },
     watch:{
     selectName() {
-      console.log(this.selectName);
+      // console.log(this.selectName);
     },
     hoverName(){
-      console.log(this.hoverName);
+      // console.log(this.hoverName);
     }
   }
 
