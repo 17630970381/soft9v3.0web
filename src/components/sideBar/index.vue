@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-container class="con">
+    <el-container   class="con">
       <el-header class="header">
         <el-menu class="el-menu-demo" mode="horizontal" @select="handleSelect">
           <el-menu-item index="1" style="color: cornflowerblue"
@@ -21,7 +21,7 @@
         </el-menu>
       </el-header>
       <el-container>
-        <el-aside width="200px" class="side">
+        <el-aside width="200px"  class="side">
           <el-menu
             default-active="1"
             router

@@ -12,7 +12,7 @@ import userManage from "@/components/tab/userManage.vue";
 import LogIn from "@/views/LogIn.vue"
 import UserSideBar from "@/components/user/UserSideBar.vue"
 import Predict from "@/components/user/Predict.vue"
-import DieaseIntro from "@/components/user/DieaseIntro.vue"
+import DieaseIntro from "@/components/user/DieaseIntro/DieaseIntro.vue"
 Vue.use(VueRouter)
 
 const routes = [
