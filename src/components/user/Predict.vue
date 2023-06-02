@@ -44,30 +44,30 @@
           <el-card :body-style="{ padding: '10px'}" class="card">
             <!-- 卡片头 -->
             <div slot="header" id="cardHead">
-              <i class="el-icon-warning changecolor"></i>
+              <i class="el-icon-warning" :style="changeColor(index)"></i>
               <span>{{disease.name}}</span>
             </div>
             <!-- 卡片内容 -->
             <div style="padding: 14px;" id="cardContent">
               <div>
-                <span class="changecolor">推荐就诊科室：</span>
+                <span :style="changeColor(index)">推荐就诊科室：</span>
                 <span>{{disease.dptment}}</span>
               </div>
 
               <div>
-                <div class="changecolor">本疾病或有以下症状：</div>
+                <div :style="changeColor(index)">本疾病或有以下症状：</div>
                 <div>{{disease.symp}}</div>
               </div>
 
               <div>
-                <div class="changecolor">建议采取下列预防措施：</div>
+                <div :style="changeColor(index)">建议采取下列预防措施：</div>
                 <div>{{disease.prevent}}</div>
               </div>
             </div>
           </el-card>
         </el-col>
       </el-row>
-      <el-button type="success" @click="done" style="margin-left: 45%;margin-top: 50px;" round>完成</el-button>
+      <el-button type="success" @click="done" style="margin-left: 47%;margin-top: 50px;" round>完成</el-button>
     </el-main>
   </div>
 </template>
@@ -116,8 +116,18 @@ export default {
             this.symptom.isShow = false;
             this.step = 2;
             this.predict.isShow = true;
-            console.log(this.symptom.getted)
         },
+
+        changeColor(index){
+        switch (index) {
+          case 0:
+            return 'color:#cb2f2f';
+          case 1:
+            return 'color:#f57710';
+          default:
+            return 'color:#2fcbb6';
+        }
+      },
 
         // 选项变化时同步更改tag
         changeGetted(pindex,sindex){
@@ -237,9 +247,9 @@ i {
   font-size: 30px;
 }
 
-.changecolor {
-  color: #2fcbb6;
-}
+/* .changecolor {
+  color: #f57710;
+} */
 
 /* 文字与icon对齐 */
 #cardHead > span {
@@ -252,6 +262,6 @@ i {
 }
 
 #dptment {
-  color: #2fcbb6;
+  color: #cb7a2f;
 }
 </style>
