@@ -37,11 +37,11 @@
     </el-main>
 
     <!-- -------------------------------------疾病预测页面---------------------------------------------- -->
-    <el-main v-show="predict.isShow">
+    <el-main v-loading="loading" v-show="predict.isShow">
       <h1 id="title">预诊结果</h1>
       <el-row id="cardList" :gutter="30" type="flex" justify="center">
         <el-col :span="6" v-for="(disease,index) of predict.disease" :key="index">
-          <el-card :body-style="{ padding: '10px'}" class="card">
+          <el-card :body-style="{ height:'260px',padding: '10px'}" class="card">
             <!-- 卡片头 -->
             <div slot="header" id="cardHead">
               <i class="el-icon-warning" :style="changeColor(index)"></i>
@@ -74,10 +74,13 @@
 
 <script>
 import parts from './js/predict'
+import dis from './js/disease.js'
+import {testget,testpost} from '@/api/user.js'
 export default {
     name: 'Predict',
     data(){
         return {
+            loading:false,
             step: 1,
             symptom: {
                 isShow: true,
@@ -87,35 +90,41 @@ export default {
             },
             predict: {
                 isShow: false,
-                disease:[{
-                    code:'jaundice',
-                    name:'黄疸',
-                    symp:'皮肤和眼睛呈现黄色，尿液变深，粪便变浅，可能伴有乏力、恶心、食欲不振等。',
-                    dptment:'消化内科、肝胆外科。',
-                    prevent:'保持良好的个人卫生，避免接触传染性黄疸的病人，注射乙肝疫苗，避免酗酒和不安全的性行为，定期进行肝功能检查。'
-
-                },{
-                    code:'Hypoglycemia',
-                    name:'低血糖',
-                    symp:'头晕、出汗、心悸、颤抖、饥饿感、混乱、疲劳、焦虑等。',
-                    dptment:'内分泌科、内科。',
-                    prevent:'定期监测血糖水平，保持规律的饮食，避免过度剧烈的运动，遵医嘱使用胰岛素或口服药物治疗糖尿病。'
-                },{
-                    code:'Arthritis',
-                    name:'关节炎',
-                    symp:'关节疼痛、肿胀、僵硬，可能伴有关节红肿、运动障碍、疲劳等。',
-                    dptment:'风湿免疫科、骨科。',
-                    prevent:'保持适度的体重，进行适度的锻炼，避免过度使用关节，保持良好的姿势和体位，避免受伤，定期进行健康检查。'
-                }]
+                disease:[],
             }
         }
     },
 
     methods:{
         submitPredict(){
+            let s1 = this.symptom.getted[0].code;
+            let s2 = this.symptom.getted[1].code;
+            let s3 = this.symptom.getted[2].code;
+            let s4 = this.symptom.getted[3].code;
+            let s5 = this.symptom.getted[4].code;
+            console.log(s1,s2,s3,s4,s5);
+            
+                this.loading = true
+              testpost(s1, s2, s3, s4, s5).then(res=>{
+              this.loading = false
+
+              console.log(`联通啦！！！！！！！！收到的是${[res]}`);
+              const data = res.map(item=>JSON.parse(item).code.trim())
+              console.log(data);//['xxx','yyy']
+              this.predict.disease = dis.filter(item=>{
+                return data.indexOf(item.code)!==-1
+              })
+              console.log(this.predict.disease);
+            });
             this.symptom.isShow = false;
             this.step = 2;
             this.predict.isShow = true;
+        },
+
+        mounted() {
+          this.init();
+          testget(1,2)
+          testpost(3,4)
         },
 
         changeColor(index){
@@ -222,6 +231,7 @@ export default {
 }
 
 .card {
+  
   width: 100%;
 }
 

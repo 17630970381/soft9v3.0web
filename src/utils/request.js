@@ -30,23 +30,26 @@ server.interceptors.response.use(
   response => {
     // 对响应数据进行处理
     const res = response.data
+    console.log(response);
     let msg = res.msg || '未知错误，请联系管理员'
-    switch (res.code) {
+    if (response.status === 200) {
+       msg = res.res
+      return Promise.resolve(msg)
+    }
+    switch (response.status) {
       case 401:
         msg = '认证失败，无法访问系统资源'
         router.replace('/')
         break
-    
+      
       default:
         msg = '系统未知错误'
         break
     }
-    if (res.code === 200) {
-      return Promise.resolve(msg)
-    } else {
+    
       Message.error(msg)
       return Promise.reject(msg)
-    }
+    
   },
   error => {
     // 响应错误处理

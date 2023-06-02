@@ -70,7 +70,6 @@
   </div>
 </template>
 <script>
-import {testget,testpost} from '@/api/user.js'
 export default {
   props: { selectName: String },
   data() {
@@ -123,11 +122,7 @@ export default {
       console.log(index,indexPath);
     },
   },
-  mounted() {
-    this.init();
-    testget(1,2)
-    testpost(3,4)
-  },
+
   watch: {
     selectName() {
       this.activeName = this.selectName ? this.selectName : "简介";
