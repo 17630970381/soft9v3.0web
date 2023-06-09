@@ -42,6 +42,14 @@
                 <el-menu-item index="/metastasis">肺癌转移预测</el-menu-item>
               </el-menu-item-group>
             </el-submenu> -->
+            <el-menu-item index="/Predict">
+                <i class="el-icon-menu"></i>
+                <span slot="title">风险预测</span>
+            </el-menu-item>
+            <el-menu-item index="/DieaseIntro">
+                <i class="el-icon-menu"></i>
+                <span slot="title">健康咨询</span>
+            </el-menu-item>
             <el-menu-item index="/dataManage">
                   <i class="el-icon-menu"></i>
                   <span slot="title">数据管理</span>
@@ -53,7 +61,8 @@
           </el-menu>
         </el-aside>
         <el-main class="main">
-          <app-main></app-main>
+          <!-- <app-main></app-main> -->
+          <router-view></router-view>
         </el-main>
       </el-container>
     </el-container>
@@ -61,9 +70,9 @@
 </template>
 
 <script>
-import AppMain from "@/components/AppMain";
+// import AppMain from "@/components/AppMain";
 export default {
-  components: { AppMain },
+  // components: { AppMain },
   data() {
     return {
       activeIndex: "1",
