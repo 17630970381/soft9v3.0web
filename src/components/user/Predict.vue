@@ -85,7 +85,7 @@
 
 <script>
 import parts from './js/predict'
-import dis from './js/disease.js'
+// import dis from './js/disease.js'
 import {testget,testpost} from '@/api/user.js'
 import Body from './DieaseIntro/components/Body.vue'
 export default {
@@ -120,17 +120,20 @@ export default {
             console.log(s1,s2,s3,s4,s5);
             
             this.loading = true
-            testpost(s1, s2, s3, s4, s5).then(res=>{
+            testpost(s1, s2, s3, s4, s5).then((res)=>{
               this.loading = false
-
-              console.log(`联通啦！！！！！！！！收到的是${res}`);
-              const data = res.map(item=>JSON.parse(item).code.trim())
-              console.log(`解析后是${data}`);//['xxx','yyy']
-              this.predict.disease = dis.filter(item=>{
-                return data.indexOf(item.code)!==-1
-              })
+              console.log(res);
+              // const data = res.map(item=>JSON.parse(item).code.trim())
+              // console.log(`解析后是${data}`);//['xxx','yyy']
+              // this.predict.disease = dis.filter(item=>{
+              //   return data.indexOf(item.code)!==-1
+              // })
+              this.predict.disease = res;
               console.log(this.predict.disease);
               this.predict.selectName = this.predict.disease[0].part;
+            })
+            .catch(error => {
+              console.log(error);
             });
             this.symptom.isShow = false;
             this.step = 2;
