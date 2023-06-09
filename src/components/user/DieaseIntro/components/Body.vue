@@ -1,5 +1,5 @@
 <template>
-  <div id="mychart"></div>
+  <div id="mychart" ref="mychart"></div>
 </template>
 <script>
 import * as echarts from "echarts";
@@ -57,7 +57,8 @@ export default {
     },
     initMyChart() {
       //   var ROOT_PATH = "server";
-      var chartDom = document.getElementById("mychart");
+      // var chartDom = document.getElementById("mychart");
+      var chartDom = this.$refs.mychart;
       var myChart = echarts.init(chartDom);
       this.myChart = myChart;
       var option;
@@ -142,9 +143,9 @@ export default {
 </script>
 <style scoped>
 #mychart {
-  width: 140%;
+  width: 100%;
   height: 100%;
-  transform: translateX(-20%);
+  transform: translateX(-5%);
   background-color: aliceblue;
 }
 </style>

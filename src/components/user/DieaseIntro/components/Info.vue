@@ -32,7 +32,7 @@
     </el-tab-pane>
   </el-tabs> -->
   <div id="sideMenu" style="width:20%">
-    <el-menu id="menus" ref="menus" default-active="9" v-model="activeName" @select="handleClick" :unique-opened="true">
+    <el-menu style="height:100vh;" id="menus" ref="menus" default-active="9" v-model="activeName" @select="handleClick">
       <el-submenu index="心脏">
         <template slot="title">心脏</template>
       </el-submenu>
@@ -122,7 +122,9 @@ export default {
       console.log(index,indexPath);
     },
   },
-
+  mounted(){
+    this.init()
+  },
   watch: {
     selectName() {
       this.activeName = this.selectName ? this.selectName : "简介";
