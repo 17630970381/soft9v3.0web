@@ -35,6 +35,23 @@ export function heartPost(age, sex, cp, trestbps, chol, fbs, restecg, thalach, e
   });
 }
 
+export function diseasePost() {
+  return request({
+    method: "post",
+    url: "/Diseases/api/diseases/findbypartNameAndNameAndCode",
+  });
+}
+
+export function disInfoGet(code) {
+  return request({
+    method: "get",
+    url: "/Diseases/api/diseases/findbycode",
+    params: {
+      code: code,
+    },
+  });
+}
+
 export function testget(params1, params2) {
   return request({
     method: "post",

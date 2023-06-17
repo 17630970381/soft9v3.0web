@@ -30,6 +30,8 @@
 
     <!-- -------------------------------------心脏病模型输入页面 --------------------------------------------------->
     <el-main v-if="heart.isShow" id="heartForm">
+      <!-- keep alive无效果，可删 -->
+        <keep-alive>
       <el-form :model="heart" :rules="heart.rules" ref="ruleForm" label-width="180px" class="demo-ruleForm">
         <el-form-item label="年龄" prop="age" required>
           <el-input v-model="heart.age"></el-input>
@@ -98,9 +100,10 @@
           <!-- <el-button @click="resetForm('ruleForm')">重置</el-button> -->
         </el-form-item>
       </el-form>
+        </keep-alive>
       
+    
     </el-main>
-
     <!-- -------------------------------------多病种模型输入参数页面---------------------------------------------- -->
     <el-main v-if="symptom.isShow">
       <el-collapse v-model="symptom.activeNames" id="select">
@@ -187,7 +190,8 @@
                 </div>
               </div>
             </el-card>
-            <div id="board" v-if="loading === false">
+            <!-- -->
+            <div id="board" v-if="loading === false" >
               <Board :rate="heart.rate"></Board>
             </div>
             
@@ -574,6 +578,7 @@ i {
   display: flex;
   justify-content: center;
   margin-right: 5%;
+  /* background-color: red; */
 }
 
 #highRiskCard ::v-deep .el-card__header{

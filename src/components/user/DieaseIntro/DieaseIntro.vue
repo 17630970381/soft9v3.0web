@@ -60,6 +60,7 @@ export default {
   flex: 1;
 }
 .right {
+
   background-color: rgb(240, 240, 240);
   flex: 2;
   border: 1px solid rgb(231, 229, 229);
