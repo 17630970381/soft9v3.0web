@@ -61,6 +61,10 @@
               <i class="el-icon-menu"></i>
               <span slot="title">风险预测</span>
             </el-menu-item>
+            <el-menu-item index="/Batch">
+              <i class="el-icon-menu"></i>
+              <span slot="title">批量预测</span>
+            </el-menu-item>
             <el-menu-item index="/dataManage">
               <i class="el-icon-menu"></i>
               <span slot="title">数据管理</span>

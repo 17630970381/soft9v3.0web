@@ -13,6 +13,7 @@ import LogIn from "@/views/LogIn.vue"
 import UserSideBar from "@/components/user/UserSideBar.vue"
 import Predict from "@/components/user/Predict.vue"
 import DieaseIntro from "@/components/user/DieaseIntro/DieaseIntro.vue"
+import Batch from "@/components/tab/Batch.vue"
 Vue.use(VueRouter)
 
 const routes = [
@@ -57,6 +58,11 @@ const routes = [
         name: "DieaseIntro_manager",
         component: DieaseIntro,
       },
+      {
+        path: "/Batch",
+        name: "Batch",
+        component: Batch,
+      }
     ],
   },
   {

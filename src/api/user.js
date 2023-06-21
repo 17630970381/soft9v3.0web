@@ -1,3 +1,4 @@
+//多病预测
 import request from "@/utils/request";
 export function testpost(params1, params2, params3, params4, params5) {
   return request({
@@ -13,6 +14,7 @@ export function testpost(params1, params2, params3, params4, params5) {
   });
 }
 
+//心脏病单例预测
 export function heartPost(age, sex, cp, trestbps, chol, fbs, restecg, thalach, exang, oldpeak, slope, ca, thal) {
   return request({
     method: "post",
@@ -35,6 +37,7 @@ export function heartPost(age, sex, cp, trestbps, chol, fbs, restecg, thalach, e
   });
 }
 
+// 获取按部位分的疾病列表
 export function diseasePost() {
   return request({
     method: "post",
@@ -42,6 +45,7 @@ export function diseasePost() {
   });
 }
 
+//健康资讯页面发送疾病码
 export function disInfoGet(code) {
   return request({
     method: "get",

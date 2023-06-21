@@ -3,7 +3,7 @@
     <el-header>
       <div id="step">
         <el-steps :active="step" align-center>
-          <el-step title="选择模型"></el-step>
+          <el-step title="选择疾病"></el-step>
           <el-step title="输入参数"></el-step>
           <el-step title="疾病预测"></el-step>
         </el-steps>
@@ -14,18 +14,21 @@
 
     <!-- -------------------------------------选择模型页面---------------------------------------------- -->
     <el-main v-if="modelPage">
-      <div id="modleSelect" style="display: flex,justify-content: center">
-        <h2>请选择模型：</h2>
-        <el-select v-model="model" placeholder="请选择模型">
-          <el-option
-            v-for="item in modelOptions"
-            :key="item.key"
-            :label="item.label"
-            :value="item.value">
-          </el-option>
-        </el-select>
+      <div id="modleSelect">
+        <h2>请选择您想预测的疾病：</h2>
+        <br>
+        <el-radio-group id="disGroup" v-model="model">
+          <el-radio v-for="dis,index in modelOptions" 
+          :key="index"
+          :label="dis.value"
+          class="disGroup-item"
+          border
+          :disabled="dis.disable"
+          >{{dis.name}}</el-radio>
+        </el-radio-group>
+
       </div>
-      <el-button type="primary" @click="next" style="margin-left: 45%;margin-top: 50px;" round>确认模型</el-button>
+      <el-button type="primary" @click="next" style="margin-left: 45%;margin-top: 50px;" round>确认</el-button>
     </el-main>
 
     <!-- -------------------------------------心脏病模型输入页面 --------------------------------------------------->
@@ -141,7 +144,7 @@
         <el-col class="right" :span="12">
 
           <!-- -------------------心脏病模型预测结果------------- -->
-          <div v-if="model === 1">
+          <div v-if="model === 2">
             <el-card :body-style="{ height:'260px',padding: '10px'}" id="highRiskCard" v-if="loading === false && heart.rate > 60">
               <!-- 卡片头 -->
               <div slot="header" id="cardHead">
@@ -198,7 +201,7 @@
           </div>
 
           <!-- -------------------多疾病模型预测结果-------------- -->
-          <div id="cardList" v-if="model === 2">
+          <div id="cardList" v-if="model === 1">
             <el-row v-for="(disease,index) of predict.disease" :key="index" type="flex" justify="center">
               <el-card :body-style="{ height:'260px',padding: '10px'}" class="card" shadow="hover" @click.native="clickcard(disease.part)" >
                 <!-- 卡片头 -->
@@ -237,8 +240,8 @@
 
 <script>
 import parts from './js/predict'
-// import dis from './js/disease.js'
-import {testget,testpost,heartPost} from '@/api/user.js'
+import modelOptions from './js/modelOptions.js'
+import {testpost,heartPost} from '@/api/user.js'
 import Body from './DieaseIntro/components/Body.vue'
 import Board from './Board.vue'
 export default {
@@ -250,16 +253,7 @@ export default {
             step: 1,
             model: '',
             modelPage: true,
-            modelOptions:[{
-                value: 1,
-                label: '心脏病预测模型',
-                key: 'heart'
-              },
-              {
-                value: 2,
-                label: '多疾病预测模型',
-                key: 'multiDis'
-              }],
+            modelOptions:modelOptions,
             heart: {
                 isShow: false,
                 age: '',
@@ -298,16 +292,17 @@ export default {
             switch(this.model){
               case 1:
                 this.modelPage = false;
-                this.symptom.isShow = false;
-                this.heart.isShow = true;
-                this.step = 2;
-                break;
-              case 2:
-                this.modelPage = false;
                 this.heart.isShow = false;
                 this.symptom.isShow = true;
                 this.step = 2;
                 break;
+              case 2:
+                this.modelPage = false;
+                this.symptom.isShow = false;
+                this.heart.isShow = true;
+                this.step = 2;
+                break;
+                
               default:
                 alert("请选择模型");
                 break;
@@ -334,13 +329,11 @@ export default {
           heartPost(p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13).then(res=>{
             this.predict.selectName = '心脏';
             let resres = res.res;
-            let result = JSON.parse(resres[0]);
-            let rate = JSON.parse(resres[1]);
+            let rate = JSON.parse(resres[0]);
             this.heart.rate = parseFloat((rate.probability*100).toFixed(2));
 
             this.loading = false;
             console.log(this.heart.rate)
-            console.log(result.result);
             console.log(rate.probability);
           })
           .catch(error => {
@@ -382,8 +375,6 @@ export default {
 
         mounted() {
           this.init();
-          testget(1,2);
-          testpost(3,4);
 
         },
 
@@ -461,12 +452,6 @@ export default {
   display: flex;
   justify-content: center;
   margin-right: 20%;
-}
-
-#modleSelect{
-  margin-top: 80px;
-  display: flex;
-  justify-content: center;
 }
 
 .sympName {
@@ -554,10 +539,6 @@ i {
   font-size: 30px;
 }
 
-/* .changecolor {
-  color: #f57710;
-} */
-
 /* 文字与icon对齐 */
 #cardHead > span {
   text-align: center;
@@ -600,5 +581,25 @@ i {
 }
 #lowRiskCard ::v-deep .el-card__body{
   background-color: #8abcd1;
+}
+
+#disGroup{
+  width: 60%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-content: center;
+}
+
+.disGroup-item{
+  width: 150px;
+  margin-bottom: 10px;
+
+}
+
+#modleSelect{
+  display: flex;
+  flex-direction: column;
+  margin-left: 20%;
 }
 </style>
