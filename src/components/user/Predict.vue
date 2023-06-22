@@ -4,7 +4,7 @@
       <div id="step">
         <el-steps :active="step" align-center>
           <el-step title="选择疾病"></el-step>
-          <el-step title="输入参数"></el-step>
+          <el-step title="输入病人情况"></el-step>
           <el-step title="疾病预测"></el-step>
         </el-steps>
       </div>
@@ -17,7 +17,7 @@
       <div id="modleSelect">
         <h2>请选择您想预测的疾病：</h2>
         <br>
-        <el-radio-group id="disGroup" v-model="model">
+        <el-radio-group id="disGroup" v-model="model" >
           <el-radio v-for="dis,index in modelOptions" 
           :key="index"
           :label="dis.value"
@@ -33,9 +33,15 @@
 
     <!-- -------------------------------------心脏病模型输入页面 --------------------------------------------------->
     <el-main v-if="heart.isShow" id="heartForm">
-      <!-- keep alive无效果，可删 -->
-        <keep-alive>
-      <el-form :model="heart" :rules="heart.rules" ref="ruleForm" label-width="180px" class="demo-ruleForm">
+      <el-switch
+        style="display: block"
+        v-model="heart.input"
+        active-color="#13ce66"
+        inactive-color="#409eff"
+        active-text="手动输入"
+        inactive-text="从已有病例中选择">
+      </el-switch>
+      <el-form :model="heart" :rules="heart.rules" ref="ruleForm" label-width="180px" class="demo-ruleForm" @keyup.native.enter="heartSubmit">
         <el-form-item label="年龄" prop="age" required>
           <el-input v-model="heart.age"></el-input>
         </el-form-item>
@@ -103,13 +109,13 @@
           <!-- <el-button @click="resetForm('ruleForm')">重置</el-button> -->
         </el-form-item>
       </el-form>
-        </keep-alive>
       
     
     </el-main>
     <!-- -------------------------------------多病种模型输入参数页面---------------------------------------------- -->
     <el-main v-if="symptom.isShow">
-      <el-collapse v-model="symptom.activeNames" id="select">
+      <!-- keyup事件监听不起作用 -->
+      <el-collapse v-model="symptom.activeNames" id="select" @keyup.native.enter="submitPredict">
         <el-collapse-item v-for="(p,index1) of symptom.part" :key="p.code" :name="p.code">
           <template slot="title">
             <span id="part">{{p.name}} {{p.code}}</span>
@@ -251,11 +257,12 @@ export default {
         return {
             loading:false,
             step: 1,
-            model: '',
+            model: 1,
             modelPage: true,
             modelOptions:modelOptions,
             heart: {
                 isShow: false,
+                input: false,
                 age: '',
                 sex: '',
                 cp: '',
@@ -287,6 +294,11 @@ export default {
     },
 
     methods:{
+
+        mounted() {
+          this.init();
+          this.$refs.disGroup.focus();
+        },
       
         next() {
             switch(this.model){
@@ -373,11 +385,6 @@ export default {
             this.predict.isShow = true;
         },
 
-        mounted() {
-          this.init();
-
-        },
-
         changeColor(index){
         switch (index) {
           case 0:
@@ -450,8 +457,10 @@ export default {
 
 #heartForm{
   display: flex;
+  flex-flow: column wrap;
   justify-content: center;
-  margin-right: 20%;
+  margin-right: 30%;
+  margin-left: 20%;
 }
 
 .sympName {
