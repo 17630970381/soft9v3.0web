@@ -8,7 +8,7 @@ export default {
   name: "Board",
   components: {},
   mixins: [],
-  props: { rate: Number, },
+  props: { rate: Number},
   data() {
     return {
     };
