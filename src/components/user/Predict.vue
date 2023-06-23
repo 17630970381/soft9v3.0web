@@ -29,9 +29,9 @@
 
       </div>
       <el-button id="btn" type="primary" @click="next()" style="margin-left: 45%;margin-top: 50px;" round>确认</el-button>
-      <!-- <div id="pie">
+      <div id="pie">
         <PieChart></PieChart>
-      </div> -->
+      </div>
       
     </el-main>
 

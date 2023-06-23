@@ -24,13 +24,13 @@ export default {
 
       option = {
         title: {
-          text: 'Nightingale Chart',
-          subtext: 'Fake Data',
+          text: '危险因素权重',
+          subtext: '仅供参考',
           left: 'center'
         },
         tooltip: {
           trigger: 'item',
-          formatter: '{a} <br/>{b} : {c} ({d}%)'
+          formatter: '{b} : {c} ({d}%)'
         },
         legend: {
           left: 'center',
@@ -57,21 +57,21 @@ export default {
         },
         series: [
           {
-            name: 'Area Mode',
+            name: '危险因素权重',
             type: 'pie',
             radius: [20, 140],
-            center: ['50%', '50%'],
+            center: ['50%', '45%'],
             roseType: 'area',
             itemStyle: {
               borderRadius: 5
             },
             data: [
-              { value: 0.559, name: '运动引起的ST型抑郁' },
-              { value: 0.314, name: 'rose 2' },
-              { value: 0.211, name: 'rose 3' },
-              { value: 0.638, name: 'rose 4' },
-              { value: 0.511, name: 'rose 5' },
-              { value: 0.038, name: 'rose 6' }
+              { value: 0.359, name: '血清胆固醇' },
+              { value: 0.314, name: '静息血压' },
+              { value: 0.261, name: '最大心率' },
+              { value: 0.114, name: '静息心电图' },
+              { value: 0.051, name: '地中海贫血' },
+              { value: 0.038, name: '运动时ST段峰值' }
             ]
           }
         ]
