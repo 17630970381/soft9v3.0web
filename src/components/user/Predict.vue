@@ -1,5 +1,6 @@
 <template>
   <div>
+    <!-- -------------步骤条----------------- -->
     <el-header>
       <div id="step">
         <el-steps :active="step" align-center>
@@ -35,6 +36,7 @@
     <!-- -------------------------------------心脏病模型输入页面 --------------------------------------------------->
     <el-main v-if="heart.isShow" id="heartForm">
       <el-tabs>
+        <!-- 从已有病人中选择预测 -->
         <el-tab-pane label="从已有病例选择" @click="getPatient()">
           <el-table
             :data="heart.patientTable"
@@ -119,19 +121,21 @@
             </el-table-column>
           </el-table>
         </el-tab-pane>
+
+        <!-- 手动输入病人预测 -->
         <el-tab-pane label="手动输入">
-          <el-form :model="heart" :rules="heart.rules" label-width="154px" @keyup.native.enter="heartSubmit">
+          <el-form :model="heart.feature" :rules="heart.feature.rules" label-width="154px" @keyup.native.enter="heartSubmit">
             <el-form-item label="年龄" prop="age" required>
-              <el-input v-model="heart.age"></el-input>
+              <el-input v-model="heart.feature.age"></el-input>
             </el-form-item>
             <el-form-item label="性别" prop="sex" required>
-              <el-select v-model="heart.sex" placeholder="请选择性别">
+              <el-select v-model="heart.feature.sex" placeholder="请选择性别">
                 <el-option label="男" value="male"></el-option>
                 <el-option label="女" value="female"></el-option>
               </el-select>
             </el-form-item>
             <el-form-item label="胸痛类型" required>
-              <el-select v-model="heart.cp" placeholder="请选择胸痛类型" prop="cp">
+              <el-select v-model="heart.feature.cp" placeholder="请选择胸痛类型" prop="cp">
                 <el-option label="典型心绞痛" value="1"></el-option>
                 <el-option label="非典型心绞痛" value="2"></el-option>
                 <el-option label="非心绞痛" value="3"></el-option>
@@ -139,45 +143,45 @@
               </el-select>
             </el-form-item>
             <el-form-item label="静息血压(mmHg)" prop="trestbps" required>
-              <el-input v-model="heart.trestbps"></el-input>
+              <el-input v-model="heart.feature.trestbps"></el-input>
             </el-form-item>
             <el-form-item label="血清胆固醇(mg/dl)" prop="chol" required>
-              <el-input v-model="heart.chol"></el-input>
+              <el-input v-model="heart.feature.chol"></el-input>
             </el-form-item>
             <el-form-item label="空腹血糖(mg/dl)" prop="fbs" required>
-              <el-input v-model="heart.fbs"></el-input>
+              <el-input v-model="heart.feature.fbs"></el-input>
             </el-form-item>
             <el-form-item label="静息心电图" prop="restecg" required>
-              <el-select v-model="heart.restecg" placeholder="请选择心电图结果">
+              <el-select v-model="heart.feature.restecg" placeholder="请选择心电图结果">
                 <el-option label="正常" value="0"></el-option>
                 <el-option label="有ST-T波异常" value="1"></el-option>
                 <el-option label="左心室肥大" value="2"></el-option>
               </el-select>
             </el-form-item>
             <el-form-item label="最大心率" prop="thalach" required>
-              <el-input v-model="heart.thalach"></el-input>
+              <el-input v-model="heart.feature.thalach"></el-input>
             </el-form-item>
             <el-form-item label="运动诱发性心绞痛" prop="exang" required>
-              <el-select v-model="heart.exang" placeholder="是否有该症状">
+              <el-select v-model="heart.feature.exang" placeholder="是否有该症状">
                 <el-option label="是" value="1"></el-option>
                 <el-option label="否" value="0"></el-option>
               </el-select>
             </el-form-item>
             <el-form-item label="运动时ST段下降程度" prop="oldpeak" required>
-              <el-input v-model="heart.oldpeak" placeholder="请输入整数或小数" ></el-input>
+              <el-input v-model="heart.feature.oldpeak" placeholder="请输入整数或小数" ></el-input>
             </el-form-item>
             <el-form-item label="运动时ST段峰值" prop="slope" required>
-              <el-select v-model="heart.slope" placeholder="请选择ST段形状">
+              <el-select v-model="heart.feature.slope" placeholder="请选择ST段形状">
                 <el-option label="向上倾斜" value="1"></el-option>
                 <el-option label="平坦" value="2"></el-option>
                 <el-option label="下坡" value="3"></el-option>
               </el-select>
             </el-form-item>
             <el-form-item label="主要血管数量(0-3)" prop="ca" required>
-              <el-input v-model="heart.ca"></el-input>
+              <el-input v-model="heart.feature.ca"></el-input>
             </el-form-item>
             <el-form-item label="地中海贫血" prop="thal" required>
-              <el-select v-model="heart.thal" placeholder="请选择症状">
+              <el-select v-model="heart.feature.thal" placeholder="请选择症状">
                 <el-option label="正常" value="3"></el-option>
                 <el-option label="固定缺陷" value="6"></el-option>
                 <el-option label="可逆缺陷" value="7"></el-option>
@@ -285,7 +289,7 @@
               <Board :rate="heart.rate"></Board>
             </div> -->
             <div id="pie" v-if="loading === false">
-              <PieChart :contribute="heart.contribute"></PieChart>
+              <PieChart :contribute="heart.contribute" :rate="heart.rate"></PieChart>
             </div>
             
           </div>
@@ -347,20 +351,22 @@ export default {
           modelOptions:modelOptions,
           heart: {
             isShow: false,
-            input: false,
-            age: '',
-            sex: '',
-            cp: '',
-            trestbps: '',
-            chol: '',
-            fbs: '',
-            restecg: '',
-            thalach: '',
-            exang: '',
-            oldpeak: '',
-            slope: '',
-            ca: '',
-            thal: '',
+            // input: false,
+            feature:{
+              age: '',
+              sex: '',
+              cp: '',
+              trestbps: '',
+              chol: '',
+              fbs: '',
+              restecg: '',
+              thalach: '',
+              exang: '',
+              oldpeak: '',
+              slope: '',
+              ca: '',
+              thal: ''
+            },
             rate: 0,
             patientTable: [],
             contribute:[],
@@ -499,6 +505,7 @@ export default {
             }
         },
 
+        // 把权重数据转为饼状图所需格式
         dataToPieChart(obj){
           let pieData = [];
           let sum = 0;
@@ -522,43 +529,27 @@ export default {
           return pieData;
         },
 
+        // 手动提交心脏病预测
         heartSubmit(){
-          let p1 = this.heart.age;
-          let p2 = this.heart.sex;
-          let p3 = this.heart.cp;
-          let p4 = this.heart.trestbps;
-          let p5 = this.heart.chol;
-          let p6 = this.heart.fbs;
-          let p7 = this.heart.restecg;
-          let p8 = this.heart.thalach;
-          let p9 = this.heart.exang;
-          let p10 = this.heart.oldpeak;
-          let p11 = this.heart.slope;
-          let p12 = this.heart.ca;
-          let p13 = this.heart.thal;
-
           this.loading = true;
-          heartPost(p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13).then(res=>{
+          heartPost(this.heart.feature).then(res=>{
             this.predict.selectName = '心脏';
-            console.log(res);
             let rate = JSON.parse(res[0]).probability;
-            let contribute = JSON.parse(res[1]).contributions;
-            console.log(contribute);
-            console.log(rate);
             this.heart.rate = parseFloat((rate*100).toFixed(2));
+            this.heart.contribute = this.dataToPieChart(JSON.parse(res[1]).contributions);
 
             this.loading = false;
-            console.log(this.heart.rate)
           })
           .catch(error => {
               console.log(error);
           })
+          
           this.heart.isShow = false;
           this.step = 3;
           this.predict.isShow = true;
         },
 
-        //选择病人预测
+        //选择病人进行心脏病预测
         heartSubmit2(row) {
           this.loading = true;
           heartPost2(row.patientId).then(res=>{
@@ -568,11 +559,11 @@ export default {
             this.heart.contribute = this.dataToPieChart(JSON.parse(res[1]).contributions);
 
             this.loading = false;
-            console.log(this.heart.rate)
           })
           .catch(error => {
               console.log(error);
           })
+
           this.heart.isShow = false;
           this.step = 3;
           this.predict.isShow = true;

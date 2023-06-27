@@ -6,7 +6,7 @@
 import * as echarts from "echarts";
 export default {
   name: "PieChart",
-  props: { contribute:Array },
+  props: { contribute:Array, rate:Number},
   data(){
     return {
     }  
@@ -25,7 +25,7 @@ export default {
       option = {
         title: {
           text: '危险因素权重',
-          subtext: '仅供参考',
+          subtext: `您的患病风险是${this.rate}%`,
           left: 'center'
         },
         tooltip: {
