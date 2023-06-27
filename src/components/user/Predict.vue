@@ -29,9 +29,6 @@
 
       </div>
       <el-button id="btn" type="primary" @click="next()" style="margin-left: 45%;margin-top: 50px;" round>确认</el-button>
-      <div id="pie">
-        <PieChart></PieChart>
-      </div>
       
     </el-main>
 
@@ -48,7 +45,6 @@
             row-key="patientId"
             >
             <el-table-column type="expand">
-
               <template slot-scope="detail">
                 <el-form label-position="left" inline class="detail">
                   <el-form-item label="胸痛类型：">
@@ -75,13 +71,13 @@
                   <el-form-item label="运动时ST段下降程度：">
                     <span>{{ detail.row.oldpeak }}</span>
                   </el-form-item>
-                  <el-form-item label="运动时ST段峰值">
+                  <el-form-item label="运动时ST段峰值：">
                     <span>{{ detail.row.slope }}</span>
                   </el-form-item>
-                  <el-form-item label="主要血管数量">
+                  <el-form-item label="主要血管数量：">
                     <span>{{ detail.row.ca }}</span>
                   </el-form-item>
-                  <el-form-item label="地中海贫血">
+                  <el-form-item label="地中海贫血：">
                     <span>{{ detail.row.thal }}</span>
                   </el-form-item>
                 </el-form>
@@ -109,7 +105,8 @@
             </el-table-column>
             <el-table-column
               label="地址"
-              prop="address">
+              prop="address"
+              width="300px">
             </el-table-column>
             <el-table-column label="操作">
               <template slot-scope="item">
@@ -199,8 +196,7 @@
     </el-main>
     <!-- -------------------------------------多病种模型输入参数页面---------------------------------------------- -->
     <el-main v-if="symptom.isShow">
-      <!-- keyup事件监听不起作用 -->
-      <el-collapse v-model="symptom.activeNames" id="select" @keyup.native.enter="submitPredict">
+      <el-collapse v-model="symptom.activeNames" id="select">
         <el-collapse-item v-for="(p,index1) of symptom.part" :key="p.code" :name="p.code">
           <template slot="title">
             <span id="part">{{p.name}} {{p.code}}</span>
@@ -285,8 +281,11 @@
               </div>
             </el-card>
             <!-- -->
-            <div id="board" v-if="loading === false" >
+            <!-- <div id="board" v-if="loading === false" >
               <Board :rate="heart.rate"></Board>
+            </div> -->
+            <div id="pie" v-if="loading === false">
+              <PieChart :contribute="heart.contribute"></PieChart>
             </div>
             
           </div>
@@ -332,13 +331,12 @@
 <script>
 import parts from './js/predict'
 import modelOptions from './js/modelOptions.js'
-import {testpost,heartPost,patientGet,patientDetailGet,heartPost2} from '@/api/user.js'
+import {testpost,heartPost,patientGet,heartPost2} from '@/api/user.js'
 import Body from './DieaseIntro/components/Body.vue'
-import Board from './Board.vue'
 import PieChart from './PieChart.vue'
 export default {
     name: 'Predict',
-    components:{Body: Body, Board: Board, PieChart: PieChart},
+    components:{Body: Body, PieChart: PieChart},
     computed:{},
     data(){
         return {
@@ -365,6 +363,7 @@ export default {
             thal: '',
             rate: 0,
             patientTable: [],
+            contribute:[],
           },
           symptom: {
             isShow: false,
@@ -477,7 +476,6 @@ export default {
               }
             }
             this.heart.patientTable = res;
-            console.log(this.heart.patientTable);
           })
         },
         next() {
@@ -501,6 +499,29 @@ export default {
             }
         },
 
+        dataToPieChart(obj){
+          let pieData = [];
+          let sum = 0;
+          for(let key in obj){
+            let tempobj = {
+              value: obj[key],
+              name: key
+            }
+            pieData.push(tempobj);
+            sum += +obj[key];
+          }
+          console.log(sum)
+          if(sum < 1){
+            let other = {
+              value: 1-sum,
+              name: "其他"
+            }
+            pieData.push(other);
+          }
+
+          return pieData;
+        },
+
         heartSubmit(){
           let p1 = this.heart.age;
           let p2 = this.heart.sex;
@@ -519,13 +540,15 @@ export default {
           this.loading = true;
           heartPost(p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13).then(res=>{
             this.predict.selectName = '心脏';
-            let resres = res.res;
-            let rate = JSON.parse(resres[0]);
-            this.heart.rate = parseFloat((rate.probability*100).toFixed(2));
+            console.log(res);
+            let rate = JSON.parse(res[0]).probability;
+            let contribute = JSON.parse(res[1]).contributions;
+            console.log(contribute);
+            console.log(rate);
+            this.heart.rate = parseFloat((rate*100).toFixed(2));
 
             this.loading = false;
             console.log(this.heart.rate)
-            console.log(rate.probability);
           })
           .catch(error => {
               console.log(error);
@@ -535,25 +558,17 @@ export default {
           this.predict.isShow = true;
         },
 
-        //获取用户概要信息
-        getPatient(){
-          patientGet().then((res)=>{
-
-          })
-        },
-
         //选择病人预测
         heartSubmit2(row) {
           this.loading = true;
           heartPost2(row.patientId).then(res=>{
             this.predict.selectName = '心脏';
-            let resres = res.res;
-            let rate = JSON.parse(resres[0]);
-            this.heart.rate = parseFloat((rate.probability*100).toFixed(2));
+            let rate = JSON.parse(res[0]).probability;
+            this.heart.rate = parseFloat((rate*100).toFixed(2));
+            this.heart.contribute = this.dataToPieChart(JSON.parse(res[1]).contributions);
 
             this.loading = false;
             console.log(this.heart.rate)
-            console.log(rate.probability);
           })
           .catch(error => {
               console.log(error);
@@ -664,8 +679,9 @@ export default {
 }
 
 #heartForm{
-  display: flex;
-  flex-flow: column wrap;
+  /* why：这里使用flex布局会有问题：每展开一次表格宽度都会增加 */
+  /* display: flex; */
+  /* flex-flow: column wrap; */
   /* justify-content: center; */
   margin-right: 15%;
   margin-left: 15%;
@@ -749,7 +765,7 @@ export default {
 
 h1 {
   text-align: center;
-  margin-right: 10%;
+  /* margin-right: 10%; */
 }
 
 i {
@@ -825,7 +841,6 @@ i {
 .disGroup-item{
   width: 150px;
   margin-bottom: 10px;
-
 }
 
 #modleSelect{
@@ -837,5 +852,7 @@ i {
 #pie{
   width: 500px;
   height: 500px;
+  margin-left: 10%;
+  margin-top: 5%;
 }
 </style>

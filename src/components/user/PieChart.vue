@@ -6,7 +6,7 @@
 import * as echarts from "echarts";
 export default {
   name: "PieChart",
-  props: { rate:Number },
+  props: { contribute:Array },
   data(){
     return {
     }  
@@ -30,49 +30,28 @@ export default {
         },
         tooltip: {
           trigger: 'item',
-          formatter: '{b} : {c} ({d}%)'
-        },
-        legend: {
-          left: 'center',
-          top: 'bottom',
-          data: [
-            'rose1',
-            'rose2',
-            'rose3',
-            'rose4',
-            'rose5',
-            'rose6',
-            'rose7',
-            'rose8'
-          ]
+          formatter: '{b} : {d}%'
         },
         toolbox: {
-          show: true,
+          // show: true,
           feature: {
-            mark: { show: true },
-            dataView: { show: true, readOnly: false },
+            // mark: { show: true },
+            // dataView: { show: true, readOnly: false },
             // restore: { show: true },
-            saveAsImage: { show: true }
+            // saveAsImage: { show: true }
           }
         },
         series: [
           {
-            name: '危险因素权重',
+            // name: '危险因素权重',
             type: 'pie',
-            radius: [20, 140],
-            center: ['50%', '45%'],
-            roseType: 'area',
+            radius: '50%',
+            center: ['50%', '50%'],
+            // roseType: 'area',
             itemStyle: {
-              borderRadius: 5
+              borderRadius: 0
             },
-            data: [
-              { value: 0.359, name: '血清胆固醇' },
-              { value: 0.314, name: '静息血压' },
-              { value: 0.261, name: '最大心率' },
-              { value: 0.114, name: '静息心电图' },
-              { value: 0.051, name: '地中海贫血' },
-              { value: 0.038, name: '运动时ST段峰值' }
-            ]
+            data: this.contribute
           }
         ]
       };

@@ -56,19 +56,11 @@ export function disInfoGet(code) {
   });
 }
 
-//获取病人概要信息
+//获取病人信息
 export function patientGet() {
   return request({
     method: "get",
-    url: "/Patient/patients",
-  });
-}
-
-//获取病人详细信息
-export function patientDetailGet(url) {
-  return request({
-    method: "get",
-    url: url,
+    url: "/PatientHeartAll/patient",
   });
 }
 
@@ -77,9 +69,8 @@ export function heartPost2(id) {
   return request({
     method: "post",
     url: "/runtime_bus/submit-sp.heart1",
-    data: {
-      patientId: id
-    }
+    data: id,
+    timeout: 20000,
   });
 }
 
