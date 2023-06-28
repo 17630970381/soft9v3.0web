@@ -6,7 +6,20 @@
 import * as echarts from "echarts";
 export default {
   name: "PieChart",
-  props: { contribute:Array, rate:Number},
+  props: { 
+    data:{
+      type: Array,
+      default: ()=> []
+    }, 
+    title:{
+      type: String,
+      default: ''
+    }, 
+    subtitle:{
+      type:String,
+      default: ''
+    }
+    },
   data(){
     return {
     }  
@@ -24,13 +37,13 @@ export default {
 
       option = {
         title: {
-          text: '危险因素权重',
-          subtext: `您的患病风险是${this.rate}%`,
+          text: this.title,
+          subtext: this.subtitle,
           left: 'center'
         },
         tooltip: {
           trigger: 'item',
-          formatter: '{b} : {d}%'
+          formatter: '{b} : {c} ({d}%)'
         },
         toolbox: {
           // show: true,
@@ -46,12 +59,12 @@ export default {
             // name: '危险因素权重',
             type: 'pie',
             radius: '50%',
-            center: ['50%', '50%'],
+            center: ['50%', '40%'],
             // roseType: 'area',
             itemStyle: {
               borderRadius: 0
             },
-            data: this.contribute
+            data: this.data
           }
         ]
       };

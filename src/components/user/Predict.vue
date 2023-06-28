@@ -310,7 +310,10 @@
     </el-main>
 
     <!-- -------------------------------------疾病预测页面---------------------------------------------- -->
-    <el-main id="resultMain" v-loading="loading" v-if="predict.isShow">
+    <el-main id="resultMain" v-if="predict.isShow" 
+    v-loading="loading" 
+    element-loading-text="正在预测中" 
+    >
       <el-row :gutter="20">
         <!------------------- 人体模型 ----------------->
         <el-col class="left" :span="12" >
@@ -375,7 +378,7 @@
               <Board :rate="heart.rate"></Board>
             </div> -->
             <div id="pie" v-if="loading === false">
-              <PieChart :contribute="heart.contribute" :rate="heart.rate"></PieChart>
+              <PieChart :data="heart.contribute" :title="'危险因素权重'" :subtitle="`您的患病风险是${heart.rate}%`"></PieChart>
             </div>
             
           </div>
@@ -619,16 +622,21 @@ export default {
           return pieData;
         },
 
+        //心脏病预测结果处理
+        processHeartRes(res){
+          this.predict.selectName = '心脏';
+          let rate = JSON.parse(res[0]).probability;
+          this.heart.rate = parseFloat((rate*100).toFixed(2));
+          this.heart.contribute = this.dataToPieChart(JSON.parse(res[1]).contributions);
+
+          this.loading = false;
+        },
+
         // 手动提交心脏病预测
         heartSubmit(){
           this.loading = true;
           heartPost(this.heart.feature).then(res=>{
-            this.predict.selectName = '心脏';
-            let rate = JSON.parse(res[0]).probability;
-            this.heart.rate = parseFloat((rate*100).toFixed(2));
-            this.heart.contribute = this.dataToPieChart(JSON.parse(res[1]).contributions);
-
-            this.loading = false;
+            this.processHeartRes(res);
           })
           .catch(error => {
               console.log(error);
@@ -643,12 +651,7 @@ export default {
         heartSubmit2(row) {
           this.loading = true;
           heartPost2(row.patientId).then(res=>{
-            this.predict.selectName = '心脏';
-            let rate = JSON.parse(res[0]).probability;
-            this.heart.rate = parseFloat((rate*100).toFixed(2));
-            this.heart.contribute = this.dataToPieChart(JSON.parse(res[1]).contributions);
-
-            this.loading = false;
+            this.processHeartRes(res);
           })
           .catch(error => {
               console.log(error);
@@ -759,19 +762,18 @@ export default {
             let s3 = this.symptom.getted[2].code;
             let s4 = this.symptom.getted[3].code;
             let s5 = this.symptom.getted[4].code;
-            console.log(s1,s2,s3,s4,s5);
             
             this.loading = true
             testpost(s1, s2, s3, s4, s5).then((res)=>{
               this.loading = false
-              console.log(res);
+              // console.log(res);
               // const data = res.map(item=>JSON.parse(item).code.trim())
               // console.log(`解析后是${data}`);//['xxx','yyy']
               // this.predict.disease = dis.filter(item=>{
               //   return data.indexOf(item.code)!==-1
               // })
               this.predict.disease = res;
-              console.log(this.predict.disease);
+              // console.log(this.predict.disease);
               this.predict.selectName = this.predict.disease[0].part;
             })
             .catch(error => {
