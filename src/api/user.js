@@ -1,5 +1,6 @@
 //多病预测
 import request from "@/utils/request";
+// testpost无用，可删
 export function testpost(params1, params2, params3, params4, params5) {
   return request({
     method: "post",
@@ -60,6 +61,15 @@ export function heartPost2(id) {
   });
 }
 
+//新增病例接口
+export function patientAddPost(data) {
+  return request({
+    method: "post",
+    url: "",
+    data
+  })
+}
+
 export function testget(params1, params2) {
   return request({
     method: "post",
@@ -70,3 +80,4 @@ export function testget(params1, params2) {
     },
   });
 }
+

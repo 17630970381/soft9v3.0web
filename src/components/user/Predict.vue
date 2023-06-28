@@ -116,10 +116,95 @@
                   size="mini"
                   type="primary"
                   plain
+                  round
                   @click="heartSubmit2(item.row)">预测该病人</el-button>
               </template>
             </el-table-column>
           </el-table>
+          <el-button type="primary" size="medium" round style="margin-left: 68%; margin-top: 25px" 
+          @click="heart.patientAddVisible = true">
+          添加新病例
+          </el-button>
+          <el-dialog title="新增病例" :visible.sync="heart.patientAddVisible">
+            <el-form :model="heart.feature" :rules="heart.feature.rules" label-width="154px" @keyup.native.enter="patientAdd('heart')">
+              <el-form-item label="病人ID" prop="patientId" required>
+                <el-input v-model="heart.feature.patientId"></el-input>
+              </el-form-item>
+              <el-form-item label="姓名" prop="name" required>
+                <el-input v-model="heart.feature.name"></el-input>
+              </el-form-item>
+              <el-form-item label="地址" prop="address">
+                <el-input v-model="heart.feature.address"></el-input>
+              </el-form-item>
+              <el-form-item label="年龄" prop="age" required>
+                <el-input v-model="heart.feature.age"></el-input>
+              </el-form-item>
+              <el-form-item label="性别" prop="sex" required>
+                <el-select v-model="heart.feature.sex" placeholder="请选择性别">
+                  <el-option label="男" value="male"></el-option>
+                  <el-option label="女" value="female"></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item label="胸痛类型" required>
+                <el-select v-model="heart.feature.cp" placeholder="请选择胸痛类型" prop="cp">
+                  <el-option label="典型心绞痛" value="1"></el-option>
+                  <el-option label="非典型心绞痛" value="2"></el-option>
+                  <el-option label="非心绞痛" value="3"></el-option>
+                  <el-option label="渐近心痛" value="4"></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item label="静息血压(mmHg)" prop="trestbps" required>
+                <el-input v-model="heart.feature.trestbps"></el-input>
+              </el-form-item>
+              <el-form-item label="血清胆固醇(mg/dl)" prop="chol" required>
+                <el-input v-model="heart.feature.chol"></el-input>
+              </el-form-item>
+              <el-form-item label="空腹血糖(mg/dl)" prop="fbs" required>
+                <el-input v-model="heart.feature.fbs"></el-input>
+              </el-form-item>
+              <el-form-item label="静息心电图" prop="restecg" required>
+                <el-select v-model="heart.feature.restecg" placeholder="请选择心电图结果">
+                  <el-option label="正常" value="0"></el-option>
+                  <el-option label="有ST-T波异常" value="1"></el-option>
+                  <el-option label="左心室肥大" value="2"></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item label="最大心率" prop="thalach" required>
+                <el-input v-model="heart.feature.thalach"></el-input>
+              </el-form-item>
+              <el-form-item label="运动诱发性心绞痛" prop="exang" required>
+                <el-select v-model="heart.feature.exang" placeholder="是否有该症状">
+                  <el-option label="是" value="1"></el-option>
+                  <el-option label="否" value="0"></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item label="运动时ST段下降程度" prop="oldpeak" required>
+                <el-input v-model="heart.feature.oldpeak" placeholder="请输入整数或小数" ></el-input>
+              </el-form-item>
+              <el-form-item label="运动时ST段峰值" prop="slope" required>
+                <el-select v-model="heart.feature.slope" placeholder="请选择ST段形状">
+                  <el-option label="向上倾斜" value="1"></el-option>
+                  <el-option label="平坦" value="2"></el-option>
+                  <el-option label="下坡" value="3"></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item label="主要血管数量(0-3)" prop="ca" required>
+                <el-input v-model="heart.feature.ca"></el-input>
+              </el-form-item>
+              <el-form-item label="地中海贫血" prop="thal" required>
+                <el-select v-model="heart.feature.thal" placeholder="请选择症状">
+                  <el-option label="正常" value="3"></el-option>
+                  <el-option label="固定缺陷" value="6"></el-option>
+                  <el-option label="可逆缺陷" value="7"></el-option>
+                </el-select>
+              </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+              <el-button round size="medium" @click="heart.patientAddVisible = false;heartClear()">取 消</el-button>
+              <el-button round size="medium" @click="heartClear()">重置</el-button>
+              <el-button type="primary" round size="medium" @click="patientAdd('heart')">确 定</el-button>
+            </div>
+          </el-dialog>
         </el-tab-pane>
 
         <!-- 手动输入病人预测 -->
@@ -193,6 +278,7 @@
             </el-form-item>
           </el-form>
         </el-tab-pane>
+        
       </el-tabs>
       
       
@@ -335,7 +421,7 @@
 <script>
 import parts from './js/predict'
 import modelOptions from './js/modelOptions.js'
-import {testpost,heartPost,patientGet,heartPost2} from '@/api/user.js'
+import {testpost,heartPost,patientGet,heartPost2,patientAddPost} from '@/api/user.js'
 import Body from './DieaseIntro/components/Body.vue'
 import PieChart from './PieChart.vue'
 export default {
@@ -351,8 +437,12 @@ export default {
           modelOptions:modelOptions,
           heart: {
             isShow: false,
+            patientAddVisible: false,
             // input: false,
             feature:{
+              patientId: '',
+              name: '',
+              address: '',
               age: '',
               sex: '',
               cp: '',
@@ -567,6 +657,99 @@ export default {
           this.heart.isShow = false;
           this.step = 3;
           this.predict.isShow = true;
+        },
+
+        //新增病例,参数是病种，后期新增病种可复用
+        patientAdd(disease){
+          if(disease === 'heart'){
+            patientAddPost(this.heart.feature).then((res)=>{
+              for (const patient of res) {
+                switch(patient.cp){
+                  case 1:
+                    patient.cp = "典型心绞痛";
+                    break;
+                  case 2:
+                    patient.cp = "非典型心绞痛";
+                    break;
+                  case 3:
+                    patient.cp = "非心绞痛";
+                    break;
+                  case 4:
+                    patient.cp = "渐近心痛";
+                    break;
+                  default:
+                    patient.cp = "未知";
+                    break;
+                }
+                switch(patient.restecg){
+                  case 0:
+                    patient.restecg = "正常";
+                    break;
+                  case 1:
+                    patient.restecg = "有ST-T波异常";
+                    break;
+                  case 2:
+                    patient.restecg = "左心室肥大";
+                    break;
+                  default:
+                    patient.restecg = "未知";
+                    break;
+                }
+                switch(patient.exang){
+                  case 0:
+                    patient.exang = "否";
+                    break;
+                  case 1:
+                    patient.exang = "是";
+                    break;
+                  default:
+                    patient.exang = "未知";
+                    break;
+                }
+                switch(patient.slope){
+                  case 1:
+                    patient.slope = "向上倾斜";
+                    break;
+                  case 2:
+                    patient.slope = "平坦";
+                    break;
+                  case 3:
+                    patient.slope = "下坡";
+                    break;
+                  default:
+                    patient.slope = "未知";
+                    break;
+                }
+                switch(patient.thal){
+                  case 3:
+                    patient.thal = "正常";
+                    break;
+                  case 6:
+                    patient.thal = "固定缺陷";
+                    break;
+                  case 7:
+                    patient.thal = "可逆缺陷";
+                    break;
+                  default:
+                    patient.thal = "未知";
+                    break;
+                }
+              }
+              this.heart.patientTable = res;
+            }).catch(error =>{
+              console.log(error);
+            })
+            this.heart.patientAddVisible = false;
+          }
+        },
+
+        //heart.feature清空
+        heartClear(){
+          for (const key in this.heart.feature) {
+            if (Object.hasOwnProperty.call(this.heart.feature, key)) {
+              this.heart.feature[key] = '';
+            }
+          }
         },
 
         //多疾病预测提交

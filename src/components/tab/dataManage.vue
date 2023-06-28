@@ -29,9 +29,9 @@
       </div>
       <el-button @click="clearFilter">清除</el-button>
 
-      <div id="top_right_buttons">
+      <!-- <div id="top_right_buttons">
         <el-button type="primary" @click="importData">导入数据表</el-button>
-      </div>
+      </div> -->
 
     </div>
 
@@ -294,10 +294,10 @@ export default {
         })
     }
   },
-    created() {
-        //存入sessionstorage
-        this.getAllData();
-    },
+  created() {
+      //存入sessionstorage
+      this.getAllData();
+  },
 
 }
 </script>
