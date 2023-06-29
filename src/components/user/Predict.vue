@@ -41,7 +41,7 @@
           <el-table
             :data="heart.patientTable"
             style="width: 100%"
-            max-height="400px"
+            max-height="550px"
             border
             stripe
             row-key="patientId"
@@ -102,7 +102,7 @@
             </el-table-column>
             <el-table-column
               label="性别"
-              prop="gender"
+              prop="sex"
               width="100px">
             </el-table-column>
             <el-table-column
@@ -118,6 +118,13 @@
                   plain
                   round
                   @click="heartSubmit2(item.row)">预测该病人</el-button>
+                <el-popconfirm
+                  title="删除后无法恢复，请确认删除"
+                  confirm-button-type = "danger"
+                  @confirm = "patientDel('heart',item.row)"
+                >
+                  <el-button slot="reference" type="danger" plain round style="margin-left:10px" size="mini">删除</el-button>
+                </el-popconfirm>
               </template>
             </el-table-column>
           </el-table>
@@ -141,8 +148,8 @@
               </el-form-item>
               <el-form-item label="性别" prop="sex" required>
                 <el-select v-model="heart.feature.sex" placeholder="请选择性别">
-                  <el-option label="男" value="male"></el-option>
-                  <el-option label="女" value="female"></el-option>
+                  <el-option label="男" value="1"></el-option>
+                  <el-option label="女" value="0"></el-option>
                 </el-select>
               </el-form-item>
               <el-form-item label="胸痛类型" required>
@@ -424,7 +431,7 @@
 <script>
 import parts from './js/predict'
 import modelOptions from './js/modelOptions.js'
-import {testpost,heartPost,patientGet,heartPost2,patientAddPost} from '@/api/user.js'
+import {testpost,heartPost,patientGet,heartPost2,patientAddPost,patientDelRequest} from '@/api/user.js'
 import Body from './DieaseIntro/components/Body.vue'
 import PieChart from './PieChart.vue'
 export default {
@@ -502,79 +509,7 @@ export default {
           })
 
           patientGet().then((res)=>{
-            for (const patient of res) {
-              switch(patient.cp){
-                case 1:
-                  patient.cp = "典型心绞痛";
-                  break;
-                case 2:
-                  patient.cp = "非典型心绞痛";
-                  break;
-                case 3:
-                  patient.cp = "非心绞痛";
-                  break;
-                case 4:
-                  patient.cp = "渐近心痛";
-                  break;
-                default:
-                  patient.cp = "未知";
-                  break;
-              }
-              switch(patient.restecg){
-                case 0:
-                  patient.restecg = "正常";
-                  break;
-                case 1:
-                  patient.restecg = "有ST-T波异常";
-                  break;
-                case 2:
-                  patient.restecg = "左心室肥大";
-                  break;
-                default:
-                  patient.restecg = "未知";
-                  break;
-              }
-              switch(patient.exang){
-                case 0:
-                  patient.exang = "否";
-                  break;
-                case 1:
-                  patient.exang = "是";
-                  break;
-                default:
-                  patient.exang = "未知";
-                  break;
-              }
-              switch(patient.slope){
-                case 1:
-                  patient.slope = "向上倾斜";
-                  break;
-                case 2:
-                  patient.slope = "平坦";
-                  break;
-                case 3:
-                  patient.slope = "下坡";
-                  break;
-                default:
-                  patient.slope = "未知";
-                  break;
-              }
-              switch(patient.thal){
-                case 3:
-                  patient.thal = "正常";
-                  break;
-                case 6:
-                  patient.thal = "固定缺陷";
-                  break;
-                case 7:
-                  patient.thal = "可逆缺陷";
-                  break;
-                default:
-                  patient.thal = "未知";
-                  break;
-              }
-            }
-            this.heart.patientTable = res;
+            this.processPatientTable(res);
           })
         },
         next() {
@@ -622,6 +557,93 @@ export default {
           return pieData;
         },
 
+        //处理patientTable
+        processPatientTable(res) {
+          for (const patient of res) {
+            switch(patient.sex){
+              case 0:
+                patient.sex = "女";
+                break;
+              case 1:
+                patient.sex = "男";
+                break;
+              default:
+                break;
+            }
+            switch(patient.cp){
+              case 1:
+                patient.cp = "典型心绞痛";
+                break;
+              case 2:
+                patient.cp = "非典型心绞痛";
+                break;
+              case 3:
+                patient.cp = "非心绞痛";
+                break;
+              case 4:
+                patient.cp = "渐近心痛";
+                break;
+              default:
+                patient.cp = "未知";
+                break;
+            }
+            switch(patient.restecg){
+              case 0:
+                patient.restecg = "正常";
+                break;
+              case 1:
+                patient.restecg = "有ST-T波异常";
+                break;
+              case 2:
+                patient.restecg = "左心室肥大";
+                break;
+              default:
+                patient.restecg = "未知";
+                break;
+            }
+            switch(patient.exang){
+              case 0:
+                patient.exang = "否";
+                break;
+              case 1:
+                patient.exang = "是";
+                break;
+              default:
+                patient.exang = "未知";
+                break;
+            }
+            switch(patient.slope){
+              case 1:
+                patient.slope = "向上倾斜";
+                break;
+              case 2:
+                patient.slope = "平坦";
+                break;
+              case 3:
+                patient.slope = "下坡";
+                break;
+              default:
+                patient.slope = "未知";
+                break;
+            }
+            switch(patient.thal){
+              case 3:
+                patient.thal = "正常";
+                break;
+              case 6:
+                patient.thal = "固定缺陷";
+                break;
+              case 7:
+                patient.thal = "可逆缺陷";
+                break;
+              default:
+                patient.thal = "未知";
+                break;
+            }
+          }
+          this.heart.patientTable = res;
+        },
+
         //心脏病预测结果处理
         processHeartRes(res){
           this.predict.selectName = '心脏';
@@ -662,87 +684,26 @@ export default {
           this.predict.isShow = true;
         },
 
-        //新增病例,参数是病种，后期新增病种可复用
+        //新增病例,参数是病种，后期新增病种可复用，当前可选：'heart'
         patientAdd(disease){
           if(disease === 'heart'){
             patientAddPost(this.heart.feature).then((res)=>{
-              for (const patient of res) {
-                switch(patient.cp){
-                  case 1:
-                    patient.cp = "典型心绞痛";
-                    break;
-                  case 2:
-                    patient.cp = "非典型心绞痛";
-                    break;
-                  case 3:
-                    patient.cp = "非心绞痛";
-                    break;
-                  case 4:
-                    patient.cp = "渐近心痛";
-                    break;
-                  default:
-                    patient.cp = "未知";
-                    break;
-                }
-                switch(patient.restecg){
-                  case 0:
-                    patient.restecg = "正常";
-                    break;
-                  case 1:
-                    patient.restecg = "有ST-T波异常";
-                    break;
-                  case 2:
-                    patient.restecg = "左心室肥大";
-                    break;
-                  default:
-                    patient.restecg = "未知";
-                    break;
-                }
-                switch(patient.exang){
-                  case 0:
-                    patient.exang = "否";
-                    break;
-                  case 1:
-                    patient.exang = "是";
-                    break;
-                  default:
-                    patient.exang = "未知";
-                    break;
-                }
-                switch(patient.slope){
-                  case 1:
-                    patient.slope = "向上倾斜";
-                    break;
-                  case 2:
-                    patient.slope = "平坦";
-                    break;
-                  case 3:
-                    patient.slope = "下坡";
-                    break;
-                  default:
-                    patient.slope = "未知";
-                    break;
-                }
-                switch(patient.thal){
-                  case 3:
-                    patient.thal = "正常";
-                    break;
-                  case 6:
-                    patient.thal = "固定缺陷";
-                    break;
-                  case 7:
-                    patient.thal = "可逆缺陷";
-                    break;
-                  default:
-                    patient.thal = "未知";
-                    break;
-                }
-              }
-              this.heart.patientTable = res;
+              this.processPatientTable(res);
             }).catch(error =>{
               console.log(error);
             })
             this.heart.patientAddVisible = false;
+          }
+        },
+
+        // 删除病例，参数1同新增,参数2为整行信息
+        patientDel(disease,row){
+          if(disease === 'heart'){
+            console.log("在删了",row.id)
+            patientDelRequest(row.id).then((res)=>{
+              console.log(res)
+              this.processPatientTable(res);
+            })
           }
         },
 

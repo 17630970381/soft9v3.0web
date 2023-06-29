@@ -65,9 +65,17 @@ export function heartPost2(id) {
 export function patientAddPost(data) {
   return request({
     method: "post",
-    url: "",
+    url: "PatientHeartAll/add",
     data
   })
+}
+
+// 删除病人
+export function patientDelRequest(id) {
+  return request({
+    method: "delete",
+    url: `PatientHeartAll/${id}`,
+  });
 }
 
 export function testget(params1, params2) {
