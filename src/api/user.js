@@ -74,7 +74,16 @@ export function patientAddPost(data) {
 export function patientDelRequest(id) {
   return request({
     method: "delete",
-    url: `PatientHeartAll/${id}`,
+    url: "PatientHeartAll/"+id,
+  });
+}
+
+// 获取指定数据表内容
+export function dataInfoPost(url,id) {
+  return request({
+    method: "post",
+    url,
+    data: id
   });
 }
 

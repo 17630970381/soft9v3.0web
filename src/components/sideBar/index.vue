@@ -43,16 +43,7 @@
               <i class="el-icon-menu"></i>
               <span slot="title">首页</span>
             </el-menu-item>
-            <!-- <el-submenu index="2">
-              <template slot="title">
-                <i class="el-icon-location"></i>
-                <span>用户管理</span>
-              </template>
-              <el-menu-item-group>
-                <el-menu-item index="/earlyLung">肺癌早期风险预测</el-menu-item>
-                <el-menu-item index="/metastasis">肺癌转移预测</el-menu-item>
-              </el-menu-item-group>
-            </el-submenu> -->
+
             <el-menu-item index="/DieaseIntro">
               <i class="el-icon-menu"></i>
               <span slot="title">健康咨询</span>
@@ -65,14 +56,14 @@
               <i class="el-icon-menu"></i>
               <span slot="title">批量预测</span>
             </el-menu-item>
-            <el-menu-item index="/dataManage">
+            <!-- <el-menu-item index="/dataManage">
               <i class="el-icon-menu"></i>
               <span slot="title">数据管理</span>
             </el-menu-item>
             <el-menu-item index="/userManage">
               <i class="el-icon-menu"></i>
               <span slot="title">用户管理</span>
-            </el-menu-item>
+            </el-menu-item> -->
           </el-menu>
         </el-aside>
         <el-main class="main">

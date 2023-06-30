@@ -44,7 +44,7 @@
             max-height="550px"
             border
             stripe
-            row-key="patientId"
+            row-key="id"
             >
             <el-table-column type="expand">
               <template slot-scope="detail">

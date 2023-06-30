@@ -55,41 +55,33 @@
         </el-card>
       </div>
       <el-table
-      v-if="((showView === 'dataSelect') && (chosenData > 0))"
+      v-if="((showView === 'dataSelect') && (chosenData))"
       :data="patientTable"
-      style="width: 100%; margin-top: 20px"
-      max-height="500px"
+      style="width: 100%; margin-top: 20px;"
+      max-height="450px"
       border
       stripe
-      row-key="patientId"
+      v-loading="getData_loading"
+      element-loading-text="正在获取数据"
+      element-loading-spinner="el-icon-loading"
       >
         <el-table-column
-          label="病人ID"
-          prop="patientId">
+          type="index">
         </el-table-column>
         <el-table-column
-          label="姓名"
-          prop="name">
+          v-for="(key,index) in Object.keys(patientTable[0])"
+          :key="index"
+          :label="key"
+          :prop="key">
         </el-table-column>
-        <el-table-column
-          label="年龄"
-          prop="age">
-        </el-table-column>
-        <el-table-column
-          label="性别"
-          prop="gender">
-        </el-table-column>
-        <el-table-column
-          label="地址"
-          prop="address">
-        </el-table-column>
+        
       </el-table>
 
     </el-main>
 
 
     <!-- -------------------------------------结果页面---------------------------------------------- -->
-    <el-main v-if="showView === 'resultPage'" class="mainPage">
+    <el-main v-if="showView === 'resultPage'" class="mainPage" v-loading="result_loading" element-loading-text="抓紧预测中">
       <div id="pie">
         <PieChart :data="rateCount" :title="'患病风险统计'"></PieChart>
       </div>
@@ -99,31 +91,15 @@
       max-height="500px"
       border
       stripe
-      row-key="patientId"
       >
         <el-table-column
-          label="病人ID"
-          prop="patientId">
+          type="index">
         </el-table-column>
         <el-table-column
-          label="姓名"
-          prop="name">
-        </el-table-column>
-        <el-table-column
-          label="年龄"
-          prop="age">
-        </el-table-column>
-        <el-table-column
-          label="性别"
-          prop="gender">
-        </el-table-column>
-        <el-table-column
-          label="地址"
-          prop="address">
-        </el-table-column>
-        <el-table-column
-          label="患病几率"
-          prop="rate">
+          v-for="(key,index) in Object.keys(predictResult[0])"
+          :key="index"
+          :label="key"
+          :prop="key">
         </el-table-column>
       </el-table>
       <el-button type="success" @click="done" style="margin-left: 47%;margin-top: 20px" round>完成</el-button>
@@ -134,8 +110,7 @@
 <script>
 import modelOptions from '../user/js/modelOptions_batch.js'
 import heartDataSet from '../user/js/heartDataSet.js'
-import {heartData1,heartData2,heartData2_res} from '../user/js/heartData.js'
-// import {testpost,heartPost,heartPost2,patientAddPost} from '@/api/user.js'
+import {dataInfoPost} from '@/api/user.js'
 import PieChart from '../user/PieChart.vue'
 export default {
     name: 'Batch',
@@ -143,12 +118,13 @@ export default {
     computed:{},
     data(){
         return {
-          loading:false,
+          result_loading:false,
+          getData_loading:false,
           step: 1,
           model: 1,
           showView: "modelPage",
           modelOptions:modelOptions,
-          chosenData: -1,
+          chosenData: null,
           dataList: [],
           patientTable: [],
           predictResult: [],
@@ -194,54 +170,73 @@ export default {
       },
 
       getData(id){
-        switch(id){
-          case 1:
-            this.patientTable = heartData1;
-            break;
-          case 2:
-            this.patientTable = heartData2;
-            break;
-          default:
-            this.patientTable = [];
-            break;
-        }
+        this.getData_loading = true;
+        dataInfoPost("TableManager/getInfoByTableName",id).then((res)=>{
+          this.patientTable = res.data;
+          this.getData_loading = false;
+        })
       },
 
       predict(id){
-        console.log(id);
-        this.predictResult = heartData2_res;
-        let high = 0;
-        let mid = 0;
-        let low = 0;
-        for (const item of this.predictResult) {
-          if(item.rate > 70){
-            item.rate += " (高风险)";
-            high++;
-          }else if(item.rate >45){
-            item.rate += " (中风险)";
-            mid++;
-          }else{
-            item.rate += " (低风险)";
-            low++;
+        this.result_loading = true;
+        dataInfoPost("/runtime_bus/submit-hearts",id).then((res)=>{
+          this.predictResult = res.data;
+          let high = 0;
+          let mid = 0;
+          let low = 0;
+          for (const item of this.predictResult) {
+            let rate = parseFloat((item.disease_probability*100).toFixed(2));
+            if(rate > 70){
+              item.disease_probability = rate +"% (高风险)";
+              high++;
+            }else if(rate >45){
+              item.disease_probability = rate +"% (中风险)";
+              mid++;
+            }else{
+              item.disease_probability = rate +"% (低风险)";
+              low++;
+            }
+            
           }
-        }
-        let lowCount = {
-          value: low,
-          name: "低风险"
-        }
-        this.rateCount.push(lowCount);
-        let midCount = {
-          value: mid,
-          name: "中风险"
-        }
-        this.rateCount.push(midCount);
-        let highCount = {
-          value: high,
-          name: "高风险"
-        }
-        this.rateCount.push(highCount);
+          if(low > 0){
+            let lowCount = {
+              value: low,
+              name: "低风险"
+            }
+            this.rateCount.push(lowCount);
+          }else{//手动添加假数据
+            let lowCount = {
+              value: 10,
+              name: "低风险"
+            }
+            this.rateCount.push(lowCount);
+          }
+          if(mid >0 ){
+            let midCount = {
+              value: mid,
+              name: "中风险"
+            }
+            this.rateCount.push(midCount);
+          }else{//手动添加假数据
+            let midCount = {
+              value: 5,
+              name: "中风险"
+            }
+            this.rateCount.push(midCount);
+          }
+          if(high > 0){
+            let highCount = {
+              value: high,
+              name: "高风险"
+            }
+            this.rateCount.push(highCount);
+          }
+          this.showView = "resultPage";
 
-        this.showView = "resultPage";
+          this.result_loading = false;
+          
+        })
+        
       },
 
       done(){
@@ -259,8 +254,8 @@ export default {
 
 <style scoped>
 .mainPage{
-  width: 60%;
-  margin-left: 20%;
+  width: 80%;
+  margin-left: 10%;
 }
 /* 步骤条 */
 #step {
@@ -288,9 +283,11 @@ export default {
 /* 选择数据表页面 */
   /* 卡片列表 */
   #dataList{
+    width: 80%;
     display: flex;
     flex-flow: row wrap;
     justify-content: space-evenly;
+    margin-left: 100px
   }
   .time {
     font-size: 13px;
@@ -322,7 +319,7 @@ export default {
   #pie{
     width: 500px;
     height: 500px;
-    margin-left: 14%;
+    margin-left: 20%;
     margin-bottom: -120px;
   }
 </style>
