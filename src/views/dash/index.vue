@@ -42,9 +42,9 @@
       <div class="left">
         <el-card>
           <div slot="header" class="clearfix">
-            <span class="lineStyle">▍</span><span>数据统计</span>
+            <span class="lineStyle">▍</span><span>批量预测结果</span>
           </div>
-          <div
+          <!-- <div
             v-for="(item, index) in diseaseData"
             :key="index"
             style="margin-top: 10px"
@@ -58,13 +58,25 @@
                 style="margin-top: 10px"
               ></el-progress>
             </div>
+          </div> -->
+          <div class="block">
+            <span class="demonstration" style="margin-right:15px">已预测数据</span>
+            <el-cascader
+              v-model="value1"
+              :options="options"
+              ></el-cascader>
+            <div style="width:500px;height:500px; margin-top:20px">
+              <PieChart :data="rateCount" :title="'患病风险统计'"></PieChart>
+            </div>
           </div>
+
+          
         </el-card>
       </div>
       <div class="mid">
         <el-card>
           <div slot="header" class="clearfix">
-            <span class="lineStyle">▍</span><span>系统登录情况</span>
+            <span class="lineStyle">▍</span><span>待定</span>
           </div>
           <div id="login" style="width: 500px;height:400px;"></div>
         </el-card>
@@ -72,14 +84,14 @@
       <div class="right">
         <el-card>
           <div slot="header" class="clearfix">
-            <span class="lineStyle">▍</span><span>系统数据信息</span>
+            <span class="lineStyle">▍</span><span>现有数据信息</span>
           </div>
           <el-table :data="tableData2" stripe style="width: 100%"   height="400">
-            <el-table-column prop="tableName" label="数据表" width="100">
+            <el-table-column prop="tableName" label="数据表" width="150px">
             </el-table-column>
-            <el-table-column prop="tableOrigin" label="数据来源" width="180">
+            <el-table-column prop="diease" label="疾病" width="80px">
             </el-table-column>
-            <el-table-column prop="tableSize" label="存储大小"> </el-table-column>
+            <el-table-column prop="tableSize" label="特征数量"> </el-table-column>
             <el-table-column prop="tableDate" label="创建时间">
             </el-table-column>
           </el-table>
@@ -92,11 +104,51 @@
 <script>
 import { getRequest } from '@/utils/api';
 import storage from '@/utils/storage';
+import PieChart from '@/components/user/PieChart.vue'
 export default {
   name: "index",
+  components:{PieChart: PieChart},
   data() {
     return {
       mychart:{},
+      
+      rateCount:[{
+          value: 20,
+          name: "高风险"
+        },
+        {
+          value: 86,
+          name: "中风险"
+        },
+        {
+          value: 95,
+          name: "低风险"
+        }
+      ],
+      options: [{
+          value: 'zhinan',
+          label: '心脏病',
+          children: [{
+            value: 'shejiyuanze',
+            label: '心脏病数据集（一）'
+          }, {
+            value: 'daohang',
+            label: '心脏病数据集（二）',
+          }, {
+            value: 'daohang2',
+            label: '心脏病数据集（三）',
+          }]
+        }, {
+          value: 'zujian',
+          label: '慢性肾病',
+          children: [{
+            value: 'basic',
+            label: '慢性肾病病人集（一）',
+          },{
+            value: 'basic2',
+            label: '慢性肾病病人集（二）',
+          } ]
+        }],
       tableData: [
         {
           modelid: 1,
@@ -117,18 +169,57 @@ export default {
           time: 3,
         },
       ],
-      tableData2:[],
+      tableData2:[{
+          tableName:"心脏病数据集（一）",
+          diease:"心脏病",
+          tableSize:13,
+          tableDate:"2023.6.12 10:18"
+        },
+        {
+          tableName:"心脏病数据集（二）",
+          diease:"心脏病",
+          tableSize:13,
+          tableDate:"2023.6.12 15:32"
+        },
+        {
+          tableName:"心脏病数据集（三）",
+          diease:"心脏病",
+          tableSize:13,
+          tableDate:"2023.6.12 20:15"
+        },
+        {
+          tableName:"现有病例数据",
+          diease:"多疾病",
+          tableSize:6,
+          tableDate:"2023.6.8 16:26"
+        }
+      ],
       line: null,
       patientNum: 200,
+      options_disease: [
+        {
+          value: "正在上传",
+          label: "正在上传",
+        },
+        {
+          value: "上传成功",
+          label: "上传成功",
+        },
+        {
+          value: "上传失败",
+          label: "上传失败",
+        },
+      ],
+      value1: "",
       quickEntry: [
         {
-          title: "数据表管理",
-          img: require("../../assets/dataManage.png"),
+          title: "单例预测",
+          img: require("../../assets/feiai.png"),
           router: "/dataManage",
         },
         {
-          title: "用户管理",
-          img: require("../../assets/UserManage.png"),
+          title: "批量预测",
+          img: require("../../assets/dataManage.png"),
           router: "/userManage",
         },
         // {
@@ -200,28 +291,28 @@ export default {
 
       option && this.mychart.setOption(option);
     },
-    getAllData(){
-        getRequest("/diabete/getAllData").then((response) => {
-        console.log(response);
-        if (response) {
-          storage.set('allTableData',JSON.stringify(response.data.tableList));
-          this.$store.commit('setAllTableData',storage.get('allTableData'));
-        } else {
-          console.log(response.status);
-        }
-        var tempList=JSON.parse(this.$store.getters.getAllTableData)
-          for (let i = 0; i < tempList.length; i++) {
-            const obj = {
-              tableName: tempList[i].tableName,
-              tableOrigin: tempList[i].tableOrigin,
-              tableSize: tempList[i].tableSize,
-              tableDate: tempList[i].startTime,
-            };
-            this.tableData2.push(obj);
-          }
-      });
+    // getAllData(){
+    //     getRequest("/diabete/getAllData").then((response) => {
+    //     console.log(response);
+    //     if (response) {
+    //       storage.set('allTableData',JSON.stringify(response.data.tableList));
+    //       this.$store.commit('setAllTableData',storage.get('allTableData'));
+    //     } else {
+    //       console.log(response.status);
+    //     }
+    //     var tempList=JSON.parse(this.$store.getters.getAllTableData)
+    //       for (let i = 0; i < tempList.length; i++) {
+    //         const obj = {
+    //           tableName: tempList[i].tableName,
+    //           tableOrigin: tempList[i].tableOrigin,
+    //           tableSize: tempList[i].tableSize,
+    //           tableDate: tempList[i].startTime,
+    //         };
+    //         this.tableData2.push(obj);
+    //       }
+    //   });
       
-    }
+    // }
   },
   mounted() {
     this.chart1();
@@ -230,7 +321,7 @@ export default {
     window.addEventListener('resize',()=>{
       that.mychart.resize()
     })
-    this.getAllData();
+    // this.getAllData();s
   },
 };
 </script>

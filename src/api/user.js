@@ -73,8 +73,8 @@ export function patientAddPost(data) {
 // 删除病人
 export function patientDelRequest(id) {
   return request({
-    method: "delete",
-    url: "PatientHeartAll/"+id,
+    method: "post",
+    url: "PatientHeartAll/delete/"+id,
   });
 }
 

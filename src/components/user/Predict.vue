@@ -35,7 +35,7 @@
 
     <!-- -------------------------------------心脏病模型输入页面 --------------------------------------------------->
     <el-main v-if="heart.isShow" id="heartForm">
-      <el-tabs>
+      <el-tabs @tab-click="resetForm('addForm');resetForm('handInputForm')">
         <!-- 从已有病人中选择预测 -->
         <el-tab-pane label="从已有病例选择" @click="getPatient()">
           <el-table
@@ -132,8 +132,8 @@
           @click="heart.patientAddVisible = true">
           添加新病例
           </el-button>
-          <el-dialog title="新增病例" :visible.sync="heart.patientAddVisible">
-            <el-form :model="heart.feature" :rules="heart.feature.rules" label-width="154px" @keyup.native.enter="patientAdd('heart')">
+          <el-dialog title="新增病例" :visible.sync="heart.patientAddVisible" @close="resetForm('addForm')">
+            <el-form ref="addForm" :model="heart.feature" :rules="heart.feature.rules" label-width="154px" @keyup.native.enter="patientAdd('heart')">
               <el-form-item label="病人ID" prop="patientId" required>
                 <el-input v-model="heart.feature.patientId"></el-input>
               </el-form-item>
@@ -152,7 +152,7 @@
                   <el-option label="女" value="0"></el-option>
                 </el-select>
               </el-form-item>
-              <el-form-item label="胸痛类型" required>
+              <el-form-item label="胸痛类型" prop="cp" required>
                 <el-select v-model="heart.feature.cp" placeholder="请选择胸痛类型" prop="cp">
                   <el-option label="典型心绞痛" value="1"></el-option>
                   <el-option label="非典型心绞痛" value="2"></el-option>
@@ -207,16 +207,16 @@
               </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
-              <el-button round size="medium" @click="heart.patientAddVisible = false;heartClear()">取 消</el-button>
-              <el-button round size="medium" @click="heartClear()">重置</el-button>
-              <el-button type="primary" round size="medium" @click="patientAdd('heart')">确 定</el-button>
+              <el-button round size="medium" @click="heart.patientAddVisible = false;resetForm('addForm')">取 消</el-button>
+              <el-button round size="medium" @click="resetForm('addForm')">重置</el-button>
+              <el-button type="primary" round size="medium" @click="patientAdd('heart');resetForm('addForm')">确 定</el-button>
             </div>
           </el-dialog>
         </el-tab-pane>
 
         <!-- 手动输入病人预测 -->
         <el-tab-pane label="手动输入">
-          <el-form :model="heart.feature" :rules="heart.feature.rules" label-width="154px" @keyup.native.enter="heartSubmit">
+          <el-form ref="handInputForm" :model="heart.feature" :rules="heart.feature.rules" label-width="154px" @keyup.native.enter="heartSubmit">
             <el-form-item label="年龄" prop="age" required>
               <el-input v-model="heart.feature.age"></el-input>
             </el-form-item>
@@ -226,8 +226,8 @@
                 <el-option label="女" value="female"></el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="胸痛类型" required>
-              <el-select v-model="heart.feature.cp" placeholder="请选择胸痛类型" prop="cp">
+            <el-form-item label="胸痛类型" prop="cp" required>
+              <el-select v-model="heart.feature.cp" placeholder="请选择胸痛类型">
                 <el-option label="典型心绞痛" value="1"></el-option>
                 <el-option label="非典型心绞痛" value="2"></el-option>
                 <el-option label="非心绞痛" value="3"></el-option>
@@ -279,18 +279,17 @@
                 <el-option label="可逆缺陷" value="7"></el-option>
               </el-select>
             </el-form-item>
-            <el-form-item>
-              <el-button type="primary" @click="heartSubmit" style="margin-left: 45%;margin-top: 50px;" round>提交预测</el-button>
-              <!-- <el-button @click="resetForm('ruleForm')">重置</el-button> -->
+            <el-form-item style="margin-left: 30%;margin-top: 50px;">
+              <el-button @click="resetForm('handInputForm')" round>重置</el-button>
+              <el-button type="primary" @click="heartSubmit" round>提交预测</el-button>
             </el-form-item>
           </el-form>
         </el-tab-pane>
         
       </el-tabs>
-      
-      
-    
+
     </el-main>
+
     <!-- -------------------------------------多病种模型输入参数页面---------------------------------------------- -->
     <el-main v-if="symptom.isShow">
       <el-collapse v-model="symptom.activeNames" id="select">
@@ -327,7 +326,8 @@
           <Body :selectName="predict.selectName" :hoverName="predict.hoverName"></Body>
         </el-col>
 
-        <h1 id="title">预诊结果</h1>
+        <h1 class="title" v-if="loading === false">预诊结果:</h1>
+
         <el-col class="right" :span="12">
 
           <!-- -------------------心脏病模型预测结果------------- -->
@@ -384,10 +384,14 @@
             <!-- <div id="board" v-if="loading === false" >
               <Board :rate="heart.rate"></Board>
             </div> -->
+
+            <h1 class="title" style="margin-left:-13px" v-if="loading === false">危险因素权重:</h1>
             <div id="pie" v-if="loading === false">
-              <PieChart :data="heart.contribute" :title="'危险因素权重'" :subtitle="`您的患病风险是${heart.rate}%`"></PieChart>
+              <PieChart :data="heart.contribute"></PieChart>
             </div>
             
+            <h1 class="title" style="margin-left:-13px" v-if="loading === false">异常指标:</h1>
+            <h3 class="title" v-if="loading === false">{{dangerFeature}}</h3>
           </div>
 
           <!-- -------------------多疾病模型预测结果-------------- -->
@@ -437,7 +441,74 @@ import PieChart from './PieChart.vue'
 export default {
     name: 'Predict',
     components:{Body: Body, PieChart: PieChart},
-    computed:{},
+    computed:{
+      dangerFeature(){
+        let result = "";
+        if(this.heart.feature.cp != 3){
+          switch(this.heart.feature.cp){
+            case 1:
+              result += "胸痛类型（典型心绞痛） ";
+              break;
+            case 2:
+              result += "胸痛类型（非典型心绞痛） ";
+              break;
+            case 4:
+              result += "胸痛类型（渐进心痛） ";
+              break;
+            default:
+              break;
+          }
+        }
+        if(this.heart.feature.trestbps > 140 || this.heart.feature.trestbps < 90){
+          result += `静息血压（${this.heart.feature.trestbps} mmHg）  `;
+        }
+        if(this.heart.feature.chol > 200 || this.heart.feature.chol < 90){
+          result += `血清胆固醇（${this.heart.feature.chol} mg/dl）  `;
+        }
+        if(this.heart.feature.fbs > 120 || this.heart.feature.fbs < 70){
+          result += `空腹血糖（${this.heart.feature.fbs} mg/dl）  `;
+        }
+        if(this.heart.feature.restecg != 0){
+          switch(this.heart.feature.restecg){
+            case 1:
+              result += "静息心电图（有ST-T波异常） ";
+              break;
+            case 2:
+              result += "静息心电图（左心室肥大） ";
+              break;
+            default:
+              break;
+          }
+        }
+        if(this.heart.feature.thalach > (220-this.heart.feature.age)){
+          result += `最大心率过高（${this.heart.feature.thalach}）  `;
+        }
+        if(this.heart.feature.exang == 1){
+          result += "运动诱发心绞痛  ";
+        }
+        if(this.heart.feature.oldpeak > 0){
+          result += "运动时ST段有下降现象  ";
+        }
+        if(this.heart.feature.slope != 2){
+          switch(this.heart.feature.slope){
+            case 1:
+              result += "运动时ST段峰值（向上倾斜）  ";
+              break;
+            case 3:
+              result += "运动时ST段峰值（下坡）  ";
+              break;
+            default:
+              break;
+          }
+        }
+        if(this.heart.feature.ca != 0 ){
+          result += "冠状动脉存在狭窄或堵塞 ";
+        }
+
+
+        return result;
+      }
+      },
     data(){
         return {
           loading:false,
@@ -511,6 +582,7 @@ export default {
           patientGet().then((res)=>{
             this.processPatientTable(res);
           })
+
         },
         next() {
             switch(this.model){
@@ -672,6 +744,8 @@ export default {
         //选择病人进行心脏病预测
         heartSubmit2(row) {
           this.loading = true;
+          console.log(row);
+          Object.assign(this.heart.feature,row);
           heartPost2(row.patientId).then(res=>{
             this.processHeartRes(res);
           })
@@ -707,13 +781,9 @@ export default {
           }
         },
 
-        //heart.feature清空
-        heartClear(){
-          for (const key in this.heart.feature) {
-            if (Object.hasOwnProperty.call(this.heart.feature, key)) {
-              this.heart.feature[key] = '';
-            }
-          }
+        //重置表格
+        resetForm(formName){
+          this.$refs[formName].resetFields();
         },
 
         //多疾病预测提交
@@ -902,7 +972,7 @@ export default {
 
 h1 {
   text-align: center;
-  /* margin-right: 10%; */
+  float: left;
 }
 
 i {

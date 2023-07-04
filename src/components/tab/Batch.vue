@@ -34,7 +34,7 @@
     </el-main>
 
     <!-- -------------------------------------选择数据表页面 --------------------------------------------------->
-    <el-main v-if="showView === 'dataSelect'" class="mainPage">
+    <el-main v-if="showView === 'dataSelect'" class="mainPage" v-loading="result_loading" element-loading-text="抓紧预测中">
       <div id="dataList">
         <el-card 
         :body-style="{ padding: '0px'}" 
@@ -42,20 +42,21 @@
         :key=index
         :shadow="chosenData === item.id ? 'always':'hover'" 
         style="width:200px"
-        @click.native="chosenData = item.id;getData(item.id)" 
+        @click.native="chosenData = item.id" 
         >
           <img src="@/assets/dataset.png" class="image" object-fit="contain">
           <div style="padding: 14px;">
             <span>{{item.name}}</span>
             <div class="bottom clearfix">
-              <time class="time">{{item.time}}</time>
-              <el-button type="text" class="button" @click="predict(item.id)">预测该表</el-button>
+              
+              <el-button type="text" class="button" @click="predict(item.id);step = 3">预测该表</el-button>
+              <el-button type="text" class="button" @click="getData(item.id)" style="float:left; margin-left:-5px">数据预览</el-button>
             </div>
           </div>
         </el-card>
       </div>
       <el-table
-      v-if="((showView === 'dataSelect') && (chosenData))"
+      v-if="dataTableVision"
       :data="patientTable"
       style="width: 100%; margin-top: 20px;"
       max-height="450px"
@@ -81,7 +82,7 @@
 
 
     <!-- -------------------------------------结果页面---------------------------------------------- -->
-    <el-main v-if="showView === 'resultPage'" class="mainPage" v-loading="result_loading" element-loading-text="抓紧预测中">
+    <el-main v-if="showView === 'resultPage'" class="mainPage">
       <div id="pie">
         <PieChart :data="rateCount" :title="'患病风险统计'"></PieChart>
       </div>
@@ -102,7 +103,7 @@
           :prop="key">
         </el-table-column>
       </el-table>
-      <el-button type="success" @click="done" style="margin-left: 47%;margin-top: 20px" round>完成</el-button>
+      <el-button type="success" @click="done()" style="margin-left: 47%;margin-top: 20px" round>完成</el-button>
     </el-main>
   </div>
 </template>
@@ -118,6 +119,7 @@ export default {
     computed:{},
     data(){
         return {
+          dataTableVision:false,
           result_loading:false,
           getData_loading:false,
           step: 1,
@@ -170,6 +172,7 @@ export default {
       },
 
       getData(id){
+        this.dataTableVision = true;
         this.getData_loading = true;
         dataInfoPost("TableManager/getInfoByTableName",id).then((res)=>{
           this.patientTable = res.data;
@@ -179,6 +182,7 @@ export default {
 
       predict(id){
         this.result_loading = true;
+        
         dataInfoPost("/runtime_bus/submit-hearts",id).then((res)=>{
           this.predictResult = res.data;
           let high = 0;
@@ -231,9 +235,10 @@ export default {
             }
             this.rateCount.push(highCount);
           }
-          this.showView = "resultPage";
+          
 
           this.result_loading = false;
+          this.showView = "resultPage";
           
         })
         
@@ -245,6 +250,12 @@ export default {
           this.rateCount = [];
           this.showView = "modelPage";//切换页面
           this.step = 1;
+          this.chosenData = null;
+          this.dataTableVision = false;
+          this.result_loading = false;
+          this.getData_loading = false;
+          this.step = 1;
+          this.model = 1;
       },
 
     }
@@ -289,15 +300,12 @@ export default {
     justify-content: space-evenly;
     margin-left: 100px
   }
-  .time {
-    font-size: 13px;
-    color: #999;
-  }
+
   .bottom {
     margin-top: 13px;
     line-height: 12px;
   }
-  .button {
+  #dataList .button {
     padding: 0;
     float: right;
   }

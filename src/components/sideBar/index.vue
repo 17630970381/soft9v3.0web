@@ -3,12 +3,12 @@
     <el-container class="con">
       <el-header class="header">
         <el-menu
+        :default-active="activeIndex"
           background-color="#071135"
           text-color="#fff"
           active-text-color="#fff"
           class="el-menu-demo"
           mode="horizontal"
-          @select="handleSelect"
         >
           <span index="1" style="float: left; color: cornflowerblue"
             ><i class="el-icon-box"></i
@@ -21,9 +21,20 @@
           <span  index="3" style="float: right;color:#fff"
             ><i class="el-icon-user"></i>欢迎你，xx</span
           >
-          <el-menu-item index="4" style="float: right"
-            ><i class="el-icon-question"></i
-          ></el-menu-item>
+          <el-menu-item index="4" style="float: right">
+            <span @click="openDialog()">软件介绍</span>
+            <i class="el-icon-question"></i>
+            <el-dialog
+            title="软件介绍"
+            :visible="describVision"
+            width="50%"
+            @close="closedialog()"
+            @closed="closedialog()">
+              <p style="line-height: 30px;">{{description1}}</p>
+              <p style="line-height: 30px;">{{description2}}</p>
+              <img src="@/assets/description.jpg" alt="软件流程图" width="100%">
+            </el-dialog>
+          </el-menu-item>
           <!--          <el-menu-item index="3" disabled>消息中心</el-menu-item>-->
           <!--          <el-menu-item index="4"><a href="https://www.ele.me" target="_blank">订单管理</a></el-menu-item>-->
         </el-menu>
@@ -81,32 +92,24 @@ export default {
   // components: { AppMain },
   data() {
     return {
-      activeIndex: "1",
-      activeIndex2: "1",
-      dialogVisible: false,
+      activeIndex: "0",
+      describVision: false,
+      description1: "基于多任务学习的多病种疾病风险预测软件是一款医疗健康软件，通过调用相关算法，用户可以进行多种疾病（共病）的风险预测，可以帮助用户更好",
+      description2:"地管理自己的健康状况。本软件现有首页，健康咨询、单例预测和批量预测等功能，具体流程如此下图:"
     };
   },
   methods: {
-    handleSelect(key) {
-      if (key == 4) {
-        this.$alert(
-          "多病种之间具有复杂关联关系，同时多种疾病可能存在某些相同的病征。本软件采用机器学习方法来挖掘多病种之间的复杂关联关系。本软件根据不同疾病的不同使用场景，能够完成数据选择，数据处理，特征选择，模型设置，模型预测等功能。",
-          "软件介绍",
-          {
-            confirmButtonText: "确定",
-            callback: (action) => {
-              this.$message({
-                type: "info",
-                message: `action: ${action}`,
-              });
-            },
-          }
-        );
-      }
+    openDialog(){
+      this.describVision = true;
+      console.log("open",this.describVision)
     },
     handleOpen(key, keyPath) {
       console.log(key, keyPath);
     },
+    closedialog(){
+      this.describVision = false;
+      console.log('close',this.describVision)
+    }
   },
 };
 </script>
@@ -132,7 +135,7 @@ export default {
 .header {
   background-color: #071135;
   color: #333;
-  text-align: center;
+  /* text-align: center; */
   line-height: 60px;
 }
 
