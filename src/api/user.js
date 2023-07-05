@@ -43,13 +43,6 @@ export function disInfoGet(code) {
   });
 }
 
-//获取病人信息
-export function patientGet() {
-  return request({
-    method: "get",
-    url: "/PatientHeartAll/patient",
-  });
-}
 
 //发送patientID用于预测
 export function heartPost2(id) {
@@ -98,3 +91,10 @@ export function testget(params1, params2) {
   });
 }
 
+export function getRequest(url,data) {
+  return request({
+    method: "get",
+    url,
+    data
+  });
+}

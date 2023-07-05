@@ -17,13 +17,14 @@ import Batch from "@/components/tab/Batch.vue"
 Vue.use(VueRouter)
 
 const routes = [
+  // {有登录页面时加上
+  //   path: "/",
+  //   name: "LogIn",
+  //   component: LogIn,
+  // },
   {
+    // path: "/sideBar",有登录页面时加上
     path: "/",
-    name: "LogIn",
-    component: LogIn,
-  },
-  {
-    path: "/sideBar",
     name: "SideBar",
     redirect: "/dash",
     component: SideBar,

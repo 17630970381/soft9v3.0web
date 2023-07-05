@@ -5,7 +5,7 @@ const modelOptions = [
     disable: false,
   },
   {
-    name: "慢性胃病",
+    name: "慢性肾病",
     value: 2,
     disable: true,
   },

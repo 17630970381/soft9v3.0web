@@ -4,9 +4,9 @@
     <el-header>
       <div id="step">
         <el-steps :active="step" align-center>
-          <el-step title="选择疾病"></el-step>
-          <el-step title="输入病人情况"></el-step>
-          <el-step title="疾病预测"></el-step>
+          <el-step title="选择疾病" icon="el-icon-guide"></el-step>
+          <el-step title="输入病人情况" icon="el-icon-edit"></el-step>
+          <el-step title="疾病预测" icon="el-icon-view"></el-step>
         </el-steps>
       </div>
     </el-header>
@@ -292,6 +292,14 @@
 
     <!-- -------------------------------------多病种模型输入参数页面---------------------------------------------- -->
     <el-main v-if="symptom.isShow">
+      <el-alert
+        title="为了预测的准确性，请最少选择5个症状。"
+        type="error"
+        center
+        show-icon
+        v-show="symptom.alertVision"
+        @close="symptom.alertVision = false">
+      </el-alert>
       <el-collapse v-model="symptom.activeNames" id="select">
         <el-collapse-item v-for="(p,index1) of symptom.part" :key="p.code" :name="p.code">
           <template slot="title">
@@ -389,9 +397,11 @@
             <div id="pie" v-if="loading === false">
               <PieChart :data="heart.contribute"></PieChart>
             </div>
+            <div style="margin-top:-142px">
+              <h1 class="title" style="margin-left:-13px" v-if="loading === false">异常指标:</h1>
+              <p style="font-size:20px; padding-top:15px" v-if="loading === false">{{dangerFeature}}</p>
+            </div>
             
-            <h1 class="title" style="margin-left:-13px" v-if="loading === false">异常指标:</h1>
-            <h3 class="title" v-if="loading === false">{{dangerFeature}}</h3>
           </div>
 
           <!-- -------------------多疾病模型预测结果-------------- -->
@@ -435,7 +445,7 @@
 <script>
 import parts from './js/predict'
 import modelOptions from './js/modelOptions.js'
-import {testpost,heartPost,patientGet,heartPost2,patientAddPost,patientDelRequest} from '@/api/user.js'
+import {testpost,heartPost,getRequest,heartPost2,patientAddPost,patientDelRequest} from '@/api/user.js'
 import Body from './DieaseIntro/components/Body.vue'
 import PieChart from './PieChart.vue'
 export default {
@@ -544,6 +554,7 @@ export default {
           },
           symptom: {
             isShow: false,
+            alertVision: false,
             activeNames:[],
             part:JSON.parse(JSON.stringify(parts)),
             getted:[]
@@ -578,12 +589,8 @@ export default {
               }
             }
           })
-
-          patientGet().then((res)=>{
-            this.processPatientTable(res);
-          })
-
         },
+
         next() {
             switch(this.model){
               case 1:
@@ -593,6 +600,9 @@ export default {
                 this.step = 2;
                 break;
               case 2:
+                getRequest("/PatientHeartAll/patient").then((res)=>{
+                  this.processPatientTable(res);
+                })
                 this.modelPage = false;
                 this.symptom.isShow = false;
                 this.heart.isShow = true;
@@ -744,7 +754,6 @@ export default {
         //选择病人进行心脏病预测
         heartSubmit2(row) {
           this.loading = true;
-          console.log(row);
           Object.assign(this.heart.feature,row);
           heartPost2(row.patientId).then(res=>{
             this.processHeartRes(res);
@@ -783,36 +792,44 @@ export default {
 
         //重置表格
         resetForm(formName){
-          this.$refs[formName].resetFields();
+          // 不加if判断会报错找不到resetFields，因为form用的v-if，不显示时找不到DOM结构
+          if(this.$refs[formName]){
+            this.$refs[formName].resetFields();
+          }
+          
         },
 
         //多疾病预测提交
         submitPredict(){
-            let s1 = this.symptom.getted[0].code;
-            let s2 = this.symptom.getted[1].code;
-            let s3 = this.symptom.getted[2].code;
-            let s4 = this.symptom.getted[3].code;
-            let s5 = this.symptom.getted[4].code;
-            
-            this.loading = true
-            testpost(s1, s2, s3, s4, s5).then((res)=>{
-              this.loading = false
-              // console.log(res);
-              // const data = res.map(item=>JSON.parse(item).code.trim())
-              // console.log(`解析后是${data}`);//['xxx','yyy']
-              // this.predict.disease = dis.filter(item=>{
-              //   return data.indexOf(item.code)!==-1
-              // })
-              this.predict.disease = res;
-              // console.log(this.predict.disease);
-              this.predict.selectName = this.predict.disease[0].part;
-            })
-            .catch(error => {
-              console.log(error);
-            });
-            this.symptom.isShow = false;
-            this.step = 3;
-            this.predict.isShow = true;
+          if(this.symptom.getted.length < 5){
+            this.symptom.alertVision = true;
+            return;
+          }
+          let s1 = this.symptom.getted[0].code;
+          let s2 = this.symptom.getted[1].code;
+          let s3 = this.symptom.getted[2].code;
+          let s4 = this.symptom.getted[3].code;
+          let s5 = this.symptom.getted[4].code;
+          
+          this.loading = true
+          testpost(s1, s2, s3, s4, s5).then((res)=>{
+            this.loading = false
+            // console.log(res);
+            // const data = res.map(item=>JSON.parse(item).code.trim())
+            // console.log(`解析后是${data}`);//['xxx','yyy']
+            // this.predict.disease = dis.filter(item=>{
+            //   return data.indexOf(item.code)!==-1
+            // })
+            this.predict.disease = res;
+            // console.log(this.predict.disease);
+            this.predict.selectName = this.predict.disease[0].part;
+          })
+          .catch(error => {
+            console.log(error);
+          });
+          this.symptom.isShow = false;
+          this.step = 3;
+          this.predict.isShow = true;
         },
 
         changeColor(index){
@@ -929,10 +946,10 @@ export default {
   font-size: 15px;
 }
 
-#title {
+/* .title {
   text-align: center;
   font-size: 25px;
-}
+} */
 
 .right {
   margin-top: 10px;

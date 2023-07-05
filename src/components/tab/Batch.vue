@@ -4,9 +4,9 @@
     <el-header>
       <div id="step">
         <el-steps :active="step" align-center>
-          <el-step title="选择疾病"></el-step>
-          <el-step title="选择数据"></el-step>
-          <el-step title="疾病预测"></el-step>
+          <el-step title="选择疾病" icon="el-icon-guide"></el-step>
+          <el-step title="选择数据" icon="el-icon-document"></el-step>
+          <el-step title="疾病预测" icon="el-icon-view"></el-step>
         </el-steps>
       </div>
     </el-header>
@@ -14,7 +14,7 @@
     <el-divider></el-divider>
 
     <!-- -------------------------------------选择模型页面---------------------------------------------- -->
-    <el-main v-if="showView === 'modelPage'">
+    <el-main v-if="showView === 'modelPage'" v-loading="dataList_loading" element-loading-text="正在获取病例数据">
       <div id="modleSelect">
         <h2>请选择您想预测的疾病：</h2>
         <br>
@@ -46,15 +46,25 @@
         >
           <img src="@/assets/dataset.png" class="image" object-fit="contain">
           <div style="padding: 14px;">
-            <span>{{item.name}}</span>
+            <span>{{item.chinesename}}</span>
             <div class="bottom clearfix">
-              
-              <el-button type="text" class="button" @click="predict(item.id);step = 3">预测该表</el-button>
-              <el-button type="text" class="button" @click="getData(item.id)" style="float:left; margin-left:-5px">数据预览</el-button>
+              <el-button type="text" class="button" @click="predict(item.tablename);step = 3">预测该表</el-button>
+              <el-button type="text" class="button" @click="getData(item.tablename)" style="float:left; margin-left:-5px">数据预览</el-button>
             </div>
           </div>
         </el-card>
       </div>
+      <el-pagination
+        @size-change="pageSizeChange()"
+        @current-change="currentPageChange()"
+        :current-page.sync="currentPage"
+        :page-sizes="[3, 4, 5]"
+        :page-size.sync="pageSize"
+        layout="sizes, prev, pager, next"
+        :total="dataTotal"
+        :hide-on-single-page="true"
+        style="margin-left:35%;margin-top:20px">
+      </el-pagination>
       <el-table
       v-if="dataTableVision"
       :data="patientTable"
@@ -110,8 +120,7 @@
 
 <script>
 import modelOptions from '../user/js/modelOptions_batch.js'
-import heartDataSet from '../user/js/heartDataSet.js'
-import {dataInfoPost} from '@/api/user.js'
+import {dataInfoPost,getRequest} from '@/api/user.js'
 import PieChart from '../user/PieChart.vue'
 export default {
     name: 'Batch',
@@ -119,6 +128,7 @@ export default {
     computed:{},
     data(){
         return {
+          dataList_loading:false,
           dataTableVision:false,
           result_loading:false,
           getData_loading:false,
@@ -131,6 +141,9 @@ export default {
           patientTable: [],
           predictResult: [],
           rateCount:[],
+          pageSize: 4,
+          currentPage: 1,
+          dataTotal: 0
         }
     },
 
@@ -151,24 +164,49 @@ export default {
             // }
             if(this.showView === "modelPage"){
               this.next();
-              // console.log(this.symptom.isShow);
             }
           }
         })
       },
 
       next() {
+          if(this.model > 0){
+            this.dataList_loading = true;
+          }
           switch(this.model){
             case 1:
-              this.dataList = heartDataSet;
-              this.showView = "dataSelect"
-              this.step = 2;
+              //获取dataSetsList
+              getRequest(`DataManager/data/heart?page=${this.currentPage}&pageSize=${this.pageSize}`).then((res)=>{
+                console.log("datalist👉",res.list);
+                this.dataList = res.list;
+                this.dataTotal = res.total;
+                console.log(this.dataTotal)
+                this.dataList_loading = false;
+                this.showView = "dataSelect"
+                this.step = 2;
+              })
               break;
 
             default:
               alert("请选择疾病");
               break;
           }
+      },
+
+      pageSizeChange(){
+        getRequest(`DataManager/data/heart?page=${this.currentPage}&pageSize=${this.pageSize}`).then((res)=>{
+                console.log("新的datalist👉",res.list);
+                this.dataList = res.list;
+                this.dataTotal = res.total;
+              })
+      },
+
+      currentPageChange(){
+        getRequest(`DataManager/data/heart?page=${this.currentPage}&pageSize=${this.pageSize}`).then((res)=>{
+                console.log("新的datalist👉",res.list);
+                this.dataList = res.list;
+                this.dataTotal = res.total;
+              })
       },
 
       getData(id){

@@ -107,8 +107,7 @@ export default {
       this.timer = setTimeout(fuc.bind(this, ...args), 150);
     },
     init() {
-      let menu = this.$refs.menus;
-      console.log(menu);
+      // let menu = this.$refs.menus;
       let menus = this.$refs.menus.$el;
       // console.log(tab);
       menus.addEventListener("mouseover", (event) => {
@@ -161,7 +160,6 @@ export default {
   mounted() {
     this.init();
     diseasePost().then((res) => {
-      console.log(res);
       this.diseaseList = res;
     });
   },

@@ -57,7 +57,11 @@
 
             <el-menu-item index="/DieaseIntro">
               <i class="el-icon-menu"></i>
-              <span slot="title">健康咨询</span>
+              <span slot="title">健康资讯</span>
+            </el-menu-item>
+            <el-menu-item index="">
+              <i class="el-icon-menu"></i>
+              <span slot="title">模型训练</span>
             </el-menu-item>
             <el-menu-item index="/Predict">
               <i class="el-icon-menu"></i>

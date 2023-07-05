@@ -213,14 +213,24 @@ export default {
       value1: "",
       quickEntry: [
         {
-          title: "单例预测",
-          img: require("../../assets/feiai.png"),
-          router: "/dataManage",
+          title: "健康资讯",
+          img: require("../../assets/JKZX.png"),
+          router: "/DieaseIntro",
+        },
+        {
+          title: "模型训练",
+          img: require("../../assets/modelTrain.png"),
+          router: "",
+        },
+        {
+          title: "风险预测",
+          img: require("../../assets/singlePredict.png"),
+          router: "/Predict",
         },
         {
           title: "批量预测",
-          img: require("../../assets/dataManage.png"),
-          router: "/userManage",
+          img: require("../../assets/batchPredict.png"),
+          router: "/Batch",
         },
         // {
         //   title: "多病种关联关系挖掘",
@@ -260,37 +270,37 @@ export default {
   },
   methods: {
     quickLink(index) {
-      console.log(this.quickEntry[index].router);
+
       this.$router.push(this.quickEntry[index].router);
     },
-    chart1() {
-      var chartDom = document.getElementById('login');
-      this.mychart = this.$echarts.init(chartDom);
+    // chart1() {
+    //   var chartDom = document.getElementById('login');
+    //   this.mychart = this.$echarts.init(chartDom);
 
-      var option;
-      option = {
-        xAxis: {
-          type: "category",
-          data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-        },
-        yAxis: {
-          type: "value",
-        },
-        series: [
-          {
-            data: [120, 200, 150, 80, 70, 110, 130],
-            type: "bar",
-            showBackground: true,
-            color:" #75AAF2",
-            backgroundStyle: {
-              color: "rgba(180, 180, 180, 0.2)",
-            },
-          },
-        ],
-      };
+    //   var option;
+    //   option = {
+    //     xAxis: {
+    //       type: "category",
+    //       data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    //     },
+    //     yAxis: {
+    //       type: "value",
+    //     },
+    //     series: [
+    //       {
+    //         data: [120, 200, 150, 80, 70, 110, 130],
+    //         type: "bar",
+    //         showBackground: true,
+    //         color:" #75AAF2",
+    //         backgroundStyle: {
+    //           color: "rgba(180, 180, 180, 0.2)",
+    //         },
+    //       },
+    //     ],
+    //   };
 
-      option && this.mychart.setOption(option);
-    },
+    //   option && this.mychart.setOption(option);
+    // },
     // getAllData(){
     //     getRequest("/diabete/getAllData").then((response) => {
     //     console.log(response);
@@ -315,13 +325,12 @@ export default {
     // }
   },
   mounted() {
-    this.chart1();
-    const that=this;
-    this.mychart.resize();
-    window.addEventListener('resize',()=>{
-      that.mychart.resize()
-    })
-    // this.getAllData();s
+    // const that=this;
+    // this.mychart.resize();
+    // window.addEventListener('resize',()=>{
+    //   that.mychart.resize()
+    // })
+    // this.getAllData();
   },
 };
 </script>
@@ -347,6 +356,7 @@ export default {
 .topBigDiv .left .quickEntryBox {
   /*border: 1px red solid;*/
   /*box-sizing: border-box;*/
+  margin-top: 38px;
   width: 100%;
   height: 100%;
   display: flex;
