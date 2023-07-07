@@ -14,6 +14,7 @@ import UserSideBar from "@/components/user/UserSideBar.vue"
 import Predict from "@/components/user/Predict.vue"
 import DieaseIntro from "@/components/user/DieaseIntro/DieaseIntro.vue"
 import Batch from "@/components/tab/Batch.vue"
+import SoftwareIntro from "@/components/tab/SoftwareIntro.vue";
 Vue.use(VueRouter)
 
 const routes = [
@@ -63,7 +64,12 @@ const routes = [
         path: "/Batch",
         name: "Batch",
         component: Batch,
-      }
+      },
+      {
+        path: "/SoftwareIntro",
+        name: "SoftwareIntro",
+        component: SoftwareIntro,
+      },
     ],
   },
   {

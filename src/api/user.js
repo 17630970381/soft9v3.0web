@@ -91,10 +91,18 @@ export function testget(params1, params2) {
   });
 }
 
-export function getRequest(url,data) {
+export function getRequest(url,param) {
   return request({
     method: "get",
     url,
-    data
+    params:param
   });
+}
+
+export function postRequest(url, data) {
+  return request({
+    method: "post",
+    url,
+    data
+  })
 }

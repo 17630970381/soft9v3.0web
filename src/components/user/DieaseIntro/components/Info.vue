@@ -1,36 +1,4 @@
 <template>
-  <!-- <el-tabs
-    tab-position="left"
-    id="tabs"
-    v-model="activeName"
-    @tab-click="handleClick"
-    type="border-card"
-  >
-    <el-tab-pane name="心脏" label="心脏">
-      <div class="content">心脏</div>
-    </el-tab-pane>
-    <el-tab-pane name="肺部" label="肺部">
-      <div class="content">肺部</div>
-    </el-tab-pane>
-    <el-tab-pane name="肝脏" label="肝脏">
-      <div class="content">肝脏</div>
-    </el-tab-pane>
-    <el-tab-pane name="脾脏" label="脾脏">
-      <div class="content">脾脏</div>
-    </el-tab-pane>
-    <el-tab-pane name="肾脏" label="肾脏">
-      <div class="content">肾脏</div>
-    </el-tab-pane>
-    <el-tab-pane name="大肠" label="大肠">
-      <div class="content">大肠</div>
-    </el-tab-pane>
-    <el-tab-pane name="小肠" label="小肠">
-      <div class="content">小肠</div>
-    </el-tab-pane>
-    <el-tab-pane name="简介" label="简介">
-      <div class="content">简介</div>
-    </el-tab-pane>
-  </el-tabs> -->
   <div style="display: flex; height: 100%">
     <!-- ------------------------侧边栏----------------------- -->
     <div id="sideMenu" style="height: 100%; width: 22%">
@@ -38,13 +6,10 @@
         style="height: 100%"
         id="menus"
         ref="menus"
-        default-active="软件简介"
+        default-active=""
         v-model="activeName"
         @select="handleClick"
       >
-        <el-menu-item index="软件简介">
-          <template slot="title">软件简介</template>
-        </el-menu-item>
         <el-submenu
           v-for="(part, index1) of diseaseList"
           :key="index1"
@@ -78,7 +43,6 @@
       <p>{{ this.detailInfo.prevent }}</p>
       <!-- <p>{{this.detailInfo.partName}}</p> -->
     </div>
-    <div v-else>软件简介</div>
   </div>
 </template>
 <script>

@@ -20,197 +20,100 @@
           </div>
         </el-card>
       </div>
+
       <div class="right">
-        <el-card class="card">
+        <el-card class="card" :body-style="{padding:'0px',paddingLeft:'20px',paddingRight:'20px'}">
           <div slot="header" class="clearfix">
             <span class="lineStyle">▍</span><span>系统模型信息</span>
           </div>
-          <!--            画图容器-->
-          <el-table :data="tableData" stripe style="width: 100%">
-            <el-table-column prop="modelid" label="模型id" width="180">
-            </el-table-column>
-            <el-table-column prop="modelname" label="模型名称" width="180">
-            </el-table-column>
-            <el-table-column prop="type" label="算法类型"> </el-table-column>
-            <el-table-column prop="time" label="模型预测次数">
-            </el-table-column>
+          <el-table :data="modelInfo" stripe style="width: 100%" height="22.5vh">
+            <el-table-column prop="taskid" label="模型id" width="140"></el-table-column>
+            <el-table-column prop="modelname" label="模型名称" width="200"></el-table-column>
+            <el-table-column prop="diseasename" label="涉及病种"></el-table-column>
+            <el-table-column prop="publisher" label="发布人"> </el-table-column>
           </el-table>
         </el-card>
       </div>
     </div>
-    <div class="bottomBigDiv">
-      <div class="left">
-        <el-card>
-          <div slot="header" class="clearfix">
-            <span class="lineStyle">▍</span><span>批量预测结果</span>
-          </div>
-          <!-- <div
-            v-for="(item, index) in diseaseData"
-            :key="index"
-            style="margin-top: 10px"
-          >
-            <div style="text-align: center">
-              <span>{{ item.name }}</span>
-              <el-progress
-                :text-inside="true"
-                :stroke-width="28"
-                :percentage="(item.num * 100) / patientNum"
-                style="margin-top: 10px"
-              ></el-progress>
-            </div>
-          </div> -->
-          <div class="block">
-            <span class="demonstration" style="margin-right:15px">已预测数据</span>
-            <el-cascader
-              v-model="value1"
-              :options="options"
-              ></el-cascader>
-            <div style="width:500px;height:500px; margin-top:20px">
-              <PieChart :data="rateCount" :title="'患病风险统计'"></PieChart>
-            </div>
-          </div>
 
-          
-        </el-card>
-      </div>
-      <div class="mid">
-        <el-card>
+    <div class="bottomBigDiv">
+      <div class="left" >
+        <el-card :body-style="{padding:'0px',paddingLeft:'20px',paddingRight:'20px',height:'48vh'}">
           <div slot="header" class="clearfix">
-            <span class="lineStyle">▍</span><span>待定</span>
+            <span class="lineStyle">▍</span><span>现有数据库信息</span>
           </div>
-          <div id="login" style="width: 500px;height:400px;"></div>
-        </el-card>
-      </div>
-      <div class="right">
-        <el-card>
-          <div slot="header" class="clearfix">
-            <span class="lineStyle">▍</span><span>现有数据信息</span>
-          </div>
-          <el-table :data="tableData2" stripe style="width: 100%"   height="400">
-            <el-table-column prop="tableName" label="数据表" width="150px">
-            </el-table-column>
-            <el-table-column prop="diease" label="疾病" width="80px">
-            </el-table-column>
-            <el-table-column prop="tableSize" label="特征数量"> </el-table-column>
-            <el-table-column prop="tableDate" label="创建时间">
+          <el-table :data="databaseInfo" stripe style="width: 100%"   max-height="400">
+            <el-table-column prop="databasename" label="库名" width="130px"></el-table-column>
+            <el-table-column prop="disease" label="涉及疾病" width="120px"></el-table-column>
+            <el-table-column prop="tablenumber" label="数据表数"></el-table-column>
+            <el-table-column prop="operators" label="创建者"> </el-table-column>
+            <el-table-column label="操作">
+              <template slot-scope="scope">
+                <el-button plain type="primary" size="small" @click="getDataByBase(scope.row.databasename)">查看</el-button>
+              </template>
+              
             </el-table-column>
           </el-table>
         </el-card>
       </div>
+      
+      <div class="mid">
+        <el-card :body-style="{padding:'0px',paddingLeft:'20px',paddingRight:'20px',height:'48vh'}">
+          <div slot="header" class="clearfix">
+            <span class="lineStyle">▍</span><span>库内数据信息 </span><span v-if="currentDatabase">（{{currentDatabase}}）</span>
+          </div>
+          <el-table :data="datasetInfo" stripe style="width: 100%"   max-height="400">
+            <el-table-column prop="tablename" label="表名" width="110px"></el-table-column>
+            <el-table-column prop="featurenumber" label="特征数" width="90px"></el-table-column>
+            <el-table-column prop="datanumber" label="样本数"></el-table-column>
+            <el-table-column prop="operators" label="创建者"></el-table-column>
+            <el-table-column label="操作">
+              <template slot-scope="scope">
+                <el-button plain type="primary" size="small" :disabled="!scope.row.projection"
+                @click="getResult(scope.row.affiliationdatabase,scope.row.tablename)">查看结果</el-button>
+              </template>
+              
+            </el-table-column>
+          </el-table>
+        </el-card>
+      </div>
+
+      <div class="right">
+        <el-card :body-style="{padding:'0',paddingLeft:'20px',paddingRight:'20px',paddingTop:'20px',height:'45.9vh',overflow:'hidden'}">
+          <div slot="header" class="clearfix">
+            <span class="lineStyle">▍</span><span>批量预测结果</span><span v-if="currentDataset">（{{currentDataset}}）</span>
+          </div>
+          <div style="width:500px;height:500px; margin-top:20px">
+            <PieChart 
+            v-if="!pieLoading" 
+            v-loading="pieLoading" 
+            element-loading-text="正在获取结果"
+            :data="rateCount" 
+            :title="'患病风险统计'"></PieChart>
+          </div>
+        </el-card>
+      </div>
+
     </div>
   </div>
 </template>
 
 <script>
-import { getRequest } from '@/utils/api';
-import storage from '@/utils/storage';
 import PieChart from '@/components/user/PieChart.vue'
+import {getRequest,postRequest} from '@/api/user'
 export default {
   name: "index",
   components:{PieChart: PieChart},
   data() {
     return {
-      mychart:{},
-      
-      rateCount:[{
-          value: 20,
-          name: "高风险"
-        },
-        {
-          value: 86,
-          name: "中风险"
-        },
-        {
-          value: 95,
-          name: "低风险"
-        }
-      ],
-      options: [{
-          value: 'zhinan',
-          label: '心脏病',
-          children: [{
-            value: 'shejiyuanze',
-            label: '心脏病数据集（一）'
-          }, {
-            value: 'daohang',
-            label: '心脏病数据集（二）',
-          }, {
-            value: 'daohang2',
-            label: '心脏病数据集（三）',
-          }]
-        }, {
-          value: 'zujian',
-          label: '慢性肾病',
-          children: [{
-            value: 'basic',
-            label: '慢性肾病病人集（一）',
-          },{
-            value: 'basic2',
-            label: '慢性肾病病人集（二）',
-          } ]
-        }],
-      tableData: [
-        {
-          modelid: 1,
-          modelname: "KNN",
-          type: "分类",
-          time: 6,
-        },
-        {
-          modelid: 2,
-          modelname: "随机森林",
-          type: "分类",
-          time: 4,
-        },
-        {
-          modelid: 3,
-          modelname: "xgboost",
-          type: "分类",
-          time: 3,
-        },
-      ],
-      tableData2:[{
-          tableName:"心脏病数据集（一）",
-          diease:"心脏病",
-          tableSize:13,
-          tableDate:"2023.6.12 10:18"
-        },
-        {
-          tableName:"心脏病数据集（二）",
-          diease:"心脏病",
-          tableSize:13,
-          tableDate:"2023.6.12 15:32"
-        },
-        {
-          tableName:"心脏病数据集（三）",
-          diease:"心脏病",
-          tableSize:13,
-          tableDate:"2023.6.12 20:15"
-        },
-        {
-          tableName:"现有病例数据",
-          diease:"多疾病",
-          tableSize:6,
-          tableDate:"2023.6.8 16:26"
-        }
-      ],
-      line: null,
-      patientNum: 200,
-      options_disease: [
-        {
-          value: "正在上传",
-          label: "正在上传",
-        },
-        {
-          value: "上传成功",
-          label: "上传成功",
-        },
-        {
-          value: "上传失败",
-          label: "上传失败",
-        },
-      ],
-      value1: "",
+      currentDatabase:"",
+      currentDataset:"",
+      modelInfo:[],
+      databaseInfo:[],
+      datasetInfo:[],
+      predictResult:[],
+      rateCount:[],
+      pieLoading: false,
       quickEntry: [
         {
           title: "健康资讯",
@@ -232,105 +135,104 @@ export default {
           img: require("../../assets/batchPredict.png"),
           router: "/Batch",
         },
-        // {
-        //   title: "多病种关联关系挖掘",
-        //   img: require("../../assets/mutipile.png"),
-        //   router: "/connectMining",
-        // },
-        // {
-        //   title: "疾病预测",
-        //   img: require("../../assets/feiai.png"),
-        //   router: "/dangePredict",
-        // },
-        // { title: "其他功能", img: require("../../assets/other.png") },
-      ],
-      diseaseData: [
-        {
-          name: "胃癌",
-          num: 30,
-        },
-        {
-          name: "糖尿病",
-          num: 23,
-        },
-        {
-          name: "肺癌",
-          num: 56,
-        },
-        {
-          name: "乳腺癌",
-          num: 12,
-        },
-        {
-          name: "高血压",
-          num: 22,
-        },
       ],
     };
   },
-  methods: {
-    quickLink(index) {
+  
+  mounted() {
+    this.init();
+  },
 
+  methods: {
+    init(){
+      // 获取模型信息
+      getRequest("/Model/getall").then((res)=>{
+        this.modelInfo = res;
+      }).catch(error=>{
+        console.log(error);
+      })
+      // 获取数据库信息
+      getRequest("/DataManager/database").then((res)=>{
+        this.databaseInfo = res;
+        if(this.databaseInfo[0].databasename){
+          this.currentDatabase = this.databaseInfo[0].databasename;
+          this.getDataByBase(this.databaseInfo[0].databasename);
+        }
+      }).catch(error=>{
+        console.log(error);
+      })
+    },
+
+    // 根据库名获取数据表
+    getDataByBase(databasename){
+      postRequest("/DataManager/data",JSON.stringify({databasename})).then((res)=>{
+        this.datasetInfo = res;
+        if(databasename){
+          this.currentDatabase = databasename;
+          this.getResult(this.datasetInfo[0].affiliationdatabase,this.datasetInfo[0].tablename)
+        }
+      }).catch(error=>{
+        console.log(error);
+      })
+    },
+
+    // 获取特定数据表的预测结果
+    getResult(basename,tablename){
+      this.pieLoading = true;
+      if(tablename){
+        this.currentDataset = tablename;
+      }
+      getRequest("/DataManager/getInfoByTableName",{basename,tablename}).then((res)=>{
+        this.predictResult = res.data;
+        this.rateCount = [];
+        let high = 0;
+        let mid = 0;
+        let low = 0;
+        for (const item of this.predictResult) {
+          if(!item.disease_probability){
+            break;
+          }
+          let rate = parseFloat((item.disease_probability*100).toFixed(2));
+          if(rate > 70){
+            high++;
+          }else if(rate >45){
+            mid++;
+          }else{
+            low++;
+          }
+          
+        }
+        if(low > 0){
+          let lowCount = {
+            value: low,
+            name: "低风险"
+          }
+          this.rateCount.push(lowCount);
+        }
+        if(mid >0 ){
+          let midCount = {
+            value: mid,
+            name: "中风险"
+          }
+          this.rateCount.push(midCount);
+        }
+        if(high > 0){
+          let highCount = {
+            value: high,
+            name: "高风险"
+          }
+          this.rateCount.push(highCount);
+        }
+
+        this.pieLoading = false;
+      }).catch(error=>{
+        console.log(error);
+      })
+    },
+
+    quickLink(index) {
       this.$router.push(this.quickEntry[index].router);
     },
-    // chart1() {
-    //   var chartDom = document.getElementById('login');
-    //   this.mychart = this.$echarts.init(chartDom);
-
-    //   var option;
-    //   option = {
-    //     xAxis: {
-    //       type: "category",
-    //       data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-    //     },
-    //     yAxis: {
-    //       type: "value",
-    //     },
-    //     series: [
-    //       {
-    //         data: [120, 200, 150, 80, 70, 110, 130],
-    //         type: "bar",
-    //         showBackground: true,
-    //         color:" #75AAF2",
-    //         backgroundStyle: {
-    //           color: "rgba(180, 180, 180, 0.2)",
-    //         },
-    //       },
-    //     ],
-    //   };
-
-    //   option && this.mychart.setOption(option);
-    // },
-    // getAllData(){
-    //     getRequest("/diabete/getAllData").then((response) => {
-    //     console.log(response);
-    //     if (response) {
-    //       storage.set('allTableData',JSON.stringify(response.data.tableList));
-    //       this.$store.commit('setAllTableData',storage.get('allTableData'));
-    //     } else {
-    //       console.log(response.status);
-    //     }
-    //     var tempList=JSON.parse(this.$store.getters.getAllTableData)
-    //       for (let i = 0; i < tempList.length; i++) {
-    //         const obj = {
-    //           tableName: tempList[i].tableName,
-    //           tableOrigin: tempList[i].tableOrigin,
-    //           tableSize: tempList[i].tableSize,
-    //           tableDate: tempList[i].startTime,
-    //         };
-    //         this.tableData2.push(obj);
-    //       }
-    //   });
-      
-    // }
-  },
-  mounted() {
-    // const that=this;
-    // this.mychart.resize();
-    // window.addEventListener('resize',()=>{
-    //   that.mychart.resize()
-    // })
-    // this.getAllData();
   },
 };
 </script>
@@ -380,12 +282,13 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 10px;
+  margin-top: 20px;
 }
 .bottomBigDiv .left {
   box-sizing: border-box;
   height: 100%;
   width: 33%;
+  overflow: hidden;
 }
 .bottomBigDiv .mid {
   box-sizing: border-box;
