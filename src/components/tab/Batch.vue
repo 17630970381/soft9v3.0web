@@ -210,11 +210,11 @@ export default {
       },
 
       getData(id){
-        this.dataTableVision = true;
         this.getData_loading = true;
         dataInfoPost("TableManager/getInfoByTableName",id).then((res)=>{
           this.patientTable = res.data;
           this.getData_loading = false;
+          this.dataTableVision = true;
         })
       },
 

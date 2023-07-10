@@ -12,7 +12,7 @@
         >
           <span index="1" style="float: left; color: cornflowerblue">
             <i class="el-icon-box"></i>
-            <span style="font-size:20px">基于多任务学习的多病种疾病风险预测</span></span
+            <span style="font-size:20px">多病种疾病风险预测工具软件</span></span
           >
           <!--            <template slot="title">当前服务器：</template>-->
           <el-menu-item index="2" style="float: right"
@@ -81,7 +81,7 @@
 
              <div class="menu-footer">
               <el-menu-item index="/SoftwareIntro"> 软件介绍</el-menu-item>
-              <el-menu-item index="/operation"> 操作手册</el-menu-item>
+              <el-menu-item > 操作手册</el-menu-item>
             </div>
 
           </el-menu>

@@ -397,10 +397,7 @@
             <div id="pie" v-if="loading === false">
               <PieChart :data="heart.contribute"></PieChart>
             </div>
-            <div style="margin-top:-142px">
-              <h1 class="title" style="margin-left:-13px" v-if="loading === false">异常指标:</h1>
-              <p style="font-size:20px; padding-top:15px" v-if="loading === false">{{dangerFeature}}</p>
-            </div>
+            
             
           </div>
 
@@ -435,6 +432,32 @@
           </div>
         </el-col>
       </el-row>
+
+      <div v-if="loading === false && model === 2">
+        <h1 class="title" style="margin-left:-13px">指标详情:</h1>
+        <el-table
+          :data="heart.featureTable"
+          style="width: 70%; margin-left:16%"
+          border
+          :row-style="tableRowClassName">
+          <el-table-column
+            prop="name"
+            label="项目名称">
+          </el-table-column>
+          <el-table-column
+            prop="value"
+            label="结果">
+          </el-table-column>
+          <el-table-column
+            prop="rangeValue"
+            label="参考值">
+          </el-table-column>
+          <el-table-column
+            prop="unit"
+            label="单位">
+          </el-table-column>
+        </el-table>
+      </div>
       
       
       <el-button type="success" @click="done" style="margin-left: 47%;" round>完成</el-button>
@@ -551,6 +574,7 @@ export default {
             rate: 0,
             patientTable: [],
             contribute:[],
+            featureTable:[]
           },
           symptom: {
             isShow: false,
@@ -724,10 +748,12 @@ export default {
             }
           }
           this.heart.patientTable = res;
+          console.log("病人表👉",res);
         },
 
         //心脏病预测结果处理
         processHeartRes(res){
+          console.log(res);
           this.predict.selectName = '心脏';
           let rate = JSON.parse(res[0]).probability;
           this.heart.rate = parseFloat((rate*100).toFixed(2));
@@ -739,6 +765,7 @@ export default {
         // 手动提交心脏病预测
         heartSubmit(){
           this.loading = true;
+          this.processFeatureTable(this.heart.feature);
           heartPost(this.heart.feature).then(res=>{
             this.processHeartRes(res);
           })
@@ -751,10 +778,60 @@ export default {
           this.predict.isShow = true;
         },
 
+        //获取并处理featureTable
+        processFeatureTable(features){
+          getRequest("/Diseases/getall").then((res)=>{
+            for (const item of res) {
+              item.value = features[item.symp];
+            }
+            console.log(res);
+            this.heart.featureTable = res;
+          })
+        },
+
+        tableRowClassName ({row, rowIndex}) {
+          let styleRes = { "background": "#ee6666 !important" }
+          if (row.symp == "cp" && row.value !== "无") {//胸痛类型
+            return styleRes;
+          }
+          if (row.symp == "trestbps" && (row.value > 140 || row.value < 90)) {
+            return styleRes;//静息血压
+          }
+          if (row.symp == "chol" && (row.value > 200 || row.value < 90)) {
+            return styleRes;//血清胆固醇
+          }
+          if (row.symp == "fbs" && (row.value > 120 || row.value < 70)) {
+            return styleRes;//空腹血糖
+          }
+          if (row.symp == "restecg" && row.value !== "正常") {
+            return styleRes;//静息心电图
+          }
+          if (row.symp == "thalach" && row.value > (220-this.heart.feature.age)) {
+            return styleRes;//最大心率
+          }
+          if (row.symp == "exang" && row.value !== "否") {
+            return styleRes;//运动诱发心绞痛
+          }
+          if (row.symp == "oldpeak" && row.value > 0) {
+            return styleRes;//运动时ST段有下降现象
+          }
+          if (row.symp == "slope" && row.value !== "平坦") {
+            return styleRes;//运动时ST段峰值
+          }
+          if (row.symp == "ca" && row.value !== 0) {
+            return styleRes;//荧光血管
+          }
+          if (row.symp == "thal" && row.value !== "正常") {
+            return styleRes;//地中海贫血
+          }
+          return '';
+        },
+
         //选择病人进行心脏病预测
         heartSubmit2(row) {
           this.loading = true;
           Object.assign(this.heart.feature,row);
+          this.processFeatureTable(this.heart.feature);
           heartPost2(row.patientId).then(res=>{
             this.processHeartRes(res);
           })
@@ -782,15 +859,13 @@ export default {
         // 删除病例，参数1同新增,参数2为整行信息
         patientDel(disease,row){
           if(disease === 'heart'){
-            console.log("在删了",row.id)
             patientDelRequest(row.id).then((res)=>{
-              console.log(res)
               this.processPatientTable(res);
             })
           }
         },
 
-        //重置表格
+        //重置表单
         resetForm(formName){
           // 不加if判断会报错找不到resetFields，因为form用的v-if，不显示时找不到DOM结构
           if(this.$refs[formName]){
@@ -1079,4 +1154,5 @@ i {
   margin-left: 10%;
   margin-top: 5%;
 }
+
 </style>

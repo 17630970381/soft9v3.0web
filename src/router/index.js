@@ -27,7 +27,7 @@ const routes = [
     // path: "/sideBar",有登录页面时加上
     path: "/",
     name: "SideBar",
-    redirect: "/dash",
+    redirect: "/SoftwareIntro",
     component: SideBar,
     children: [
       {

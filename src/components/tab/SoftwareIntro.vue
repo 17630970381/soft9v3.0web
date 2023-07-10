@@ -1,9 +1,19 @@
 <template>
   <div>
     <div class="container">
-      <div style="font-size: 50px">基于多任务学习的多病种疾病风险预测软件</div>
+      <div style="font-size: 50px">多病种疾病风险预测工具软件</div>
       <div class="size-icon">
-        <div class="icon">
+        <div v-for="(item, index) in quickEntry" :key="index" class="icon">
+          <div class="singleBox" @click="quickLink(index)">
+            <img
+              :src="item.img"
+              class="imgStyle"
+              style="border-radius: 15px"
+            />
+            <h3 style="font-size: 30px">{{ item.title }}</h3>
+          </div>
+        </div>
+        <!-- <div class="icon">
           <img src="@/assets/book.png" alt="健康资讯">
           <h3 style="font-size: 30px">健康资讯</h3>
         </div>
@@ -19,7 +29,7 @@
         <div class="icon">
           <img src="@/assets/batch.png" alt="批量预测">
           <h3 style="font-size: 30px">批量预测</h3>
-        </div>
+        </div> -->
       </div>
     </div>
   </div>
@@ -27,6 +37,38 @@
 <script>
 export default {
   setup() {},
+  data(){
+    return {
+      quickEntry: [
+        {
+          title: "健康资讯",
+          img: require("@/assets/book.png"),
+          router: "/DieaseIntro",
+        },
+        {
+          title: "模型训练",
+          img: require("@/assets/model_intro.png"),
+          router: "",
+        },
+        {
+          title: "风险预测",
+          img: require("@/assets/danLiYuCe.png"),
+          router: "/Predict",
+        },
+        {
+          title: "批量预测",
+          img: require("@/assets/batch.png"),
+          router: "/Batch",
+        },
+      ],
+    }
+  },
+
+  methods:{
+    quickLink(index) {
+      this.$router.push(this.quickEntry[index].router);
+    },
+  }
 };
 </script>
 <style scoped>
