@@ -228,10 +228,10 @@
             </el-form-item>
             <el-form-item label="胸痛类型" prop="cp" required>
               <el-select v-model="heart.feature.cp" placeholder="请选择胸痛类型">
-                <el-option label="典型心绞痛" value="1"></el-option>
-                <el-option label="非典型心绞痛" value="2"></el-option>
-                <el-option label="非心绞痛" value="3"></el-option>
-                <el-option label="渐近心痛" value="4"></el-option>
+                <el-option label="典型心绞痛" value=1></el-option>
+                <el-option label="非典型心绞痛" value=2></el-option>
+                <el-option label="非心绞痛" value=3></el-option>
+                <el-option label="渐近心痛" value=4></el-option>
               </el-select>
             </el-form-item>
             <el-form-item label="静息血压(mmHg)" prop="trestbps" required>
@@ -245,9 +245,9 @@
             </el-form-item>
             <el-form-item label="静息心电图" prop="restecg" required>
               <el-select v-model="heart.feature.restecg" placeholder="请选择心电图结果">
-                <el-option label="正常" value="0"></el-option>
-                <el-option label="有ST-T波异常" value="1"></el-option>
-                <el-option label="左心室肥大" value="2"></el-option>
+                <el-option label="正常" value=0></el-option>
+                <el-option label="有ST-T波异常" value=1></el-option>
+                <el-option label="左心室肥大" value=2></el-option>
               </el-select>
             </el-form-item>
             <el-form-item label="最大心率" prop="thalach" required>
@@ -255,8 +255,8 @@
             </el-form-item>
             <el-form-item label="运动诱发性心绞痛" prop="exang" required>
               <el-select v-model="heart.feature.exang" placeholder="是否有该症状">
-                <el-option label="是" value="1"></el-option>
-                <el-option label="否" value="0"></el-option>
+                <el-option label="是" value=1></el-option>
+                <el-option label="否" value=0></el-option>
               </el-select>
             </el-form-item>
             <el-form-item label="运动时ST段下降程度" prop="oldpeak" required>
@@ -264,9 +264,9 @@
             </el-form-item>
             <el-form-item label="运动时ST段峰值" prop="slope" required>
               <el-select v-model="heart.feature.slope" placeholder="请选择ST段形状">
-                <el-option label="向上倾斜" value="1"></el-option>
-                <el-option label="平坦" value="2"></el-option>
-                <el-option label="下坡" value="3"></el-option>
+                <el-option label="向上倾斜" value=1></el-option>
+                <el-option label="平坦" value=2></el-option>
+                <el-option label="下坡" value=3></el-option>
               </el-select>
             </el-form-item>
             <el-form-item label="主要血管数量(0-3)" prop="ca" required>
@@ -274,9 +274,9 @@
             </el-form-item>
             <el-form-item label="地中海贫血" prop="thal" required>
               <el-select v-model="heart.feature.thal" placeholder="请选择症状">
-                <el-option label="正常" value="3"></el-option>
-                <el-option label="固定缺陷" value="6"></el-option>
-                <el-option label="可逆缺陷" value="7"></el-option>
+                <el-option label="正常" value=3></el-option>
+                <el-option label="固定缺陷" value=6></el-option>
+                <el-option label="可逆缺陷" value=7></el-option>
               </el-select>
             </el-form-item>
             <el-form-item style="margin-left: 30%;margin-top: 50px;">
@@ -434,7 +434,7 @@
       </el-row>
 
       <div v-if="loading === false && model === 2">
-        <h1 class="title" style="margin-left:-13px">指标详情:</h1>
+        <h1 class="title" style="margin-left:6%">指标详情:</h1>
         <el-table
           :data="heart.featureTable"
           style="width: 70%; margin-left:16%"
@@ -651,7 +651,6 @@ export default {
             pieData.push(tempobj);
             sum += +obj[key];
           }
-          console.log(sum)
           if(sum < 1){
             let other = {
               value: 1-sum,
@@ -663,97 +662,109 @@ export default {
           return pieData;
         },
 
+        convertHeartFeatureToChinese(patient){
+          console.log("转中文",typeof patient.cp);
+          switch(patient.sex){
+            case 'female':
+              patient.sex = "女";
+              break;
+            case 'male':
+              patient.sex = "男";
+              break;
+            case 0:
+              patient.sex = "女";
+              break;
+            case 1:
+              patient.sex = "男";
+              break;
+            default:
+              patient.sex = "未知";
+              break;
+          }
+          switch(Number(patient.cp)){
+            case 1:
+              patient.cp = "典型心绞痛";
+              break;
+            case 2:
+              patient.cp = "非典型心绞痛";
+              break;
+            case 3:
+              patient.cp = "非心绞痛";
+              break;
+            case 4:
+              patient.cp = "渐近心痛";
+              break;
+            default:
+              patient.cp = "未知";
+              break;
+          }
+          switch(Number(patient.restecg)){
+            case 0:
+              patient.restecg = "正常";
+              break;
+            case 1:
+              patient.restecg = "有ST-T波异常";
+              break;
+            case 2:
+              patient.restecg = "左心室肥大";
+              break;
+            default:
+              patient.restecg = "未知";
+              break;
+          }
+          switch(Number(patient.exang)){
+            case 0:
+              patient.exang = "否";
+              break;
+            case 1:
+              patient.exang = "是";
+              break;
+            default:
+              patient.exang = "未知";
+              break;
+          }
+          switch(Number(patient.slope)){
+            case 1:
+              patient.slope = "向上倾斜";
+              break;
+            case 2:
+              patient.slope = "平坦";
+              break;
+            case 3:
+              patient.slope = "下坡";
+              break;
+            default:
+              patient.slope = "未知";
+              break;
+          }
+          switch(Number(patient.thal)){
+            case 3:
+              patient.thal = "正常";
+              break;
+            case 6:
+              patient.thal = "固定缺陷";
+              break;
+            case 7:
+              patient.thal = "可逆缺陷";
+              break;
+            default:
+              patient.thal = "未知";
+              break;
+          }
+          return patient;
+        
+        },
+
         //处理patientTable
         processPatientTable(res) {
-          for (const patient of res) {
-            switch(patient.sex){
-              case 0:
-                patient.sex = "女";
-                break;
-              case 1:
-                patient.sex = "男";
-                break;
-              default:
-                break;
-            }
-            switch(patient.cp){
-              case 1:
-                patient.cp = "典型心绞痛";
-                break;
-              case 2:
-                patient.cp = "非典型心绞痛";
-                break;
-              case 3:
-                patient.cp = "非心绞痛";
-                break;
-              case 4:
-                patient.cp = "渐近心痛";
-                break;
-              default:
-                patient.cp = "未知";
-                break;
-            }
-            switch(patient.restecg){
-              case 0:
-                patient.restecg = "正常";
-                break;
-              case 1:
-                patient.restecg = "有ST-T波异常";
-                break;
-              case 2:
-                patient.restecg = "左心室肥大";
-                break;
-              default:
-                patient.restecg = "未知";
-                break;
-            }
-            switch(patient.exang){
-              case 0:
-                patient.exang = "否";
-                break;
-              case 1:
-                patient.exang = "是";
-                break;
-              default:
-                patient.exang = "未知";
-                break;
-            }
-            switch(patient.slope){
-              case 1:
-                patient.slope = "向上倾斜";
-                break;
-              case 2:
-                patient.slope = "平坦";
-                break;
-              case 3:
-                patient.slope = "下坡";
-                break;
-              default:
-                patient.slope = "未知";
-                break;
-            }
-            switch(patient.thal){
-              case 3:
-                patient.thal = "正常";
-                break;
-              case 6:
-                patient.thal = "固定缺陷";
-                break;
-              case 7:
-                patient.thal = "可逆缺陷";
-                break;
-              default:
-                patient.thal = "未知";
-                break;
-            }
+          for (let patient of res) {
+            patient = this.convertHeartFeatureToChinese(patient);
           }
           this.heart.patientTable = res;
-          console.log("病人表👉",res);
         },
 
         //心脏病预测结果处理
         processHeartRes(res){
-          console.log(res);
           this.predict.selectName = '心脏';
           let rate = JSON.parse(res[0]).probability;
           this.heart.rate = parseFloat((rate*100).toFixed(2));
@@ -764,14 +775,18 @@ export default {
 
         // 手动提交心脏病预测
         heartSubmit(){
+          console.log("在那里",this.heart.feature)
           this.loading = true;
-          this.processFeatureTable(this.heart.feature);
           heartPost(this.heart.feature).then(res=>{
+            console.log("👉",this.heart.feature)
             this.processHeartRes(res);
           })
           .catch(error => {
               console.log(error);
           })
+          console.log("在这里",this.heart.feature)
+          this.heart.feature = this.convertHeartFeatureToChinese(this.heart.feature);
+          this.processFeatureTable(this.heart.feature);
           
           this.heart.isShow = false;
           this.step = 3;

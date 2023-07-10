@@ -10,5 +10,3 @@ export const tabSwitch = {
         }
     }
 }
-
-export const 
