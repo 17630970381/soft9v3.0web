@@ -9,23 +9,28 @@ import dash from '@/views/dash/index.vue'
 import dataManage from "@/components/tab/dataManage.vue";
 import modelManage from "@/components/tab/modelManage.vue";
 import userManage from "@/components/tab/userManage.vue";
-import LogIn from "@/views/LogIn.vue"
 import UserSideBar from "@/components/user/UserSideBar.vue"
 import Predict from "@/components/user/Predict.vue"
 import DieaseIntro from "@/components/user/DieaseIntro/DieaseIntro.vue"
 import Batch from "@/components/tab/Batch.vue"
 import SoftwareIntro from "@/components/tab/SoftwareIntro.vue";
+import Login from "@/views/Login";
+import Register from "@/views/register";
 Vue.use(VueRouter)
 
 const routes = [
-  // {有登录页面时加上
-  //   path: "/",
-  //   name: "LogIn",
-  //   component: LogIn,
-  // },
   {
-    // path: "/sideBar",有登录页面时加上
-    path: "/",
+    path: '/',
+    name: 'login',
+    component: Login
+  },
+  {
+    path: '/register',
+    name: 'register',
+    component: Register
+  },
+  {
+    path: "/sideBar",
     name: "SideBar",
     redirect: "/SoftwareIntro",
     component: SideBar,
