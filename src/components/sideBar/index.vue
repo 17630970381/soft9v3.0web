@@ -15,11 +15,11 @@
             <span style="font-size:20px">多病种疾病风险预测工具软件</span></span
           >
           <!--            <template slot="title">当前服务器：</template>-->
-          <el-menu-item index="2" style="float: right"
+          <el-menu-item index="2" style="float: right" @click="LogOut"
             ><i class="el-icon-close"></i>退出登录</el-menu-item
           >
           <span  index="3" style="float: right;color:#fff"
-            ><i class="el-icon-user"></i>欢迎你，xx</span
+            ><i class="el-icon-user"></i>欢迎你，{{LoginUserName}}</span
           >
           <!-- <el-menu-item index="4" style="float: right">
             <span @click="openDialog()">软件介绍</span>
@@ -70,14 +70,15 @@
               <i class="el-icon-menu"></i>
               <span slot="title">批量预测</span>
             </el-menu-item>
-            <!-- <el-menu-item index="/dataManage">
+            <el-menu-item index="/dataManage">
               <i class="el-icon-menu"></i>
               <span slot="title">数据管理</span>
             </el-menu-item>
-            <el-menu-item index="/userManage">
+            <el-menu-item index="/tableManage">
               <i class="el-icon-menu"></i>
-              <span slot="title">用户管理</span>
-            </el-menu-item> -->
+              <span slot="title">字段管理</span>
+            </el-menu-item>
+
 
              <div class="menu-footer">
               <el-menu-item index="/SoftwareIntro"> 软件介绍</el-menu-item>
@@ -110,12 +111,21 @@ export default {
   data() {
     return {
       activeIndex: "0",
+      LoginUserName:""
       // describVision: false,
       // description1: "基于多任务学习的多病种疾病风险预测软件是一款医疗健康软件，通过调用相关算法，用户可以进行多种疾病（共病）的风险预测，可以帮助用户更好",
       // description2:"地管理自己的健康状况。本软件现有首页，健康咨询、单例预测和批量预测等功能，具体流程如此下图:"
     };
   },
+  created() {
+    this.LoginUserName = sessionStorage.getItem("user")
+  },
   methods: {
+    LogOut(){
+      sessionStorage.clear();
+      this.LoginUserName = "";
+      this.$router.replace("/")
+    }
     // openDialog(){
     //   this.describVision = true;
     //   console.log("open",this.describVision)

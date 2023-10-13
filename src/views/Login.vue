@@ -122,6 +122,7 @@ export default {
               console.log(resp);
               if (resp.code == "200") {
                  sessionStorage.setItem("user", this.loginForm.username);
+                 sessionStorage.setItem("uid", resp.data.uid);
                  this.$router.push('/sideBar');
               }
             }

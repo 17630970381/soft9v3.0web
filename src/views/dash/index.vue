@@ -40,16 +40,14 @@
       <div class="left" >
         <el-card :body-style="{padding:'0px',paddingLeft:'20px',paddingRight:'20px',height:'48vh'}">
           <div slot="header" class="clearfix">
-            <span class="lineStyle">▍</span><span>现有数据库信息</span>
+            <span class="lineStyle">▍</span><span>现有疾病种类信息</span>
           </div>
           <el-table :data="databaseInfo" stripe style="width: 100%"   max-height="400">
-            <el-table-column prop="databasename" label="库名" width="130px"></el-table-column>
-            <el-table-column prop="disease" label="涉及疾病" width="120px"></el-table-column>
-            <el-table-column prop="tablenumber" label="数据表数"></el-table-column>
-            <el-table-column prop="operators" label="创建者"> </el-table-column>
+            <el-table-column prop="diseaseName" label="涉及疾病" width="120px"></el-table-column>
+            <el-table-column prop="num" label="数据表数"></el-table-column>
             <el-table-column label="操作">
               <template slot-scope="scope">
-                <el-button plain type="primary" size="small" @click="getDataByBase(scope.row.databasename)">查看</el-button>
+                <el-button plain type="primary" size="small" @click="getDataByBase(scope.row.diseaseName)">查看</el-button>
               </template>
               
             </el-table-column>
@@ -60,17 +58,18 @@
       <div class="mid">
         <el-card :body-style="{padding:'0px',paddingLeft:'20px',paddingRight:'20px',height:'48vh'}">
           <div slot="header" class="clearfix">
-            <span class="lineStyle">▍</span><span>库内数据信息 </span><span v-if="currentDatabase">（{{currentDatabase}}）</span>
+            <span class="lineStyle">▍</span><span>具体疾病数据信息 </span><span v-if="currentDatabase">（{{currentDatabase}}）</span>
           </div>
-          <el-table :data="datasetInfo" stripe style="width: 100%"   max-height="400">
-            <el-table-column prop="tablename" label="表名" width="110px"></el-table-column>
-            <el-table-column prop="featurenumber" label="特征数" width="90px"></el-table-column>
-            <el-table-column prop="datanumber" label="样本数"></el-table-column>
-            <el-table-column prop="operators" label="创建者"></el-table-column>
+          <el-table :data="datasetInfo" stripe style="width: 100%"   max-height="450">
+            <el-table-column prop="id" label="ID" width="35px"></el-table-column>
+            <el-table-column prop="chinesename" label="表名" width="120px"></el-table-column>
+            <el-table-column prop="featurenumber" label="特征数" width="63px"></el-table-column>
+            <el-table-column prop="datanumber" label="样本数" width="63px" ></el-table-column>
+            <el-table-column prop="operators" label="创建者" width="65px"></el-table-column>
             <el-table-column label="操作">
               <template slot-scope="scope">
-                <el-button plain type="primary" size="small" :disabled="!scope.row.projection"
-                @click="getResult(scope.row.affiliationdatabase,scope.row.tablename)">查看结果</el-button>
+                <el-button plain type="primary" size="small" :disabled="!scope.row.isProjection"
+                @click="getResult(scope.row.id)">查看</el-button>
               </template>
               
             </el-table-column>
@@ -153,10 +152,11 @@ export default {
       })
       // 获取数据库信息
       getRequest("/DataManager/database").then((res)=>{
+        //console.log(res);
         this.databaseInfo = res;
-        if(this.databaseInfo[0].databasename){
-          this.currentDatabase = this.databaseInfo[0].databasename;
-          this.getDataByBase(this.databaseInfo[0].databasename);
+        if(this.databaseInfo[0].diseaseName){
+          this.currentDatabase = this.databaseInfo[0].diseaseName;
+          this.getDataByBase(this.databaseInfo[0].diseaseName);
         }
       }).catch(error=>{
         console.log(error);
@@ -164,12 +164,14 @@ export default {
     },
 
     // 根据库名获取数据表
-    getDataByBase(databasename){
-      postRequest("/DataManager/data",JSON.stringify({databasename})).then((res)=>{
+    getDataByBase(diseaseName){
+      postRequest("/DataManager/data",JSON.stringify({diseaseName})).then((res)=>{
+        console.log(res);
         this.datasetInfo = res;
-        if(databasename){
-          this.currentDatabase = databasename;
-          this.getResult(this.datasetInfo[0].affiliationdatabase,this.datasetInfo[0].tablename)
+        if(diseaseName){
+          this.currentDatabase = diseaseName;
+          this.currentDataset = this.datasetInfo[0].chinesename;
+          this.getResult(this.datasetInfo[0].id)
         }
       }).catch(error=>{
         console.log(error);
@@ -177,12 +179,11 @@ export default {
     },
 
     // 获取特定数据表的预测结果
-    getResult(basename,tablename){
+    getResult(id){
       this.pieLoading = true;
-      if(tablename){
-        this.currentDataset = tablename;
-      }
-      getRequest("/DataManager/getInfoByTableName",{basename,tablename}).then((res)=>{
+      
+      getRequest(`/DataManager/getInfoByTableID/${id}`).then((res)=>{
+        //console.log(res);
         this.predictResult = res.data;
         this.rateCount = [];
         let high = 0;
@@ -287,13 +288,13 @@ export default {
 .bottomBigDiv .left {
   box-sizing: border-box;
   height: 100%;
-  width: 33%;
+  width: 28%;
   overflow: hidden;
 }
 .bottomBigDiv .mid {
   box-sizing: border-box;
   height: 100%;
-  width: 33%;
+  width: 38%;
 }
 .bottomBigDiv .right {
   box-sizing: border-box;

@@ -143,6 +143,12 @@ export default {
   box-shadow: none;
   border: none;
 }
+h3{
+  margin: 1%;
+}
+p{
+  margin: 1%;
+}
 #menus {
   /* height: 80%; */
   /* overflow-y: auto; */
