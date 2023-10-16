@@ -209,9 +209,9 @@ export default {
               })
       },
 
-      getData(id){
+      getData(tableName){
         this.getData_loading = true;
-        dataInfoPost("TableManager/getInfoByTableName",id).then((res)=>{
+        dataInfoPost("DataTable/getInfoByTableName",tableName).then((res)=>{
           this.patientTable = res.data;
           this.getData_loading = false;
           this.dataTableVision = true;

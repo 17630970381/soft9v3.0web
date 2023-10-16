@@ -218,7 +218,7 @@
         <el-tab-pane label="手动输入">
           <el-form ref="handInputForm" :model="heart.feature" :rules="heart.feature.rules" label-width="154px" @keyup.native.enter="heartSubmit">
             <el-form-item label="年龄" prop="age" required>
-              <el-input v-model="heart.feature.age"></el-input>
+              <el-input v-model.number="heart.feature.age"></el-input>
             </el-form-item>
             <el-form-item label="性别" prop="sex" required>
               <el-select v-model="heart.feature.sex" placeholder="请选择性别">
@@ -328,21 +328,12 @@
     v-loading="loading" 
     element-loading-text="正在预测中" 
     >
-      <el-row :gutter="20">
-        <!------------------- 人体模型 ----------------->
-        <el-col class="left" :span="12" >
-          <Body :selectName="predict.selectName" :hoverName="predict.hoverName"></Body>
-        </el-col>
-
-        <h1 class="title" v-if="loading === false">预诊结果:</h1>
-
-        <el-col class="right" :span="12">
-
+      <div class="container" style="display: flex;">
           <!-- -------------------心脏病模型预测结果------------- -->
-          <div v-if="model === 2">
-            <el-card :body-style="{ height:'260px',padding: '10px'}" id="highRiskCard" v-if="loading === false && heart.rate > 60">
+          <div v-if="model === 2" class="left_content" style="width: 42%;">
+            <el-card :body-style="{ height:'300px',padding: '10px'}" id="highRiskCard" v-if="loading === false && heart.rate > 60">
               <!-- 卡片头 -->
-              <div slot="header" id="cardHead">
+              <div slot="header" id="cardHead" >
                 <i class="el-icon-warning"></i>
                 <span>高风险</span>
               </div>
@@ -358,7 +349,7 @@
                 </div>
               </div>
             </el-card>
-            <el-card :body-style="{ height:'260px',padding: '10px'}" id="middleRiskCard" v-if="loading === false && heart.rate < 60 && heart.rate > 30">
+            <el-card :body-style="{ height:'300px',padding: '10px'}" id="middleRiskCard" v-if="loading === false && heart.rate < 60 && heart.rate > 30">
               <!-- 卡片头 -->
               <div slot="header" id="cardHead">
                 <i class="el-icon-warning"></i>
@@ -375,7 +366,7 @@
                 </div>
               </div>
             </el-card>
-            <el-card :body-style="{ height:'260px',padding: '10px'}" id="lowRiskCard" v-if="loading === false && heart.rate < 30">
+            <el-card :body-style="{ height:'300px',padding: '10px'}" id="lowRiskCard" v-if="loading === false && heart.rate < 30">
               <!-- 卡片头 -->
               <div slot="header" id="cardHead">
                 <i class="el-icon-warning"></i>
@@ -392,12 +383,11 @@
             <!-- <div id="board" v-if="loading === false" >
               <Board :rate="heart.rate"></Board>
             </div> -->
-
-            <h1 class="title" style="margin-left:-13px" v-if="loading === false">危险因素权重:</h1>
-            <div id="pie" v-if="loading === false">
-              <PieChart :data="heart.contribute"></PieChart>
+            <h1 class="title" style="margin-left:5px" v-if="loading === false">危险因素权重:</h1>
+            <div id="pie" v-if="loading === false" style="margin-left: 5px;">
+              <PieChart :data="heart.contribute" style="margin-left: -50px;"></PieChart>
             </div>
-            
+
             
           </div>
 
@@ -430,36 +420,35 @@
               </el-card>
             </el-row>
           </div>
-        </el-col>
-      </el-row>
+          
+          <div v-if="loading === false && model === 2" class="right_content">
+            <h1 class="title" style="margin-left:5%; margin-top: -2px;">指标详情:</h1>
+            <el-table
+              :data="heart.featureTable"
+              style="width: 100%; margin-left:5%"
+              border
+              :row-style="tableRowClassName">
+              <el-table-column
+                prop="name"
+                label="项目名称">
+              </el-table-column>
+              <el-table-column
+                prop="value"
+                label="结果">
+              </el-table-column>
+              <el-table-column
+                prop="rangeValue"
+                label="参考值">
+              </el-table-column>
+              <el-table-column
+                prop="unit"
+                label="单位">
+              </el-table-column>
+            </el-table>
+          </div>
 
-      <div v-if="loading === false && model === 2">
-        <h1 class="title" style="margin-left:6%">指标详情:</h1>
-        <el-table
-          :data="heart.featureTable"
-          style="width: 70%; margin-left:16%"
-          border
-          :row-style="tableRowClassName">
-          <el-table-column
-            prop="name"
-            label="项目名称">
-          </el-table-column>
-          <el-table-column
-            prop="value"
-            label="结果">
-          </el-table-column>
-          <el-table-column
-            prop="rangeValue"
-            label="参考值">
-          </el-table-column>
-          <el-table-column
-            prop="unit"
-            label="单位">
-          </el-table-column>
-        </el-table>
       </div>
-      
-      
+
       <el-button type="success" @click="done" style="margin-left: 47%;" round>完成</el-button>
     </el-main>
   </div>
@@ -758,6 +747,7 @@ export default {
         //处理patientTable
         processPatientTable(res) {
           for (let patient of res) {
+            console.log(patient);
             patient = this.convertHeartFeatureToChinese(patient);
           }
           this.heart.patientTable = res;
@@ -853,10 +843,10 @@ export default {
           .catch(error => {
               console.log(error);
           })
-
           this.heart.isShow = false;
           this.step = 3;
           this.predict.isShow = true;
+          this.resetForm('handInputForm');
         },
 
         //新增病例,参数是病种，后期新增病种可复用，当前可选：'heart'

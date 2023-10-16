@@ -64,11 +64,11 @@
             </el-menu-item>
             <el-menu-item index="/Predict">
               <i class="el-icon-menu"></i>
-              <span slot="title">风险预测</span>
+              <span slot="title">病例风险预测</span>
             </el-menu-item>
             <el-menu-item index="/Batch">
               <i class="el-icon-menu"></i>
-              <span slot="title">批量预测</span>
+              <span slot="title">人群患病风险预测</span>
             </el-menu-item>
             <el-menu-item index="/dataManage">
               <i class="el-icon-menu"></i>
