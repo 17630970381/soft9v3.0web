@@ -343,14 +343,14 @@
             }
           }
         }
-        if (labelCount < 1) {
-          this.$message({
-            showClose: true,
-            type: "warning",
-            message: "请至少设置一个标签特征",
-          });
-          return false;
-        }
+        // if (labelCount < 1) {
+        //   this.$message({
+        //     showClose: true,
+        //     type: "warning",
+        //     message: "请至少设置一个标签特征",
+        //   });
+        //   return false;
+        // }
         if (this.dialogForm.dataDisease != "多疾病" && labelCount > 1) {
           this.$message({
             showClose: true,

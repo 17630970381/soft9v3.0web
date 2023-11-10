@@ -6,6 +6,7 @@ import dash from '@/views/dash/index.vue'
 // import earlyLung from "@/views/lung/earlyLung";
 // import connectMining from "@/components/tab/connectMining.vue";
 // import dangePredict from "@/components/tab/dangePredict.vue";
+import ModelTrain from "@/components/tab/ModeTrain.vue"
 import dataManage from "@/components/tab/dataManage.vue";
 import tableManage from "@/components/tab/tableManage.vue";
 import modelManage from "@/components/tab/modelManage.vue";
@@ -45,6 +46,11 @@ const routes = [
         path: "/dataManage",
         name: "dataManage",
         component: dataManage,
+      },
+      {
+        path: "/modelTrain",
+        name: "ModelTrain",
+        component: ModelTrain,
       },
       {
         path: "/tableManage",

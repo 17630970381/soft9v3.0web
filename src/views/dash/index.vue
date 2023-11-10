@@ -49,7 +49,6 @@
               <template slot-scope="scope">
                 <el-button plain type="primary" size="small" @click="getDataByBase(scope.row.diseaseName)">查看</el-button>
               </template>
-              
             </el-table-column>
           </el-table>
         </el-card>
@@ -60,7 +59,7 @@
           <div slot="header" class="clearfix">
             <span class="lineStyle">▍</span><span>具体疾病数据信息 </span><span v-if="currentDatabase">（{{currentDatabase}}）</span>
           </div>
-          <el-table :data="datasetInfo" stripe style="width: 100%"   max-height="450">
+          <el-table :data="datasetInfo" stripe style="width: 100%;"  height="50vh">
             <el-table-column prop="id" label="ID" width="35px"></el-table-column>
             <el-table-column prop="chinesename" label="表名" width="120px"></el-table-column>
             <el-table-column prop="featurenumber" label="特征数" width="63px"></el-table-column>
@@ -69,7 +68,7 @@
             <el-table-column label="操作">
               <template slot-scope="scope">
                 <el-button plain type="primary" size="small" :disabled="!scope.row.isProjection"
-                @click="getResult(scope.row.id)">查看</el-button>
+                @click="getResult(scope.row.id,scope.row.chinesename)">查看</el-button>
               </template>
               
             </el-table-column>
@@ -171,7 +170,7 @@ export default {
         if(diseaseName){
           this.currentDatabase = diseaseName;
           this.currentDataset = this.datasetInfo[0].chinesename;
-          this.getResult(this.datasetInfo[0].id)
+          this.getResult(this.datasetInfo[0].id,this.currentDataset)
         }
       }).catch(error=>{
         console.log(error);
@@ -179,9 +178,9 @@ export default {
     },
 
     // 获取特定数据表的预测结果
-    getResult(id){
+    getResult(id,chinesename){
       this.pieLoading = true;
-      
+      this.currentDataset = chinesename;
       getRequest(`/DataManager/getInfoByTableID/${id}`).then((res)=>{
         //console.log(res);
         this.predictResult = res.data;
@@ -317,4 +316,5 @@ export default {
   padding: 0;
   height: 100%;
 }
+
 </style>

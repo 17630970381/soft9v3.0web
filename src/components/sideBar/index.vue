@@ -58,7 +58,7 @@
               <i class="el-icon-menu"></i>
               <span slot="title">健康资讯</span>
             </el-menu-item>
-            <el-menu-item index="">
+            <el-menu-item index="/modelTrain">
               <i class="el-icon-menu"></i>
               <span slot="title">模型训练</span>
             </el-menu-item>

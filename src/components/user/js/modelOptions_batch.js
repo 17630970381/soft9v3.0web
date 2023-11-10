@@ -12,7 +12,7 @@ const modelOptions = [
   {
     name: "糖尿病",
     value: 3,
-    disable: true,
+    disable: false,
   },
   {
     name: "高血压",
@@ -32,7 +32,7 @@ const modelOptions = [
   {
     name: "肺癌",
     value: 7,
-    disable: true,
+    disable: false,
   },
   {
     name: "肝癌",
