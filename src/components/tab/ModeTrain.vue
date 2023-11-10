@@ -361,10 +361,10 @@ export default {
 
     },
     /*上传数据(模型训练)*/
-    handleUploadError(response, file, ) {
+    handleUploadError(response) {
       if (response.code === 400) {
         this.$message.error('上传失败,该数据已存在');
-        file = null;
+        // file = null;
         // fileList = null;
       }
     },
@@ -380,7 +380,7 @@ export default {
     handleRemove(file, fileList) {
       console.log(file, fileList);
     },
-    handleUploadSuccess(response, file, ) {
+    handleUploadSuccess(response, file) {
       this.filename = file.name.replace('.csv', '')
       console.log(this.filename)
       console.log(response)
@@ -656,30 +656,15 @@ i {
   font-weight: 600;
 }
 
-.valueRange {
-  color: gray;
-  margin-left: 10px;
-}
+
 
 .el-icon-warning-outline {
   margin-left: 10px;
   font-size: 20px;
 }
-.el-icon-warning-outline:hover {
-  color: #368ce7;
-}
 
-.buttonBox {
-  width: 35vh;
-  margin-top: 70px;
-  margin-right: auto;
-  margin-left: auto;
-}
 
-.Al-margin {
-  margin-top: 10px;
-  margin-bottom: 10px;
-}
+
 
 /*训练结果*/
 .taskBox1 {
