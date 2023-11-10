@@ -53,6 +53,11 @@ const routes = [
         component: ModelTrain,
       },
       {
+        path: "/taskChoose",
+        name: "taskChoose",
+        component: () => import("@/components/tab/taskChoose.vue"),
+      },
+      {
         path: "/tableManage",
         name: "tableManage",
         component: tableManage,

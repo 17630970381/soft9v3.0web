@@ -62,6 +62,10 @@
               <i class="el-icon-menu"></i>
               <span slot="title">模型训练</span>
             </el-menu-item>
+            <el-menu-item index="/taskChoose">
+              <i class="el-icon-menu"></i>
+              <span slot="title">模型选择</span>
+            </el-menu-item>
             <el-menu-item index="/Predict">
               <i class="el-icon-menu"></i>
               <span slot="title">病例风险预测</span>
