@@ -121,7 +121,7 @@ export default {
         {
           title: "模型训练",
           img: require("../../assets/modelTrain.png"),
-          router: "",
+          router: "/modelTrain",
         },
         {
           title: "风险预测",

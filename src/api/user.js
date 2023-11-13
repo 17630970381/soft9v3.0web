@@ -106,3 +106,11 @@ export function postRequest(url, data) {
     data
   })
 }
+
+export function delRequest(url, data) {
+  return request({
+    method: "delete",
+    url,
+    data
+  })
+}

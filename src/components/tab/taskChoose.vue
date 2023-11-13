@@ -42,9 +42,20 @@
     <el-table-column
         fixed="right"
         label="操作"
-        width="100">
+    width="200">
       <template slot-scope="scope">
         <el-button  @click="handleClick(scope.row)" type="primary" size="small">使用模型</el-button>
+        <el-popconfirm
+            confirm-button-text='确定'
+            cancel-button-text='不用了'
+            icon="el-icon-info"
+            icon-color="red"
+            title="您确定删除该模型吗吗？"
+            @confirm="delMode(scope.row.taskId)"
+            style="margin-left: 5px;margin-right: 5px"
+        >
+          <el-button  size="small" type="danger" slot="reference">删除<i class="el-icon-remove-outline" style="margin-left: 5px "></i></el-button>
+        </el-popconfirm>
       </template>
     </el-table-column>
   </el-table>
@@ -80,7 +91,7 @@
 
 <script >
 import {getRequest} from "@/utils/api";
-import {postRequest} from "@/api/user";
+import {delRequest, postRequest} from "@/api/user";
 
 export default {
   name: 'taskChoose',
@@ -102,7 +113,7 @@ export default {
       reOnlineUse:{
         path:"",
         fea: []
-      }
+      },
     }
 
   },
@@ -123,6 +134,17 @@ export default {
       this.dialogVisible1 = true
       console.log(this.onlineUse)
 
+    },
+    delMode(taskId){
+      console.log(taskId)
+      delRequest(`/OnlineTask/delByTaskId/${taskId}`).then(res => {
+        if(res){
+          this.$message.success("删除成功")
+          this.getAllTask()
+        }else {
+          this.$message.error("删除失败")
+        }
+      })
     },
     resetOnlineUse(){
       this.dialogVisible1 = false

@@ -487,7 +487,7 @@
 
 <script>
 import parts from './js/predict'
-import modelOptions from './js/modelOptions.js'
+import modelOptionTemplate from "@/components/user/js/modelOptions";
 import {testpost,heartPost,getRequest,heartPost2,patientAddPost,patientDelRequest} from '@/api/user.js'
 import Body from './DieaseIntro/components/Body.vue'
 import PieChart from './PieChart.vue'
@@ -560,6 +560,28 @@ export default {
 
 
       return result;
+
+    },
+    modelOptions() {
+      return modelOptionTemplate.map(option => {
+        const isOptionAvailable = this.dataFromDB.includes(option.name);
+
+
+        return {
+          ...option,
+          disable: option.alwaysEnable ? false : !isOptionAvailable
+        };
+      });
+    },
+  },
+  async created() {
+    try {
+      const res = await getRequest("/DataManager/getDiseaseName");
+      if (res) {
+        this.dataFromDB = res;
+      }
+    } catch (err) {
+      console.error(err);
     }
   },
   data(){
@@ -568,7 +590,6 @@ export default {
       step: 1,
       model: 1,
       modelPage: true,
-      modelOptions:modelOptions,
       heart: {
         isShow: false,
         patientAddVisible: false,
@@ -613,7 +634,8 @@ export default {
       dialogVisible:false,
       agList:{
         ag:''
-      }
+      },
+      dataFromDB: [],
     }
   },
 

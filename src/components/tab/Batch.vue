@@ -48,7 +48,8 @@
           <div style="padding: 14px;">
             <span>{{item.chinesename}}</span>
             <div class="bottom clearfix">
-              <el-button type="text" class="button" @click="dialogVisible = true">预测该表</el-button>
+              <!-- <el-button type="text" class="button" @click="dialogVisible = true">预测该表</el-button> -->
+              <el-button type="text" class="button" @click="predict(item.tablename)">预测该表</el-button>
               <el-button type="text" class="button" @click="getData(item.tablename)" style="float:left; margin-left:-5px">数据预览</el-button>
             </div>
           </div>
@@ -139,13 +140,13 @@
 </template>
 
 <script>
-import modelOptions from '../user/js/modelOptions_batch.js'
+// eslint-disable-next-line no-unused-vars
+import modelOptionTemplate from "../user/js/modelOptions_batch.js";
 import {dataInfoPost,getRequest} from '@/api/user.js'
 import PieChart from '../user/PieChart.vue'
 export default {
   name: 'Batch',
   components:{PieChart: PieChart},
-  computed:{},
   data(){
     return {
       dataList_loading:false,
@@ -155,7 +156,6 @@ export default {
       step: 1,
       model: 1,
       showView: "modelPage",
-      modelOptions:modelOptions,
       chosenData: null,
       dataList: [],
       patientTable: [],
@@ -168,7 +168,30 @@ export default {
       dialogVisible: false,
       agList: {
         ag:''
+      },
+      dataFromDB: [],
+    }
+  },
+  computed: {
+    modelOptions() {
+      return modelOptionTemplate.map(option => {
+        const isOptionAvailable = this.dataFromDB.includes(option.name);
+
+        return {
+          ...option,
+          disable: !isOptionAvailable,
+        };
+      });
+    },
+  },
+  async created() {
+    try {
+      const res = await getRequest("/DataManager/getDiseaseName");
+      if (res) {
+        this.dataFromDB = res;
       }
+    } catch (err) {
+      console.error(err);
     }
   },
 
@@ -244,8 +267,9 @@ export default {
     },
 
     predict(id){
+      console.log('👉👉',id);
       this.result_loading = true;
-      this.dialogVisible = false
+      this.dialogVisible = false;
 
       dataInfoPost("/runtime_bus/submit-hearts",id).then((res)=>{
         this.predictResult = res.data;
