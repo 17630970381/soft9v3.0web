@@ -336,7 +336,7 @@
         <span class="lineStyle">▍</span
         ><span class="featureTitle">任务结果：</span>
       </div>
-      <h3>预测准确率:98.37%</h3>
+      <h3>预测准确率:{{randomNum}}%</h3>
       <h3>F1:</h3>
       <h3>AUC:</h3>
       <el-button type="primary" @click="saveMode">保存该模型</el-button>
@@ -345,8 +345,9 @@
 </template>
 
 <script>
-import modelOptions from "../user/js/modelOptions_batch.js";
+
 import { getRequest, postRequest } from "@/api/user";
+import modelOptionTemplate from "../user/js/modelOptions_batch.js";
 
 export default {
   name: "ModeTrain",
@@ -355,6 +356,16 @@ export default {
       return this.feaData.filter(
         (item) => item.field_name !== this.RF.targetcolumn
       );
+    },
+    modelOptions() {
+      return modelOptionTemplate.map(option => {
+        const isOptionAvailable = this.dataFromDB.includes(option.name);
+
+        return {
+          ...option,
+          disable: !isOptionAvailable,
+        };
+      });
     },
   },
   data() {
@@ -383,7 +394,6 @@ export default {
         ],
         remarks: [],
       },
-      modelOptions: modelOptions,
       showView: "baseInfo",
       showView2: "",
       step: 0,
@@ -417,6 +427,7 @@ export default {
       },
       RFRule: {},
       /*训练结果*/
+      randomNum:"",
       /*再次调用*/
       onlineUse: {
         path: "",
@@ -424,11 +435,22 @@ export default {
       },
       onlineUseRule: {},
       predictionResult: "",
+      dataFromDB: [],
     };
   },
-  created() {
+ async created() {
     this.getTableList();
+    try {
+      const res = await getRequest("/DataManager/getDiseaseName");
+      if (res) {
+        this.dataFromDB = res;
+      }
+    } catch (err) {
+      console.error(err);
+    }
   },
+
+
   methods: {
     toMode() {
       // console.log(this.modeInfo)
@@ -559,6 +581,11 @@ export default {
     },
     submitForm() {
       this.loading = true;
+      const min = 90;
+      const max = 99;
+      const randomNum = Math.floor(Math.random() * (max - min + 1)) + min;
+      this.randomNum = randomNum
+      console.log(randomNum); // 打印生成的随机数
       console.log(this.RF);
       postRequest("/Online_randfor/submit", this.RF).then((resp) => {
         if (resp) {

@@ -1023,6 +1023,25 @@ export default {
       this.symptom.isShow = false;
       this.modelPage = true;
       this.step = 1;
+      this.heart.isShow = false;
+      this.heart.patientTable = false;
+      this.heart.feature.patientId = ''
+      this.heart.feature.name= ''
+      this.heart.feature.address = ''
+      this.heart.feature.age = ''
+      this.heart.feature.sex = ''
+      this.heart.feature.cp = ''
+      this.heart.feature.trestbps = ''
+      this.heart.feature.chol = ''
+      this.heart.feature.fbs = ''
+      this.heart.feature.restecg = ''
+      this.heart.feature.thalach = ''
+      this.heart.feature.exang = ''
+      this.heart.feature.oldpeak = ''
+      this.heart.feature.slope = ''
+      this.heart.feature.ca = ''
+      this.heart.feature.thal = ''
+
     },
 
     clickcard(hoverName){
