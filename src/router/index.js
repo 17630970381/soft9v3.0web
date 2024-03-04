@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import SideBar from '@/components/sideBar/index.vue'
-import dash from '@/views/dash/index.vue'
+import dash from '@/views/dash/index2.vue'
 // import metastasis from "@/views/lung/metastasis";
 // import earlyLung from "@/views/lung/earlyLung";
 // import connectMining from "@/components/tab/connectMining.vue";
@@ -21,18 +21,18 @@ import Register from "@/views/register";
 Vue.use(VueRouter)
 
 const routes = [
+  // {
+  //   path: '/',
+  //   name: 'login',
+  //   component: Login
+  // },
+  // {
+  //   path: '/register',
+  //   name: 'register',
+  //   component: Register
+  // },
   {
-    path: '/',
-    name: 'login',
-    component: Login
-  },
-  {
-    path: '/register',
-    name: 'register',
-    component: Register
-  },
-  {
-    path: "/sideBar",
+    path: "/",
     name: "SideBar",
     redirect: "/SoftwareIntro",
     component: SideBar,
@@ -47,11 +47,33 @@ const routes = [
         name: "dataManage",
         component: dataManage,
       },
+      //   模型训练开始
       {
         path: "/modelTrain",
         name: "ModelTrain",
-        component: ModelTrain,
+        component: () => import("@/components/modeTrain/createTask.vue"),
       },
+      {
+        path: "/dataChoose",
+        name: "dataChoose",
+        component: () => import("@/components/modeTrain/dataChoose.vue"),
+      },
+      {
+        path: "/featureChoose",
+        name: "featureChoose",
+        component: () => import("@/components/modeTrain/featureChoose.vue"),
+      },
+      {
+        path: "/alChoose",
+        name: "alChoose",
+        component: () => import("@/components/modeTrain/alChoose.vue"),
+      },
+      {
+        path: "/resultShow",
+        name: "resultShow",
+        component: () => import("@/components/modeTrain/resultShow.vue"),
+      },
+      //   模型训练结束
       {
         path: "/taskChoose",
         name: "taskChoose",
@@ -66,6 +88,11 @@ const routes = [
         path: "/modelManage",
         name: "modelManage",
         component: modelManage,
+      },
+      {
+        path: "/TaskManage",
+        name: "taskManage",
+        component: () => import("@/components/tab/TaskManage.vue")
       },
       {
         path: "/userManage",
@@ -92,6 +119,11 @@ const routes = [
         name: "SoftwareIntro",
         component: SoftwareIntro,
       },
+      {
+        path: "/diseasePre",
+        name: "diseasePre",
+        component: () => import("@/components/diseasePrediction/diseasePre.vue"),
+      }
     ],
   },
   {
@@ -136,17 +168,17 @@ const routes = [
 const router = new VueRouter({
   routes
 })
-router.beforeEach((to, from, next) => {
-  //to将要访问的路径
-  //from代表从哪个路径跳转而来
-  //next是一个函数，表示放行
-  //next() 放行 next('/login')强制跳转
-
-  if (to.path === '/') return next();
-  if(to.path==='/register') return next();
-  //获取token
-  const uid = window.sessionStorage.getItem('uid');
-  if (!uid) return next('/');
-  next();
-});
+// router.beforeEach((to, from, next) => {
+//   //to将要访问的路径
+//   //from代表从哪个路径跳转而来
+//   //next是一个函数，表示放行
+//   //next() 放行 next('/login')强制跳转
+//
+//   if (to.path === '/') return next();
+//   if(to.path==='/register') return next();
+//   //获取token
+//   const uid = window.sessionStorage.getItem('uid');
+//   if (!uid) return next('/');
+//   next();
+// });
 export default router

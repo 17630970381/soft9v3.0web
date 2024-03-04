@@ -2,14 +2,15 @@
 <template>
   <!-- <h1>这里写人体和疾病介绍</h1> -->
   <!-- <Body></Body> -->
-  <div class="container">
-    <div class="left">
-      <Body :selectName="selectName" @select="select" :hoverName="hoverName" @hover="hover"></Body>
+    <div class="container">
+      <div class="left">
+        <Body :selectName="selectName" @select="select" :hoverName="hoverName" @hover="hover"></Body>
+      </div>
+      <div class="right">
+        <Info :selectName="selectName" @hover="hover"  @select="select"></Info>
+      </div>
     </div>
-    <div class="right">
-      <Info :selectName="selectName" @hover="hover"  @select="select"></Info>
-    </div>
-  </div>
+
 </template>
 
 <script>
