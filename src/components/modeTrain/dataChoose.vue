@@ -10,12 +10,16 @@
         <el-step title="运算结果" icon="el-icon-picture"></el-step>
       </el-steps>
     </div>
+    <!--  选择数据  -->
+    <div>
+      <DataManage />
+    </div>
 
     <!-- 数据选择 -->
     <el-button @click="toFeatureChoose()">
       选择该数据
     </el-button>
-
+    <el-button @click="test">test</el-button>
     <el-button @click="dataToCreate()">
       上一步
     </el-button>
@@ -24,9 +28,11 @@
 </template>
 
 <script>
+import DataManage from "@/components/tab/dataManage.vue";
 
 export default {
   name: "dataChoose",
+  components: {DataManage},
   computed: {
     formData() {
       return this.$store.state.formData
@@ -34,17 +40,24 @@ export default {
   },
   data() {
     return {
-      active:2
+      active:2,
+      tableName:"testdata",
     }
   },
 
   methods: {
     toFeatureChoose(){
+      this.$store.commit('dataChooseToFeatureChoose',this.tableName)
+      console.log(this.formData)
       this.$router.replace('/featureChoose')
     },
     dataToCreate(){
       this.$router.replace('/modelTrain')
     },
+    test(){
+      console.log("dc")
+      console.log(this.formData)
+    }
   },
 
 }

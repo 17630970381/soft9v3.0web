@@ -99,7 +99,6 @@
 import { mapGetters, mapMutations, mapState, mapActions } from "vuex";
 import { treeData } from "@/components/tab/treeTargetData.js";
 import Parameter from "@/components/diseasePrediction/Parameter.vue";
-import parameter from "@/components/diseasePrediction/Parameter.vue";
 import HistoryData from "@/components/diseasePrediction/historyData.vue";
 export default {
   name: "diseasePre",
@@ -108,9 +107,6 @@ export default {
     Parameter,
   },
   computed: {
-    parameter() {
-      return parameter
-    },
     ...mapState(["taskList"]),
     ...mapGetters(["taskLeaderList", "taskDiseaseList"]),
 
@@ -131,9 +127,9 @@ export default {
       ],
       // 已训练算法选择
       trainedAlgorithms: [
-        { name: 'Algorithm 1', selected: false },
-        { name: 'Algorithm 2', selected: false },
-        { name: 'Algorithm 3', selected: false },
+        { name: 'Algorithm1', selected: false },
+        { name: 'Algorithm2', selected: false },
+        { name: 'Algorithm3', selected: false },
       ],
       selectedAlgorithms: [],
       publicSelectedAlgorithms: [],
@@ -193,10 +189,12 @@ export default {
     parameterShow(){
       this.parameterShow1 = !this.parameterShow1
       this.historyShow1 = false
+      this.electionAl = ""
     },
     historyShow(){
       this.historyShow1 = !this.historyShow1
       this.parameterShow1 = false
+      this.electionAl = ""
     },
     changeData(node) {
       this.disease = node.label;

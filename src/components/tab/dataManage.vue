@@ -438,7 +438,6 @@ export default {
       return sessionStorage.getItem("userid")
     }
   },
-
   watch: {
     "dialogForm.tableName"() {
       this.checkTableName();
@@ -447,6 +446,7 @@ export default {
 
   data() {
     return {
+
       // 获取虚拟树形结构数据
       treeData: JSON.parse(JSON.stringify(treeData)),
       // 获取虚拟表格数据

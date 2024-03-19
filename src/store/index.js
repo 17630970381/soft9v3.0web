@@ -17,9 +17,18 @@ export default new Vuex.Store({
       assignee: '',
       participants: '',
       notes: ''
-    }
-
-
+    },
+  //   数据表选择
+    tableName: "",
+  // 模型训练，特征选择 传递选择的特征
+    featureChooseData: {
+      target: "",
+      trainFea: [],
+    },
+  // 算法结果
+    resultData: {},
+    // 算法选择中以选算法
+    selectedAlgorithms:[],
   },
   getters: {
     getAllTableData(state){
@@ -71,6 +80,8 @@ export default new Vuex.Store({
       return newArray;
     },
 
+    // 模型训练中 特征选择（已选择完毕的特征）
+    getFeatureChooseData: (state) => state.featureChooseData,
 
   },
   mutations: {
@@ -85,7 +96,10 @@ export default new Vuex.Store({
     taskToDataChoose(state,data) {
       state.formData = data;
     },
-
+    // 数据表选择
+    dataChooseToFeatureChoose(state,data) {
+      state.tableName = data;
+    },
     SetDataList(state, value) {
       state.dataList = value;
     },
@@ -95,6 +109,17 @@ export default new Vuex.Store({
     SetModelList(state, value) {
       state.modelList = value;
     },
+    // 模型训练中 特征选择（已选择完毕的特征）
+    updateFeatureChooseData(state, data) {
+      state.featureChooseData = data;
+    },
+    // 算法运行完的结果，传到结果展示页面
+    setResultData(state,data){
+      state.resultData = data;
+    },
+    selectedAlgorithms(state,data){
+      state.selectedAlgorithms = data
+    }
   },
   actions: {
     getDataList(context) {
@@ -126,6 +151,10 @@ export default new Vuex.Store({
             console.log("模型列表获取错误，请联系管理员。");
             console.log(err);
           });
+    },
+// 模型训练中 特征选择（已选择完毕的特征）
+    updateFeatureChooseData({ commit }, data) {
+      commit('updateFeatureChooseData', data);
     },
   },
   modules: {

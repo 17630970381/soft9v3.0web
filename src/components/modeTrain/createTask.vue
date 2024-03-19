@@ -31,6 +31,7 @@
       </el-form-item>
       <el-form-item >
         <el-button style="margin-top: 50px;" type="primary" @click="toDataC">下一步</el-button>
+        <el-button @click="test">test</el-button>
       </el-form-item>
     </el-form>
   </div>
@@ -59,13 +60,19 @@ export default {
 
     }
   },
+
   methods: {
     toDataC() {
       // 处理表单提交逻辑
       console.log('Form submitted:', this.formData);
       this.$store.commit('taskToDataChoose',this.formData)
       this.$router.replace('/dataChoose')
+    },
+    test(){
+      console.log("ct")
+      console.log(this.formData)
     }
+
   }
 }
 </script>
