@@ -19,7 +19,6 @@
     <el-button @click="toFeatureChoose()">
       选择该数据
     </el-button>
-    <el-button @click="test">test</el-button>
     <el-button @click="dataToCreate()">
       上一步
     </el-button>

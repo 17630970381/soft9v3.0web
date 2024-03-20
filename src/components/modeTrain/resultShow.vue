@@ -24,7 +24,6 @@
           模型演示
         </el-button>
         <el-button style="margin-top: 20px;width: 130px"  type="primary"  @click="saveModel">保存模型</el-button>
-        <el-button style="margin-top: 20px;width: 130px"  type="primary"  @click="test">测试</el-button>
       </div>
     <!--  主体展示     -->
       <div class="small-div right">
@@ -32,11 +31,11 @@
         <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal" @select="handleSelect">
           <el-menu-item v-for="(item, index) in selectedAlgorithms" :key="index" :index="item">{{ item }}</el-menu-item>
         </el-menu>
-        <div v-if="sequence === 1">
+        <div v-if="sequence === 1" id="downloadArea">
             <div style="display: flex; justify-content: space-between; align-items: center;">
               <h1 style="margin: 20px 20px 20px 20px; font-size: 25px;display: inline-block">模型效果评价</h1>
               <div>
-                <el-button style="margin-top: 20px;margin-right: 10px; width: 100px"  type="primary">下载报告</el-button>
+                <el-button style="margin-top: 20px;margin-right: 10px; width: 100px"  @click="downloadPDF" type="primary">下载报告</el-button>
               </div>
             </div>
             <div style="margin-top: 10px">
@@ -89,19 +88,31 @@
                   在训练完模型之后，特征重要度可以帮助我们理解模型是如何做出预测决策的，以及哪些特征对于模型的性能起到了关键作用。</el-tag>
                 <img :src="require('@/assets/20240319195319_RF/feature_importance.png')" alt="Image">
               </div>
-
             </div>
         </div>
         <!--    模型演示    -->
         <div v-if="sequence === 2">
-          <span v-if ="electionAl ===''" style="display: block;margin-bottom: 5px">请选择要输入特征值的算法标签</span>
-          <span v-else style="display: block;margin-bottom: 5px">当前所选算法： {{electionAl}}</span>
-          <div v-for="(feature, index) in selectedAlgorithmFeatures" :key="index"
-               style="margin-bottom: 10px">
-            <label>{{ feature.name }}: </label>
-            <el-input v-model="feature.value"  v-validate-number/>
+          <div style="margin-left: 20px;margin-top: 20px">
+            <span style="display: block;margin-bottom: 5px;font-size: 30px;">当前所选算法： {{electionAl}}</span>
+            <div v-for="(feature, index) in selectedAlgorithmFeatures" :key="index"
+                 style="margin-bottom: 10px;display: flex; flex-direction: column;">
+              <label>{{ feature.name }}: </label>
+              <el-input v-model="feature.value"  v-validate-number style="width: 50%"/>
+            </div>
+            <el-button @click="promptTest">提交数据，开始预测</el-button>
           </div>
-
+          <div>
+            <el-card  v-if="predictionResult === '0'"
+                style="margin-top: 20px;margin-left: 20px;width: 50%;
+                background-color: #3cadad; border-radius: 30px">
+              <p style="font-size: 20px;">该数据患有肺癌的概率较低</p>
+            </el-card>
+            <el-card v-if="predictionResult === '1'"
+                     style="margin-top: 20px;margin-left: 20px;width: 50%;
+                      background-color: #ce1f1f; border-radius: 30px">
+              <p style="font-size: 20px;font-weight: bold">该数据患有肺癌的概率较高，请及时就医!!</p>
+            </el-card>
+          </div>
         </div>
       </div>
     </div>
@@ -110,6 +121,9 @@
 
 <script>
 import Vue from "vue";
+import {postRequest} from "@/api/user";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 Vue.directive('validate-number', {
   bind(el) {
@@ -144,6 +158,14 @@ export default {
     // selectedAlgorithms() {
     //   return this.$store.state.selectedAlgorithms
     // },
+    // 特征选择里的特征
+    // featureChooseData: {
+    //   target: "",
+    //   trainFea: [],
+    // },
+    featureChooseData() {
+      return this.$store.getters.getFeatureChooseData;
+    },
 
     selectedData() {
       return this.resultData[this.electionAl] || [];
@@ -165,6 +187,8 @@ export default {
         recall:'',
         f1Score:'',
       }],
+      // 所选的特征，用于模型演示
+      fea: ['age','tal','cc','dd'],
       //图片
       pictureUrl:"",
       // 测试死数据
@@ -172,7 +196,7 @@ export default {
       resultData:{
          "RF":[{"uid": 516005890 ,"modelname":"test1",
            "evaluate": "{'accuracy': 0.71696, 'precision': 0.71780, 'recall': 0.71395, 'f1': 0.76285}",
-           "picture": "@\\assets\\20240319195319_RF",
+           "picture": "'@\\assets\\20240319195319_RF'",
            "pkl":"E:\\soft\\software9-3\\software9\\src\\main\\resources\\Algorithm\\PKL\\20240319195319_RF.pkl"
          }],
         "DT":[{"uid": 516005890 ,"modelname":"test2",
@@ -188,7 +212,13 @@ export default {
       selectedAlgorithmFeatures: [],
       //   所有算法特征值输入完毕
       alFlag: false,
+
+      // 模型调用结果
+      predictionResult: '',
     }
+  },
+  created() {
+    this.predictionResult = ''
   },
   mounted() {
     this.tableData1[0].alName = this.electionAl
@@ -203,6 +233,13 @@ export default {
     this.tableData1[0].recall = resultMap.get('recall')
     this.tableData1[0].f1Score = resultMap.get('f1')
     this.pictureUrl = this.selectedData[0].picture
+    this.updateSelectedAlgorithmFeatures()
+  },
+  watch: {
+    electionAl(newAlgorithm, oldAlgorithm) {
+      // electionAl 变化时更新 selectedAlgorithmFeatures
+      this.updateSelectedAlgorithmFeatures();
+    },
   },
   methods: {
     toFeatureChoose(){
@@ -217,12 +254,8 @@ export default {
     modelShow() {
       this.sequence = 2
     },
-    saveModel(){
-
-    },
     test(){
-
-      console.log(this.pictureUrl)
+      console.log(this.selectedAlgorithmFeatures)
     },
     handleSelect(key){
       this.electionAl = key
@@ -242,11 +275,58 @@ export default {
 
     getPictureUrl(imageName) {
       // 手动拼接文件夹路径和图片名称
-      return this.pictureUrl + '/' + imageName;
+      let path = this.pictureUrl + '\\' + imageName
+      let cleanPath = path.replace(/'/g, ''); // 去掉所有单引
+      return require(cleanPath)
     },
 
     // 模型演示
     // 获取特征
+    updateSelectedAlgorithmFeatures(){
+      this.selectedAlgorithmFeatures = this.fea
+          ? this.fea.map(name => ({ name, value: '' }))
+          : [];
+    },
+    // 提交测试
+    promptTest(){
+      // let path = this.selectedData[0].pkl
+      let path = "E:\\soft\\software9-3\\software9\\src\\main\\resources\\Algorithm\\PKL\\20240319195319_RF.pkl"
+      // let values = this.selectedAlgorithmFeatures.map(item => item.value)
+      // let fea = ['2', '1', '1', '1', '1', '15', '5', '0', '0', '0', '0', '1', '2', '0', '0', '0', '0', '0', '0', '1', '1']
+      let fea = ['2', '1', '1', '1', '1', '15', '5', '0', '0', '0', '0', '4', '2', '0', '0', '0', '0', '1', '1', '1', '1']
+      // 发送请求
+      let onlineUse = {
+          path, fea
+      }
+      console.log(onlineUse)
+      postRequest('/OnlineUse/use',onlineUse).then(res => {
+        this.predictionResult = res.res[0]
+      })
+    },
+    // 保存模型
+    saveModel(){
+      this.$router.replace('/modelTrain')
+    },
+
+    downloadPDF() {
+      // 获取要下载的元素
+      const element = document.getElementById('downloadArea');
+
+      // 使用 html2canvas 将元素转换为 Canvas
+      html2canvas(element).then(canvas => {
+        // 获取 Canvas 对象的图像数据
+        const imgData = canvas.toDataURL('image/png');
+
+        // 设置 PDF 尺寸（A4）
+        const pdf = new jsPDF('p', 'mm', 'a4');
+
+        // 添加 Canvas 图像数据到 PDF
+        pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
+
+        // 下载 PDF 文件
+        pdf.save('download.pdf');
+      });
+    },
 
   },
 

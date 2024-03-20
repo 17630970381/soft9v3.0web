@@ -9,7 +9,7 @@
   </div>
   <el-button v-if="!alFlag" @click="saveData" type="success">保存</el-button>
   <el-button v-if="alFlag" @click="promptDta" type="success">提交数据，开始预测</el-button>
-<!--  <el-button @click="test">test</el-button>-->
+  <el-button @click="test">test</el-button>
 </div>
 </template>
 
@@ -227,7 +227,7 @@ export default {
 
     },
     test(){
-      console.log(this.selectedAlgorithmFeatures)
+      console.log(this.allModelFeatureArray)
     }
   },
 }

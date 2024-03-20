@@ -64,9 +64,6 @@
           <el-button @click="featureToData()" type="primary">
             上一步
           </el-button>
-          <el-button @click="test">
-            测试
-          </el-button>
           <el-button @click="toAlChoose()" type="success">
             下一步
           </el-button>

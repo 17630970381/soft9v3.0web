@@ -13,7 +13,7 @@ export default new Vuex.Store({
     modelList: [],
   //  创建任务 => 数据选择
     formData: {
-      taskName: '',
+      modelName: '',
       assignee: '',
       participants: '',
       notes: ''

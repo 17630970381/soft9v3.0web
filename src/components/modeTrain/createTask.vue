@@ -15,7 +15,7 @@
   <div  style="margin-top: 200px;"  class="form-container">
     <el-form :model="formData" label-width="80px" style="width: 70%;margin-top: 10px" >
       <div class="form-row">
-        <el-form-item label="任务名称:" prop="taskName" >
+        <el-form-item label="模型名称:" prop="taskName" >
           <el-input v-model="formData.taskName" style="width: 100%; font-size: 18px;"></el-input>
         </el-form-item>
         <el-form-item label="负责人:" prop="assignee">
@@ -31,13 +31,10 @@
       </el-form-item>
       <el-form-item >
         <el-button style="margin-top: 50px;" type="primary" @click="toDataC">下一步</el-button>
-        <el-button @click="test">test</el-button>
       </el-form-item>
     </el-form>
   </div>
 
-
-  <!-- 选择任务  -->
   <div>
 
   </div>
@@ -51,7 +48,7 @@ export default {
   data() {
     return {
       formData: {
-        taskName: '',
+        modelName: '',
         assignee: '',
         participants: '',
         notes: ''
