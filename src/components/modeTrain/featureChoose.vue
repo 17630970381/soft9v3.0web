@@ -37,9 +37,9 @@
             <span class="featureTitle">选择作为标签的特征(因变量)：</span>
             <span style="">(请先选择因变量，才可进行自变量的选择)</span>
           </div>
-          <div class="left-align" style="margin-top: 20px">
+          <div class="left-align" style="margin-top: 20px;display: flex; flex-wrap: wrap;">
             <label v-for="feature in fea" :key="feature" class="custom-large-radio">
-              <input type="radio" v-model="target" :value="feature">
+              <input type="radio" v-model="target" :value="feature" style="margin-right: 5px;">
               {{ feature }}
             </label>
           </div>
@@ -51,10 +51,10 @@
                     type="checkbox" v-model="selectAll" @change="handleSelectAll" :disabled="target === ''"> 全选
           </div>
 
-          <div class="left-align" style="margin-top: 20px;margin-bottom: 20px">
+          <div class="left-align" style="margin-top: 20px;display: flex; flex-wrap: wrap;">
 
             <label v-for="feature in availableFeatures" :key="feature" class="custom-large-checkbox">
-              <input  type="checkbox" v-model="trainFea" :value="feature"  :disabled="target === ''">
+              <input  type="checkbox" v-model="trainFea" :value="feature"  :disabled="target === ''" style="margin-right: 5px;">
               <span>{{ feature }}</span>
             </label>
           </div>
@@ -106,11 +106,14 @@ export default {
       return this.$store.state.tableName
     },
 
+    fea() {
+      return this.$store.state.fea
+    }
+
   },
   data() {
     return {
       active:3,
-      fea: ["age", "tal", "aa", "bb", "cc", "dd"],
       features: [
         { name: 'age', missingRate: 1},
         { name: 'tal', missingRate: 10 },
@@ -134,6 +137,9 @@ export default {
     }
   },
 
+  mounted() {
+
+  },
 
   methods: {
     toAlChoose() {
@@ -174,6 +180,7 @@ export default {
       }
 
     },
+
     test(){
       console.log(this.tableName)
     },
@@ -220,9 +227,9 @@ export default {
 
 .custom-large-radio {
   font-size: 20px; /* 调整字体大小 */
-  margin-right: 60px; /* 可选，调整单选框之间的间距 */
-  display: inline-block;
-  align-items: center;
+  margin-right: 20px; /* 可选，调整单选框之间的间距 */
+  margin-bottom: 10px;
+
 }
 
 .custom-large-radio input {
@@ -232,10 +239,9 @@ export default {
 }
 
 .custom-large-checkbox {
-  display: inline-block;
-  align-items: center;
-  font-size: 20px;
-  margin-right: 60px;
+  font-size: 20px; /* 调整字体大小 */
+  margin-right: 20px; /* 可选，调整单选框之间的间距 */
+  margin-bottom: 10px;
 }
 
 .custom-large-checkbox input {

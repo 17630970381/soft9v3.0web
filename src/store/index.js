@@ -15,20 +15,23 @@ export default new Vuex.Store({
     formData: {
       modelName: '',
       assignee: '',
-      participants: '',
+      diseasename: '',
       notes: ''
     },
   //   数据表选择
-    tableName: "",
+    dataChoose: "",
   // 模型训练，特征选择 传递选择的特征
     featureChooseData: {
       target: "",
       trainFea: [],
     },
+
+    completeParameter:[],
   // 算法结果
     resultData: {},
     // 算法选择中以选算法
     selectedAlgorithms:[],
+    fea: []
   },
   getters: {
     getAllTableData(state){
@@ -119,6 +122,15 @@ export default new Vuex.Store({
     },
     selectedAlgorithms(state,data){
       state.selectedAlgorithms = data
+    },
+    setTableName(state,data){
+      state.dataChoose =data
+    },
+    setFea(state,data){
+      state.fea = data
+    },
+    completeParameter(state,data){
+      state.completeParameter = data
     }
   },
   actions: {

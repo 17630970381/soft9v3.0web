@@ -22,9 +22,13 @@
           <el-input v-model="formData.assignee" style="width: 100%; font-size: 18px;"></el-input>
         </el-form-item>
       </div>
-      <el-form-item label="参与人员:" prop="participants">
+      <el-form-item label="所属疾病:" prop="disease">
         <!-- 参与人员的表单项，可以根据需求选择合适的输入组件 -->
-        <el-input v-model="formData.participants" style="width: 100%; font-size: 18px;"></el-input>
+        <el-select v-model="formData.diseasename" placeholder="请选择疾病" style="width: 100%; font-size: 18px;">
+          <el-option label="心脏病" value="心脏病"></el-option>
+          <el-option label="胃癌" value="胃癌"></el-option>
+          <el-option label="糖尿病" value="糖尿病"></el-option>
+        </el-select>
       </el-form-item>
       <el-form-item label="备注:" prop="notes">
         <el-input type="textarea" v-model="formData.notes" style="width: 100%; font-size: 18px;"></el-input>
@@ -50,7 +54,7 @@ export default {
       formData: {
         modelName: '',
         assignee: '',
-        participants: '',
+        diseasename: '',
         notes: ''
       },
       active: 1,

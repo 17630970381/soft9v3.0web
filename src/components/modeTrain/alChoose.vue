@@ -12,7 +12,9 @@
     </div>
 
     <!-- 算法选择 -->
-    <div class="alChoose">
+    <div class="alChoose"
+
+         >
     <!--  算法选择框：占20%     -->
       <div class="small-div left">
         <div class="algorithm-switches"
@@ -112,6 +114,7 @@ export default {
       isPrompt: false,
       isCard: false,
       resultData:{ },
+
     }
   },
   computed: {
@@ -275,22 +278,9 @@ export default {
     },
 
     promptParameters(){
-      let trainAl= {}
-      let target =  this.featureChooseData.target
-      let fea = this.featureChooseData. trainFea
-      let tableName = this.tableName
-      let completeParameter = this.completeParameter
-      trainAl = {
-        target,fea,tableName,completeParameter
-      }
-      console.log(trainAl)
-      // postRequest("/Model/trainAl",trainAl).then(res => {
-      //  this.resultData = res
-      //    this.$store.commit("setResultData", this.resultData)
-      //   this.$store.commit("selectedAlgorithms",this.selectedAlgorithms)
-        this.$router.replace('resultShow')
-      //   console.log(this.resultData)
-      // })
+      this.$store.commit('completeParameter',this.completeParameter)
+      this.$router.replace('resultShow');
+
 
     },
 
