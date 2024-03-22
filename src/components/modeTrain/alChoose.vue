@@ -278,8 +278,10 @@ export default {
     },
 
     promptParameters(){
+      this.$store.commit('selectedAlgorithms',this.selectedAlgorithms)
       this.$store.commit('completeParameter',this.completeParameter)
       this.$router.replace('resultShow');
+      console.log(this.selectedAlgorithms)
 
 
     },

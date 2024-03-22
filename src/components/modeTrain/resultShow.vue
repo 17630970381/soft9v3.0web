@@ -209,7 +209,7 @@ export default {
       //图片
       pictureUrl:"",
       // 测试死数据
-      selectedAlgorithms:[],
+
       resultData:{
         //  "RF":[{"uid": 516005890 ,"modelname":"test1",
         //    "evaluate": "{'accuracy': 0.71696, 'precision': 0.71780, 'recall': 0.71395, 'f1': 0.76285}",
@@ -288,6 +288,7 @@ export default {
         this.updateSelectedAlgorithmFeatures()
         this.loading = false
       })
+
     },
     toFeatureChoose(){
       this.$router.replace('/featureChoose')
@@ -302,7 +303,7 @@ export default {
       this.sequence = 2
     },
     test(){
-      console.log(this.selectedAlgorithmFeatures)
+      console.log(this.selectedAlgorithms)
     },
     handleSelect(key){
       this.electionAl = key
