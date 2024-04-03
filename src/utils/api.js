@@ -7,10 +7,10 @@ axios.defaults.baseURL='/api'
 
 // 请求拦截器
 // axios.interceptors.request.use(config => {
-    // config.headers = { 'Content-Type':'multipart/form-data' }
-    // 如果存在 token，请求携带这个 token( 登录的时候 把 token 存入了 sessionStorage ）
-    // if (window.sessionStorage.getItem("tokenStr")) {
-        // token 的key : Authorization ; value: tokenStr
+//     config.headers = { 'Content-Type':'multipart/form-data' }
+//     // 如果存在 token，请求携带这个 token( 登录的时候 把 token 存入了 sessionStorage ）
+//     if (window.sessionStorage.getItem("tokenStr")) {
+//         // token 的key : Authorization ; value: tokenStr
 //         config.headers['Authorization'] = window.sessionStorage.getItem('tokenStr')
 //     }
 //     return config;
@@ -34,7 +34,7 @@ axios.interceptors.response.use(success=>{
     return success.data;
 },error=>{
     if(error.response.code==504||error.response.code==404){
-        Message.error({message:'找不到服务器了'});
+        Message.error({message:'找不到服务器'});
     }
     else if(error.response.code==403){
         Message.error({message:'权限不足，请联系管理员'});
@@ -43,13 +43,13 @@ axios.interceptors.response.use(success=>{
         Message.error({message:'尚未登陆，请登录'});
         router.replace('/');
     }
-    // else{
-    //     if(error.response.data.message){
-    //         Message.error({message:error.response.data.message});
-    //     }else{
-    //         Message.error({message:'未知错误'})
-    //     }
-    // }
+    else{
+        if(error.response.data.message){
+            Message.error({message:error.response.data.message});
+        }else{
+            Message.error({message:'未知错误'})
+        }
+    }
     return;
 })
 let base ='';

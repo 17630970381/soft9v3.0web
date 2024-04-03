@@ -35,6 +35,8 @@
   </div>
 </template>
 <script>
+import {getRequest} from "@/utils/api";
+
 export default {
   setup() {},
   data(){
@@ -48,17 +50,17 @@ export default {
         {
           title: "模型训练",
           img: require("@/assets/model_intro.png"),
-          router: "",
+          router: "/createTask",
         },
         {
           title: "风险预测",
           img: require("@/assets/danLiYuCe.png"),
-          router: "/Predict",
+          router: "/predictionInfo",
         },
         {
-          title: "批量预测",
+          title: "模型管理",
           img: require("@/assets/batch.png"),
-          router: "/Batch",
+          router: "/modelManage",
         },
       ],
     }
@@ -68,6 +70,7 @@ export default {
     quickLink(index) {
       this.$router.push(this.quickEntry[index].router);
     },
+
   }
 };
 </script>

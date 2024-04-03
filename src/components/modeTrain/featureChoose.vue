@@ -10,27 +10,12 @@
         <el-step title="运算结果" icon="el-icon-picture"></el-step>
       </el-steps>
     </div>
-    <div class="container">
-      <!--  缺失率展示  -->
-      <div class="left">
-        <div style="margin-top: 20px">
-          <h2>特征中值的缺失率：</h2>
-        </div>
-        <div v-for="(feature, index) in sortedFeatures" :key="index"
-
-            style="margin-top: 10px">
-          <span  v-if="feature.missingRate > 0" >{{ feature.name }}</span>
-          <el-progress  :text-inside="true" :stroke-width="26"
-                        v-if="feature.missingRate > 0"
-                        :percentage="feature.missingRate"
-                        :status="getProgressStatus(feature.missingRate)"
-                        :format="formatMissingRate">
-          </el-progress>
-        </div>
-      </div>
-
+    <div>
       <!-- 特征选择 -->
-      <div class="right">
+      <div>
+        <div style="text-align: center;margin-top: 10px;background: #c5c5c5;border-radius: 50px">
+          <span style="font-weight: bold">特征下方为该特征在数据集中该特征的填充率</span>
+        </div>
         <div style="margin-top: 10px;margin-left: 20px ">
           <div>
             <span class="lineStyle">▍</span>
@@ -38,33 +23,40 @@
             <span style="">(请先选择因变量，才可进行自变量的选择)</span>
           </div>
           <div class="left-align" style="margin-top: 20px;display: flex; flex-wrap: wrap;">
-            <label v-for="feature in fea" :key="feature" class="custom-large-radio">
-              <input type="radio" v-model="target" :value="feature" style="margin-right: 5px;">
-              {{ feature }}
-            </label>
+            <el-radio-group v-model="target" >
+              <el-radio v-for="feature in fea" :key="feature" :label="feature" style="display: inline-block;" >
+                <span style="width: 260px; height: 20px; display: inline-block; line-height: 20px;">{{ feature }}</span>
+                <el-progress :percentage="featuresMissingRate[feature]"
+                             :format="format"
+                             :color="getProgressStatus(featuresMissingRate[feature])"
+                             style="width: 100%;"></el-progress>
+              </el-radio>
+            </el-radio-group>
           </div>
 
           <div style="margin-top: 30px">
          <span class="lineStyle">▍</span
          ><span class="featureTitle">参与训练的特征(自变量):</span>
-            <input  style="margin-left: 50px"
-                    type="checkbox" v-model="selectAll" @change="handleSelectAll" :disabled="target === ''"> 全选
+            <el-checkbox style="margin-left: 50px" v-model="selectAll" @change="handleSelectAll" :disabled="target === ''"/> 全选
           </div>
 
           <div class="left-align" style="margin-top: 20px;display: flex; flex-wrap: wrap;">
-
-            <label v-for="feature in availableFeatures" :key="feature" class="custom-large-checkbox">
-              <input  type="checkbox" v-model="trainFea" :value="feature"  :disabled="target === ''" style="margin-right: 5px;">
-              <span>{{ feature }}</span>
-            </label>
+            <el-checkbox-group v-model="trainFea">
+              <el-checkbox  v-for="feature in availableFeatures" :key="feature"  :label="feature" :disabled="target === ''" style="display: inline-block;">
+                <span style="width: 260px; height: 20px; display: inline-block; line-height: 20px;">{{ feature }}</span>
+                <el-progress   :percentage="featuresMissingRate[feature]"
+                               :format="format"
+                               :color="getProgressStatus(featuresMissingRate[feature])"
+                             style="width: 100%;"></el-progress>
+              </el-checkbox>
+            </el-checkbox-group>
           </div>
         </div>
-
-        <div class="center-align">
-          <el-button @click="featureToData()" type="primary">
+        <div class="center-align" style="margin-top: 30px">
+          <el-button @click="featureToData()">
             上一步
           </el-button>
-          <el-button @click="toAlChoose()" type="success">
+          <el-button @click="toAlChoose()">
             下一步
           </el-button>
         </div>
@@ -78,6 +70,9 @@
 
 
 
+import {getRequest} from "@/utils/api";
+import {percent} from "@antv/g2plot/lib/utils/transform/percent";
+
 export default {
   name: "featureChoose",
   computed: {
@@ -89,18 +84,6 @@ export default {
       return this.fea.filter((feature) => feature !== this.target);
     },
 
-    // 根据缺失率高低排序的特征数组
-    sortedFeatures() {
-      const sorted = [...this.features].sort((a, b) => b.missingRate - a.missingRate);
-      const targetFeature = sorted.find(feature => feature.name === this.target);
-      if (targetFeature) {
-        // 将 targetFeature 移到数组最前面
-        const targetIndex = sorted.indexOf(targetFeature);
-        sorted.splice(targetIndex, 1);
-        sorted.unshift(targetFeature);
-      }
-      return sorted;
-    },
 
     tableName(){
       return this.$store.state.tableName
@@ -114,16 +97,7 @@ export default {
   data() {
     return {
       active:3,
-      features: [
-        { name: 'age', missingRate: 1},
-        { name: 'tal', missingRate: 10 },
-        { name: 'aa', missingRate: 30 },
-        { name: 'bb', missingRate: 40 },
-        { name: 'cc', missingRate: 50 },
-        { name: 'dd', missingRate: 60 },
-        // 添加其他特征
-      ],
-
+      featuresMissingRate: {},
       target: "",
       trainFea: [],
       selectAll: false, // 全选状态
@@ -137,10 +111,9 @@ export default {
     }
   },
 
-  mounted() {
-
+  created() {
+    this.getMissingRates()
   },
-
   methods: {
     toAlChoose() {
       const dataToUpdate = {
@@ -149,8 +122,19 @@ export default {
       };
 
       // Dispatch the action to update the data in the store
-      this.$store.dispatch('updateFeatureChooseData', dataToUpdate);
-      this.$router.replace('/alChoose')
+      if(this.target === '' && this.trainFea.length === 0){
+        this.$message.error('请选择目标特征和训练特征');
+      }
+      else if(this.trainFea.length === 0){
+        this.$message.error('请选择训练特征');
+      }
+      else if(this.target === ''){
+        this.$message.error('请选择目标特征');
+      }else {
+        this.$store.dispatch('updateFeatureChooseData', dataToUpdate);
+        this.$router.replace('/alChoose')
+      }
+
     },
     featureToData() {
       this.$router.replace('/dataChoose')
@@ -166,23 +150,29 @@ export default {
       }
     },
 
-    formatMissingRate(percentage) {
-      return `${percentage}%`; // 定义缺失率格式
+    getMissingRates(){
+      getRequest(`/Model/getMissingRates/${this.tableName}`).then(res =>{
+        this.featuresMissingRate = res
+      })
     },
 
     getProgressStatus(missingRate) {
       if (missingRate < 30) {
-        return 'success'; // 当缺失率小于30%时，状态为成功
-      } else if (missingRate < 60) {
-        return 'warning'; // 当缺失率小于60%时，状态为警告
+        return '#ff0000';
+      } else if (missingRate < 80) {
+        return '#e6a23c';
       } else {
-        return 'exception'; // 缺失率大于等于60%时，状态为危险
+        return '#21da8b';
       }
 
     },
 
+    format(percentage) {
+      return percentage === 100 ? '满' : `${percentage}%`;
+    },
+
     test(){
-      console.log(this.tableName)
+      console.log(this.featuresMissingRate['PCT'])
     },
   },
 }

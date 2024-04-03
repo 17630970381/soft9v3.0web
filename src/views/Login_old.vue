@@ -12,7 +12,7 @@
         <img class="png" src="https://img.benmu-health.com/sanyi-health/main-pic-new.png">
       </div>
       <div class="loginDiv">
-        <div>
+        <div class="myForm">
           <el-form
               element-loading-text="正在登陆..."
               element-loading-spinner="el-icon-loading"
@@ -21,37 +21,36 @@
               :model="loginForm"
               :rules="rules"
               class="loginContainer"
-              style="font-size: 30px;height: 500px"
-
+              style="font-size: 30px"
           >
             <h3 class="loginTitle">系统登陆</h3>
-            <el-form-item  prop="username">
-              <el-input placeholder="请输入账号" size="medium" prefix-icon="el-icon-user" v-model="loginForm.username"
-                        @keydown.enter.native="submitLogin"></el-input>
-            </el-form-item>
-            <el-form-item  prop="password">
-              <el-input placeholder="请输入密码" size="medium" prefix-icon="el-icon-lock" show-password v-model="loginForm.password"
-                        @keydown.enter.native="submitLogin"></el-input>
-            </el-form-item>
-            <el-form-item prop="code">
-              <div class="input-with-image">
-                <el-input style="width: 250px; margin-right: 5px;" type="text" v-model="loginForm.code" placeholder="点击图片更换验证码"
-                          @keydown.enter.native="submitLogin"></el-input>
-                <img style="height: 38px" :src="captchaUrl" @click="updateCaptcha">
-              </div>
-            </el-form-item>
-            <el-form-item>
-              <el-checkbox v-model="checked">记住我</el-checkbox>
-            </el-form-item>
-            <el-form-item style="margin: 10px 0;text-align: right">
-              <el-button type="primary"
-                         size="medium"
-                         autocomplete="off"
-                         @click="submitLogin"
+            <el-form-item prop="username">
+              <el-input
 
-              >登录</el-button>
-              <el-button @click="register" type="warning" size="medium" autocomplete="off" >注册</el-button>
+                  type="text"
+                  auto-complete="false"
+                  v-model="loginForm.username"
+                  placeholder="请输入用户名"
+              ></el-input>
             </el-form-item>
+            <el-form-item prop="password">
+              <el-input
+
+                  type="password"
+                  auto-complete="false"
+                  v-model="loginForm.password"
+                  placeholder="请输入密码"
+              ></el-input>
+            </el-form-item>
+
+            <el-button  type="primary" style="width: 100%;font-size: 20px" @click="submitlogin"
+            >登录</el-button
+            >
+            <el-button
+                style="width: 100%; margin-top: 20px; margin-left: 0px; font-size: 20px"
+                @click="register"
+            >注册</el-button
+            >
           </el-form>
         </div>
       </div>
@@ -98,11 +97,9 @@ export default {
   name: "Login",
   data() {
     return {
-      captchaUrl:'/captcha?time'+ new Date(),
       loginForm: {
-        username: '',
-        password: '',
-        code:'',
+        username: "",
+        password: "",
       },
       loading: false,
       checked: true,
@@ -111,33 +108,26 @@ export default {
           { required: true, message: "请输入用户名", trigger: "blur" },
         ],
         password: [{ required: true, message: "请输入密码", trigger: "blur" }],
-        code: [{ required: true, message: "请输入验证码", trigger: "blur" }],
       },
     };
   },
   methods: {
-    submitLogin() {
+    submitlogin() {
       this.$refs.loginForm.validate((valid) => {
         if (valid) {
           this.loading = true;
           postRequest("/user/login", this.loginForm).then((resp) => {
-
             if (resp) {
-              getRequest(`/user/getUid/${this.loginForm.username}`).then((res) => {
-                window.sessionStorage.setItem("uid",res);
-                this.loading = false;
-
-                window.sessionStorage.setItem("user", this.loginForm.username);
-                this.$router.replace('/sideBar');
-              })
-
-              // if (resp.code == 200) {
-
-              //    this.$router.replace('/sideBar');
-              // }
+              this.loading = false;
+              console.log(resp);
+              if (resp.code == "200") {
+                 sessionStorage.setItem("user", this.loginForm.username);
+                 sessionStorage.setItem("uid", resp.data.uid);
+                 this.$router.push('/sideBar');
+              }
             }
             else{
-                this.$message.error("用户不存在或者密码错误或者验证码错误")
+                this.$message.error("用户不存在或者密码错误")
               }
           });
 
@@ -152,9 +142,6 @@ export default {
     register() {
       this.$router.push("/register");
     },
-    updateCaptcha(){
-      this.captchaUrl = '/captcha?time'+ new Date()
-    }
   },
 };
 </script>
@@ -236,7 +223,7 @@ img.png{
   background-color:white;
   position: absolute;
   bottom: 0px;
-  width: 100%;
+  width: 99%;
   height: 150px;
 }
 .cooperation .text-coop{
@@ -251,14 +238,10 @@ img.png{
 }
 .loginRemember {
   text-align: left;
-  margin: 0px 0px 10px 0px;
+  margin: 0px 0px 15px 0px;
 }
 .el-form-item__content {
   display: flex;
   align-items: center;
 }
-  .input-with-image {
-    display: flex;
-    align-items: center;
-  }
 </style>

@@ -58,7 +58,7 @@
         :before-close="resetForm">
       <el-form ref="form" :model="form" label-width="100px">
         <el-form-item label="疾病">
-          <el-select v-model="form.disease" placeholder="请选择疾病">
+          <el-select v-model="form.name" placeholder="请选择疾病">
             <el-option
                 v-for="disease in diseaseOptions"
                 :key="disease.value"
@@ -70,24 +70,38 @@
         </el-form-item>
 
         <!-- 其他疾病输入框 -->
-        <el-form-item v-if="form.disease === '其他'" label="其他疾病名称">
+        <el-form-item v-if="form.name === '其他'" label="其他疾病名称">
           <el-input v-model="form.otherDisease" placeholder="请输入其他疾病名称"></el-input>
+        </el-form-item>
+        <el-form-item label="英文名">
+          <el-input v-model="form.code" placeholder="请输入疾病的英文名称"></el-input>
+        </el-form-item>
+        <el-form-item label="症状">
+          <el-input v-model="form.symp" placeholder="请输入疾病的症状"></el-input>
         </el-form-item>
         <el-form-item label="科室">
           <el-checkbox @change="handleSelectAll" v-model="selectAll">全选</el-checkbox>
-          <el-checkbox-group v-model="form.departments">
+          <el-checkbox-group v-model="form.dptment">
             <el-checkbox v-for="department in departmentOptions" :key="department.value" :label="department.value">{{ department.label }}</el-checkbox>
           </el-checkbox-group>
         </el-form-item>
 
         <el-form-item label="建议">
           <el-input
-              v-model="form.advice"
+              v-model="form.prevent"
               type="textarea"
               placeholder="请输入建议"
               :rows="4">
           </el-input> <!-- 可以根据需求调整行数 -->
-
+        </el-form-item>
+        <el-form-item label="病灶部位">
+            <el-select v-model="form.part_name" placeholder="请选择部位" style="width: 100%; font-size: 18px;">
+              <el-option label="肝脏" value="肝脏"></el-option>
+              <el-option label="肺部" value="肺部"></el-option>
+              <el-option label="大肠" value="大肠"></el-option>
+              <el-option label="心脏" value="心脏"></el-option>
+              <el-option label="其他" value="其他"></el-option>
+            </el-select>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
@@ -98,7 +112,7 @@
    </div>
 </template>
 <script>
-import { diseasePost } from "@/api/user.js";
+import {diseasePost, postRequest} from "@/api/user.js";
 import { disInfoGet } from "@/api/user.js";
 export default {
   props: { selectName: String },
@@ -116,11 +130,13 @@ export default {
       },
       dialogVisible: false,
       form: {
-        disease: '', // 选择的疾病
-        otherDisease: '' ,// 其他疾病名称
-        departments: '', //科室名称
-        advice:'',//建议
-        // 其他表单项
+        code:'',
+        name:'',
+        otherDisease:'',
+        symp:'',
+        dptment:[],
+        prevent: '',
+        part_name: '',
       },
       diseaseOptions: [
         { value: '心脏病', label: '心脏病' },
@@ -129,14 +145,35 @@ export default {
         // 其他疾病选项
       ],
       departmentOptions: [
-        { value: '科室1', label: '科室1' },
-        { value: '科室2', label: '科室2' },
-        { value: '科室3', label: '科室3' },
+        { value: '皮肤科', label: '皮肤科' },
+        { value: '传染病科', label: '传染病科' },
+        { value: '急诊科', label: '急诊科' },
+        { value: '心内科', label: '心内科' },
+        { value: '心血管科', label: '心血管科' },
+        { value: '呼吸内科', label: '呼吸内科' },
+        { value: '肺科', label: '肺科' },
+        { value: '内分泌科', label: '内分泌科' },
+        { value: '肾内科', label: '肾内科' },
+        { value: '肾病科', label: '肾病科' },
+        { value: '肺内科', label: '肺内科' },
+        { value: '肿瘤科', label: '肿瘤科' },
+        { value: '肝胆外科', label: '肝胆外科' },
+        { value: '消化内科', label: '消化内科' },
+        { value: '妇产科', label: '妇产科' },
+        { value: '乳腺外科', label: '乳腺外科' },
+        { value: '神经外科', label: '神经外科' },
+        { value: '泌尿外科', label: '泌尿外科' },
+        { value: '神经科', label: '神经科' },
+        { value: '血液科', label: '血液科' },
+        { value: '老年病科', label: '老年病科' },
+        { value: '精神科', label: '精神科' },
+        { value: '康复医学科', label: '康复医学科' },
         // 其他科室选项
       ],
       selectAll:false,
     };
   },
+
   methods: {
     // 防抖
     fd(fuc, ...args) {
@@ -195,26 +232,109 @@ export default {
     },
     handleSelectAll() {
       if (this.selectAll) {
-        this.form.departments = this.departmentOptions.map(option => option.value);
+        this.form.dptment = this.departmentOptions.map(option => option.value);
       } else {
-        this.form.departments = [];
+        this.form.dptment = [];
       }
     },
     resetForm(){
       // 重置表单内容
       this.form = {
-        disease: '',
-        otherDisease: '',
-        departments: [],
-        suggestion: ''
+        code:'',
+        name:'',
+        symp:'',
+        dptment:'',
+        prevent: '',
+        part_name: '',
       };
       this.selectAll = false
       this.dialogVisible = false
     },
     submitForm(){
-      console.log(111);
-      this.dialogVisible = false
-      this.resetForm()
+      this.init()
+      let name = ''
+      if(this.form.name !== ''){
+        name = this.form.name
+      }else if(this.form.otherDisease !== ''){
+        name = this.form.otherDisease
+      }
+
+      if(this.form.symp==''){
+        this.$alert("请填写疾病症状", "提示", {
+          confirmButtonText: '确定',
+          callback: action => {
+            this.$message({
+              type: 'error',
+              message: '请填写疾病症状'
+            });
+          }
+        })
+      }else if(name == ''){
+        this.$alert("请填写疾病名称", "提示", {
+          confirmButtonText: '确定',
+          callback: action => {
+            this.$message({
+              type: 'error',
+              message: '请填写疾病名称'
+            });
+          }
+        })
+      }else if(this.form.dptment=='' ){
+        this.$alert("请选择疾病科室", "提示", {
+          confirmButtonText: '确定',
+          callback: action => {
+            this.$message({
+              type: 'error',
+              message: '请选择疾病科室'
+            });
+          }
+        })
+      }else if(this.form.prevent=='' ){
+        this.$alert("请输入建议", "提示", {
+          confirmButtonText: '确定',
+          callback: action => {
+            this.$message({
+              type: 'error',
+              message: '请输入建议'
+            });
+          }
+        })
+      }else {
+        let code = this.form.code
+        let name =''
+        if(this.form.name === '其他'){
+          name = this.form.otherDisease
+        }else {
+          name = this.form.name
+        }
+        let symp = this.form.symp
+        let dptment = this.form.dptment.join(",");
+        let prevent = this.form.prevent
+        let partName = this.form.part_name
+        let disease = {
+          code,name,symp,dptment,prevent,partName
+        }
+        postRequest('/Diseases/add',disease).then(res => {
+          if(res === 1){
+            this.$alert('资讯已保存', '', {
+              confirmButtonText: '确定',
+              callback: action => {
+                this.$message({
+                  type: 'success',
+                  message: `资讯保存成功`
+                });
+              }
+            });
+          }
+        })
+        this.dialogVisible = false
+        this.init();
+        diseasePost().then((res) => {
+          this.diseaseList = res;
+        });
+        this.resetForm()
+      }
+
     }
   },
   mounted() {
@@ -230,12 +350,13 @@ export default {
     activeName() {
       console.log(this.activeName);
     },
-    'form.departments': {
+    'form.dptment': {
       handler(newVal) {
         this.selectAll = newVal.length === this.departmentOptions.length;
       },
       immediate: true
-    }
+    },
+
   },
 };
 </script>

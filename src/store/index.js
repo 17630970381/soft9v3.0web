@@ -20,6 +20,8 @@ export default new Vuex.Store({
     },
   //   数据表选择
     dataChoose: "",
+    /*选择数据表名*/
+    tableName:"",
   // 模型训练，特征选择 传递选择的特征
     featureChooseData: {
       target: "",
@@ -31,7 +33,19 @@ export default new Vuex.Store({
     resultData: {},
     // 算法选择中以选算法
     selectedAlgorithms:[],
-    fea: []
+    fea: [],
+
+    // 疾病预测
+    formPreData:{
+      publisher:"",
+      diseasename:"",
+      uid:+"",
+    },
+    // 疾病预测结果数组
+    predictionResult:[],
+    selectedModelName:[],
+    //模型详情
+    modelname:"",
   },
   getters: {
     getAllTableData(state){
@@ -131,6 +145,23 @@ export default new Vuex.Store({
     },
     completeParameter(state,data){
       state.completeParameter = data
+    },
+    toDiseasePre(state,data){
+      state.formPreData = data
+    },
+    // 模型调用结果数组
+    predictionResult(state,data){
+      state.predictionResult = data
+    },
+    selectedModelName(state,data){
+      state.selectedModelName = data
+    },
+    //模型详情
+    manageModelName(state,data){
+      state.modelname = data
+    },
+    putTableName(state,data){
+      state.tableName = data
     }
   },
   actions: {

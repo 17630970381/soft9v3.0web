@@ -1,5 +1,8 @@
 <template>
-<div>
+<div  element-loading-text="正在调用模型进行预测，请稍后"
+      element-loading-spinner="el-icon-loading"
+      element-loading-background="rgba(0, 0, 0, 0.8)"
+      v-loading="loading">
   <span v-if ="electionAl ===''" style="display: block;margin-bottom: 5px">请选择要输入特征值的算法标签</span>
   <span v-else style="display: block;margin-bottom: 5px">当前所选算法： {{electionAl}}</span>
   <div v-for="(feature, index) in selectedAlgorithmFeatures" :key="index"
@@ -9,7 +12,8 @@
   </div>
   <el-button v-if="!alFlag" @click="saveData" type="success">保存</el-button>
   <el-button v-if="alFlag" @click="promptDta" type="success">提交数据，开始预测</el-button>
-  <el-button @click="test">test</el-button>
+
+  <el-button @click="toInfo">上一页</el-button>
 </div>
 </template>
 
@@ -17,6 +21,7 @@
 <script>
 import {getRequest,postRequest} from "@/api/user";
 import Vue from "vue";
+
 
 Vue.directive('validate-number', {
   bind(el) {
@@ -48,13 +53,19 @@ export default {
   },
   data() {
     return {
-      uid: +516005890,
+      uid: sessionStorage.getItem("uid")
+          ? parseInt(sessionStorage.getItem("uid"))
+          : 0,
       modelFeatureArray: [],
       publicModelFeatureArray: [],
       algorithmData: [], // 存储算法和特征值的数组
       selectedAlgorithmFeatures: [],
     //   所有算法特征值输入完毕
       alFlag: false,
+      predictionResult1:[],
+      predictionResult:{},
+      loading: false,
+      selectedModelName:[],
     }
   },
   created() {
@@ -101,10 +112,23 @@ export default {
       }
     },
 
-    electionAl(newAlgorithm, oldAlgorithm) {
-        // electionAl 变化时更新 selectedAlgorithmFeatures
-      this.updateSelectedAlgorithmFeatures();
-    },
+    // electionAl(newAlgorithm, oldAlgorithm) {
+    //     // electionAl 变化时更新 selectedAlgorithmFeatures
+    //   this.updateSelectedAlgorithmFeatures();
+    // },
+    electionAl:{
+
+      handler(newAlgorithm, oldAlgorithm){
+        if(newAlgorithm !== oldAlgorithm){
+          console.log("watch ele")
+          this.updateSelectedAlgorithmFeatures()
+        }else {
+          console.log("Wat else")
+          this.updateSelectedAlgorithmFeatures()
+        }
+
+      }
+    }
 
   },
 
@@ -125,7 +149,9 @@ export default {
            this.modelFeatureArray.push(modelFeatureObject);
 
          })
+
      }
+      this.updateSelectedAlgorithmFeatures()
     },
     getPublicList(){
       this.publicModelFeatureArray = []
@@ -147,19 +173,26 @@ export default {
     },
 
     updateSelectedAlgorithmFeatures() {
-      // 使用 find 方法查找选定算法的特征
-      const selectedAlgorithm = this.allModelFeatureArray.find(
-          modelFeatureObject => modelFeatureObject.algorithm === this.electionAl
-      );
-      // 如果找到了对应算法，更新 selectedAlgorithmFeatures
-      this.selectedAlgorithmFeatures = selectedAlgorithm
-          ? selectedAlgorithm.features.map(name => ({ name, value: '' }))
-          : [];
+        // 使用 find 方法查找选定算法的特征
+        const selectedAlgorithm = this.allModelFeatureArray.find(
+            modelFeatureObject => modelFeatureObject.algorithm === this.electionAl
+        );
+        // 如果找到了对应算法，更新 selectedAlgorithmFeatures
+        this.selectedAlgorithmFeatures = selectedAlgorithm
+            ? selectedAlgorithm.features.map(name => ({ name, value: '' }))
+            : [];
     },
 
     saveData() {
       // 保存数据的逻辑，可以将 selectedAlgorithmFeatures 数组传递给后端或进行其他操作
       // 点击保存按钮时，遍历特征，为每个特征添加值，并保存到数组中
+      for (let i = 0; i < this.selectedAlgorithmFeatures.length; i++) {
+        if (!this.selectedAlgorithmFeatures[i].value) {
+          // 如果任何一个特征值为空，显示错误消息并返回
+          this.$message.error(`${this.selectedAlgorithmFeatures[i].name} 不能为空`);
+          return;
+        }
+      }
       const algorithmObject = {
         algorithm: this.electionAl, // 你可以根据实际情况设置算法名
         features: {},
@@ -216,18 +249,44 @@ export default {
 
 
     promptDta(){
-      const requestData = {
-        uid: this.uid,  // 假设 uid 是你要发送的用户 ID
-        algorithmData: this.algorithmData  // 假设 algorithmData 是你要发送的算法数据
-      };
-      postRequest("/DiseasePre/algorithmData",requestData)
-          .then(res => {
-            console.log(res)
+      this.loading = true
+      for(let i=0;i<this.algorithmData.length;i++){
+        console.log(`这是第${i}循环`)
+        let modelname = this.algorithmData[i].algorithm
+        this.selectedModelName.push(modelname)
+        console.log(modelname)
+        getRequest(`/Patient/getModelPathByModelName/${modelname}`).then(res => {
+          let path = res;
+          let features = this.algorithmData[i].features
+          console.log(features)
+          const valuesArray = Object.values(features); // 获取对象中所有属性的值，保存在数组中
+
+// 如果您想按照对象属性的名称顺序排列数组，可以先获取对象的属性名称，然后按照属性名称顺序访问值
+          const propertyNames = Object.keys(features); // 获取对象中所有属性的名称
+          const fea = propertyNames.map(propertyName => features[propertyName]); // 按照属性名称顺序访问值
+          let onlineUse = {
+            path, fea
+          }
+          console.log(onlineUse)
+          postRequest('/OnlineUse/use',onlineUse).then(res => {
+            const obj = {}
+            obj[modelname] = res.res[0]
+            this.predictionResult1.push(obj);
+            this.predictionResult = this.predictionResult1.reduce((acc, cur) => {
+              return { ...acc, ...cur };
+            }, {});
+            this.$store.commit('predictionResult',this.predictionResult)
+            this.$store.commit('selectedModelName',this.selectedModelName)
+            this.loading = false
+            this.$router.replace('/predictionResult')
           })
+        })
+      }
 
     },
-    test(){
-      console.log(this.allModelFeatureArray)
+
+    toInfo(){
+      this.$router.replace('/predictionInfo')
     }
   },
 }

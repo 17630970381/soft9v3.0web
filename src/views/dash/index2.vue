@@ -1,62 +1,91 @@
 <template>
 <div>
   <!-- 统计总数  -->
-  <div class="top">
-    <el-card class="card">
-      <img class="cardImage" src="your-image-url.jpg">
-      <!-- el-card 的内容 -->
-      <div>
-        <!-- 这里放 el-card 的内容 -->
-        <p>专病集数量：25</p>
-      </div>
-    </el-card>
-    <el-card class="card">
-      <img class="cardImage" src="your-image-url.jpg">
-      <!-- el-card 的内容 -->
-      <div>
-        <!-- 这里放 el-card 的内容 -->
-        <p>样本数量：1000</p>
-      </div>
-    </el-card>
-    <el-card class="card">
-      <img class="cardImage" src="your-image-url.jpg">
-      <!-- el-card 的内容 -->
-      <div>
-        <!-- 这里放 el-card 的内容 -->
-        <p>起始时间：2023-12-20-9:00</p>
-      </div>
-    </el-card>
-    <el-card class="card">
-      <img class="cardImage" src="your-image-url.jpg">
-      <!-- el-card 的内容 -->
-      <div>
-        <!-- 这里放 el-card 的内容 -->
-        <p>模型总数:20</p>
-      </div>
+  <div class="topStatistic">
+    <el-card class="top_statistic_card">
+      <el-card class="statistic_item">
+        <div class="text_place">
+          <i class="el-icon-s-grid"></i> 专病集个数:{{ topData.specialityCount }}
+        </div>
+      </el-card>
+      <el-card class="statistic_item">
+        <div class="text_place">
+          <i class="el-icon-s-data"></i> 样本总量:{{ topData.sampleCount }}
+        </div>
+      </el-card>
+      <el-card class="statistic_item">
+        <div class="text_place">
+          <i class="el-icon-time"></i> 起始时间:<p></p>{{ topData.startTime }}
+        </div>
+      </el-card>
+      <el-card class="statistic_item">
+        <div class="text_place">
+          <i class="el-icon-s-claim"></i> 模型总数:{{ topData.modelCount }}
+        </div>
+      </el-card>
     </el-card>
   </div>
   <!-- 三个表 -->
-  <div class="middle">
-    <el-card class="middleCard" >
+  <div class="midStatistic">
+    <el-card class="mid_statistic_card">
+      <el-card>
+        <div slot="header" class="clearfix">
+          <span class="lineStyle">▍</span><span>疾病趋势发展图</span>
+<!--          <el-select class="chartSelect" placeholder="请选择" style="width: 300px" v-model="diseaseName">-->
+<!--            <el-option v-for="item in diagName" :key="item" :label="item" :value="item"></el-option>-->
+<!--          </el-select>-->
+        </div>
+        <div id="chartBox" style="height: 400px;width: 500px;" v-if="charBoxVisiable">
+          <firstGraph style="margin-left: 50px" :diseaName="diseaseName" :diagName="diagName" :graphdata="series"></firstGraph>
+        </div>
+      </el-card>
+      <el-card>
+        <div slot="header" class="clearfix">
+          <span class="lineStyle">▍</span><span>疾病占比</span>
+        </div>
+        <div id="chartBox" style="height: 400px;width: 500px;" v-if="charBoxVisiable2">
+          <firstMidMid style="margin-left: 80px" :midMid="midMid">
+          </firstMidMid>
+        </div>
+      </el-card>
+      <el-card>
+        <div slot="header" class="clearfix">
+          <span class="lineStyle">▍</span><span>缺失占比</span>
+          <el-select class="BarchartSelect" v-model="table_value" placeholder="请选择数据集" size="mini" @change="table_val_change">
+            <el-option v-for="item in table_value_options" :key="item" :label="item" :value="item" size="mini">
+            </el-option>
+          </el-select>
+        </div>
+          <div id="chartBox" style="height: 400px;width: 550px;" v-loading="fill_rate_loading" element-loading-text="后台加载中">
+            <Sprit  style="margin-left: 90px" v-if="this.sprit_names.length !==0" :sprit_names="sprit_names" :sprit_values="sprit_values" :height="400" :width="550" :title="table_value">
+            </Sprit>
+        </div>
+      </el-card>
+    </el-card>
+  </div>
 
-      <firstGraph/>
-    </el-card>
-    <el-card class="middleCard">
-      <firstMidMid/>
-    </el-card>
-    <el-card class="middleCard">
-      <firstMidRight/>
+<!--  <div class="bottomStatistic">-->
+<!--    <el-card class="bottom_statistic_card">-->
+<!--      <div slot="header" class="clearfix">-->
+<!--        <span class="lineStyle">▍</span><span>正负样本占比</span>-->
+<!--      </div>-->
+<!--      <div id="chartBox">-->
+<!--        <firstBottom></firstBottom>-->
+<!--      </div>-->
+<!--    </el-card>-->
+<!--  </div>-->
+  <div class="bottomStatistic">
+    <el-card class="bottom_statistic_card">
+      <div slot="header" class="clearfix">
+        <span class="lineStyle">▍</span><span>正负样本占比</span>
+      </div>
+      <div id="chartBox">
+        <Bar   v-if="this.bar_x.length !==0 && this.bar_pos.length!==0 && this.bar_neg.length!=0" style="height: 400px;width: 1400px;margin-left: 350px" :bar_x="bar_x" :bar_neg="bar_neg" :bar_pos="bar_pos">
+        </Bar>
+      </div>
     </el-card>
   </div>
-  <!-- 一个趋势图  -->
-  <div class="firstFooter">
-    <div class="bottomTitle">
-      <h1>正负样本占比</h1>
-    </div>
-    <div class="bottomCard">
-      <firstBottom/>
-    </div>
-  </div>
+
 </div>
 </template>
 
@@ -66,19 +95,155 @@ import firstGraph from "@/views/graph/firstGraph.vue";
 import firstMidMid from "@/views/graph/firstMidMid.vue";
 import firstMidRight from "@/views/graph/firstMidRight.vue";
 import firstBottom from "@/views/graph/firstBottom.vue";
+import {getRequest} from "@/utils/api";
+import Sprit from "@/components/tab/subcomponents/Sprit.vue";
+import Bar from "@/components/tab/subcomponents/Bar.vue";
 
 export default {
   name:"index2",
-  components: {firstGraph,firstMidMid,firstMidRight,firstBottom},
+  components: {Bar, firstGraph,firstMidMid,firstMidRight,firstBottom,Sprit},
   data() {
     return{
-
+      topData: {
+        specialityCount: '',
+        sampleCount: '',
+        startTime: '',
+        modelCount: ''
+      },
+      diagName:[],
+      diseaseName:"",
+      series:[],
+      charBoxVisiable: false,
+      charBoxVisiable2: false,
+      midMid:[],
+      // 缺失值占比
+      table_value_options: [],
+      table_value: '',
+      pieObject: [],
+      sprit_names:[],
+      sprit_values:[],
+      fill_rate_loading:false,
+      userbuilt_table_list:[],
+      // 柱状图
+      bar_x:[],
+      bar_neg:[],
+      bar_pos:[]
     }
   },
-
+  created() {
+    this.getTopData()
+    this.getDiagName()
+    this.getSeries()
+    this.getSeries2()
+    this.getInitInfo()
+  },
 
   methods:{
+    getTopData(){
+      getRequest('merge/getTopData').then(res => {
+         this.topData.specialityCount = res.data.specialityCount
+         this.topData.sampleCount = res.data.sampleCount
+         this.topData.startTime = res.data.startTime
+         this.topData.modelCount = res.data.modelCount
+      })
+    },
+    getDiagName(){
+      getRequest('merge/getDiagName').then(res => {
+        this.diagName = res.data
+      })
+    },
+    getSeries(){
+      getRequest('/merge/mergedata').then(res => {
+        // console.log(res.data)
+        let graphData = []
+        for (const resKey in res.data) {
+          let tempObject = {
+            name: resKey,
+            type: 'line',
+            stack: 'Total',
+            data: []
+          }
+          for (const key in res.data[resKey]) {
+            tempObject.data.push(res.data[resKey][key])
+          }
+          // console.log(tempObject)
+          graphData.push(tempObject)
+        }
+        this.series = graphData;
+        this.charBoxVisiable = true;
+      })
+    },
+    getSeries2(){
+      getRequest('merge/getDiseaseRates').then(res => {
+        let midTem = {
+          name: 'Access From',
+          type: 'pie',
+          radius: '50%',
+          data: [],
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 10,
+              shadowOffsetX: 0,
+              shadowColor: 'rgba(0, 0, 0, 0.5)'
+            }
+          }
+        }
+        for (let key in res.data) {
+          if (res.data.hasOwnProperty(key)) {
+            // 将每个键值对转换成目标格式的对象，并添加到转换后的数据数组中
+            midTem.data.push({
+              value: res.data[key],
+              name: key
+            });
+          }
+        }
+        this.midMid = midTem
+        this.charBoxVisiable2 = true;
+      })
+    },
+    table_val_change(){
+      this.fill_rate_loading=true;
+      this.sprit_names = [];
+      this.sprit_values = [];
+      getRequest(`scripts/get_fill_rate?tablename=${this.table_value}`).then(
+          (res) => {
+            this.sprit_names = res.column_name;
+            this.sprit_values = res.miss_rate;
+            this.fill_rate_loading=false;
+          }
+      );
+    },
+    getInitInfo() {
+      getRequest("/DataManager/getTableName").then(
+          (res) => {
+            if (res) {
+              this.table_value_options = res.data;
+              this.table_value = this.table_value_options[0];
+              this.table_val_change();
+            } else {
+              this.$message.error("获取数据失败");
+            }
+          }
+      );
 
+      getRequest("merge/get_pos_neg").then(
+          (res) => {
+            if (res.code == 200) {
+              this.bar_x=Object.keys(res.data);
+              let array = Object.values(res.data);
+              for (let index = 0; index < array.length; index++) {
+                const element = array[index];
+                this.bar_neg.push(element.neg);
+                this.bar_pos.push(element.pos);
+                console.log(element.pos)
+              }
+            }
+            else {
+              this.$message.error("获取数据失败");
+            }
+          }
+      )
+    }
   },
 }
 </script>
@@ -86,82 +251,184 @@ export default {
 
 
 <style scoped>
-.top {
+.topBigDiv {
   box-sizing: border-box;
-  height: 10vh;
+  height: 30vh;
   display: flex;
-  justify-content:space-around;
-  border: 2px solid #868585; /* 设置边框样式，可根据需要调整颜色和宽度 */
-  border-radius: 20px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);/* 设置阴影样式，可根据需要调整颜色和阴影参数 */
-  margin-bottom: 10px;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.top .card {
-  width: 300px;
-  /* 设置 el-card 高度，你可以根据需要调整或使用其他单位如 px、rem 等 */
-  height: 80%;
-  margin-top: 10px;
-  display: flex;
-  flex-direction: column; /* 纵向排列子元素 */
-  justify-content: center; /* 子元素水平居中 */
-  align-items: center; /* 子元素垂直居中 */
-  text-align: center;
-  border-radius: 25px;
-  position: relative; /* 设置相对定位 */
-}
-
-.cardImage {
-  position: absolute; /* 设置绝对定位 */
-  top: 10px; /* 距离上边框的距离，根据需要调整 */
-  left: 10px; /* 距离左边框的距离，根据需要调整 */
-  width: 30px; /* 设置图片宽度，根据需要调整 */
-  height: 30px; /* 设置图片高度，根据需要调整 */
-}
-
-.middle{
+.topBigDiv .left {
   box-sizing: border-box;
+  width: 49%;
+  height: 100%;
+}
+
+.topBigDiv .right {
+  box-sizing: border-box;
+  width: 49%;
+  height: 100%;
+}
+
+.topBigDiv .left .quickEntryBox {
+  /*border: 1px red solid;*/
+  /*box-sizing: border-box;*/
+  margin-top: 38px;
   width: 100%;
-  height: 38vh;
+  height: 100%;
   display: flex;
-  justify-content:space-around;
-  border: 2px solid #868585; /* 设置边框样式，可根据需要调整颜色和宽度 */
-  border-radius: 20px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);/* 设置阴影样式，可根据需要调整颜色和阴影参数 */
-  margin-bottom: 10px;
+  justify-content: space-evenly;
+  align-items: center;
 }
 
-.middleCard {
-  width: 500px;
-  /* 设置 el-card 高度，你可以根据需要调整或使用其他单位如 px、rem 等 */
-  height: 330px;
-  margin-top: 8px;
-  display: flex;
-  flex-direction: column; /* 纵向排列子元素 */
-  justify-content: center; /* 子元素水平居中 */
-  align-items: center; /* 子元素垂直居中 */
-  text-align: center;
-  border-radius: 15px;
+.topBigDiv .left .quickEntryBox .singleBox {
+  /*border: 1px red solid;*/
+  /*box-sizing: border-box;*/
+  width: 80px;
+  height: 80px;
+  border-radius: 20%;
 }
 
-.firstFooter {
+.topBigDiv .left .quickEntryBox .imgStyle {
+  width: 90%;
+  height: 90%;
+}
+
+.bottomBigDiv {
   box-sizing: border-box;
+  height: 55vh;
   display: flex;
-  justify-content: center;
-  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
-  height: 37vh;
-  border: 2px solid #868585; /* 设置边框样式，可根据需要调整颜色和宽度 */
-  border-radius: 20px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);/* 设置阴影样式，可根据需要调整颜色和阴影参数 */
+  margin-top: 20px;
 }
 
-.bottomCard {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh; /* 设置容器高度，这里使用视窗高度 */
+.bottomBigDiv .left {
+  box-sizing: border-box;
+  height: 100%;
+  width: 33%;
+  overflow: hidden;
+}
+
+.bottomBigDiv .mid {
+  box-sizing: border-box;
+  height: 100%;
+  width: 33%;
+}
+
+.bottomBigDiv .right {
+  box-sizing: border-box;
+  height: 100%;
+  width: 33%;
+}
+
+.clearfix:before,
+.clearfix:after {
+  display: table;
+  content: "";
+}
+
+.clearfix:after {
+  clear: both;
+}
+
+.lineStyle {
+  color: rgb(100, 172, 231);
+  font-weight: 40;
+}
+
+.card {
+  padding: 0;
+  height: 100%;
+}
+
+#chartBox {
+  width: 100%;
+  height: 100%;
+}
+
+.chartSelect {
+  width: 100px;
+  margin-left: 25px;
+}
+
+.BarchartSelect {
+  width: 200px;
+  margin-left: 25px;
+}
+
+.top_statistic_card {
+  text-align: center;
   margin-top: 10px;
+  margin-bottom: 10px;
+  width: 100%;
+  height: 33%;
+
+  .el-card {
+    display: inline-block;
+    width: 21%;
+    height: 100px;
+    margin: 1%;
+    padding: 10px;
+    border: 1px solid #fff;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.1);
+
+  }
 }
 
+.midStatistic {
+  width: 100%;
+}
+
+.mid_statistic_card {
+  text-align: center;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  width: 100%;
+  height: 100%;
+
+  .el-card {
+    display: inline-block;
+    width: 31%;
+    height: 100%;
+    margin: 0.5% 1.3% 0.5% 0.1%;
+    border: 1px solid #fff;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.1);
+
+  }
+}
+
+.bottomStatistic {
+  width: 100%;
+}
+
+.bottom_statistic_card {
+  text-align: center;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  width: 100%;
+  height: 100%;
+}
+
+#taskChart {
+  width: 100%;
+  height: 100%;
+}
+
+.statistic_item {
+  position: relative;
+}
+
+.statistic_item .text_place {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  position: relative;
+  font-size: 20px;
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
 </style>

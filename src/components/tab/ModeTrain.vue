@@ -376,7 +376,7 @@ export default {
         modelname: "",
         diseasename: "",
         remarks: "",
-        Publisher: sessionStorage.getItem("user")
+        publisher: sessionStorage.getItem("user")
           ? sessionStorage.getItem("user")
           : "",
         uid: sessionStorage.getItem("uid")

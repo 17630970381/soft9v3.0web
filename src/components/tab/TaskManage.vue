@@ -12,7 +12,7 @@
         :highlight-current="true"
         @node-click="changeData"
       >
-        <span class="custom-tree-node" slot-scope="{ node, data }">
+        <!-- <span class="custom-tree-node" slot-scope="{ node, data }">
           <span>{{ node.label }}</span>
           <span>
             <el-button
@@ -23,7 +23,7 @@
             >
             </el-button>
           </span>
-        </span>
+        </span> -->
       </el-tree>
       <el-dialog title="提示" :visible.sync="dialogDiseaseVisible" width="30%">
         <span>
@@ -55,7 +55,7 @@
           </el-select>
         </div>
         <el-button @click="clearFilter">清除</el-button>
-        <el-button type="success">新建任务</el-button>
+        <!-- <el-button type="success">新建任务</el-button> -->
       </div>
 
       <!--===============================    卡片组     ==============================================================-->
@@ -111,7 +111,7 @@
         </div>
         <div
           class="taskInfoBox participants"
-          v-if="result.participant.length > 0"
+          v-if="result.participant!==null"
         >
           <span class="lineStyle">▍</span
           ><span class="featureTitle">参与人：</span>
@@ -173,22 +173,25 @@
           <el-button @click="resultDialogShow = false">关 闭</el-button>
         </span>
       </el-dialog>
+
     </div>
   </div>
 </template>
 
 <script>
 import { getRequest } from "@/utils/api";
+import { state } from "@antv/g2plot/lib/adaptor/common";
 import { mapGetters, mapMutations, mapState, mapActions } from "vuex";
-import { treeData } from "@/components/tab/treeTargetData.js";
+
 
 export default {
   computed: {
-    ...mapState(["taskList"]),
+    ...mapState(["taskList","treeData"]),
     ...mapGetters(["taskLeaderList", "taskDiseaseList"]),
   },
   created() {
-    this.getTaskList(sessionStorage.getItem("userid") - 0);
+    this.getTaskList();
+    this.getTreeData();
   },
   data() {
     return {
@@ -196,23 +199,52 @@ export default {
       leader: "",
       resultDialogShow: false,
       result: {},
-      treeData: JSON.parse(JSON.stringify(treeData)),
+      
+      dialogDiseaseVisible:false,
+      diseaseName:''
     };
   },
 
   methods: {
-    ...mapActions(["getTaskList"]),
+    ...mapActions(["getTaskList","getTreeData"]),
     ...mapMutations(["SetTaskList"]),
+    // getTreeData()
+    // {
+    //   getRequest("nodes/all").then((res) => {
+    //     if(res.code == 200)
+    //     {
+    //       this.treeData = res.data;
+    //     }
+    //     else{
+    //       this.$message.error("获取树形结构数据失败");
+    //     }
+    //   });
+    // },
     handleCheck(row) {
       getRequest(`Task/result/${row.id}`).then((res) => {
-        this.result = res;
-        this.resultDialogShow = true;
+        if(res.code == 200)
+        {
+          this.result = res.data;
+          if(this.result.parameters != null){
+            this.result.parameters = this.result.parameters.split(",");
+          }
+          
+          this.resultDialogShow = true;
+        }
+        else{
+          this.$message.error("查看任务失败");
+        }
       });
     },
     handleDelete(row) {
       getRequest(`Task/delete/${row.id}`).then((res) => {
-        console.log(res);
-        this.SetTaskList(res.reverse());
+       if(res.code == 200){
+        this.$message.success("删除任务成功");
+        this.SetTaskList(res.data);
+       }
+       else{
+        this.$message.error("删除任务失败");
+       }
       });
     },
     clearFilter() {
@@ -305,5 +337,8 @@ export default {
 
 .icon {
   justify-self: end;
+}
+.taskCard{
+  width: 110%;
 }
 </style>

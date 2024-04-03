@@ -16,18 +16,16 @@
     <el-form :model="formData" label-width="80px" style="width: 70%;margin-top: 10px" >
       <div class="form-row">
         <el-form-item label="模型名称:" prop="taskName" >
-          <el-input v-model="formData.taskName" style="width: 100%; font-size: 18px;"></el-input>
+          <el-input v-model="formData.modelname" style="width: 100%; font-size: 18px;"></el-input>
         </el-form-item>
         <el-form-item label="负责人:" prop="assignee">
-          <el-input v-model="formData.assignee" style="width: 100%; font-size: 18px;"></el-input>
+          <el-input v-model="formData.assignee" disabled style="width: 100%; font-size: 18px;"></el-input>
         </el-form-item>
       </div>
       <el-form-item label="所属疾病:" prop="disease">
         <!-- 参与人员的表单项，可以根据需求选择合适的输入组件 -->
         <el-select v-model="formData.diseasename" placeholder="请选择疾病" style="width: 100%; font-size: 18px;">
-          <el-option label="心脏病" value="心脏病"></el-option>
-          <el-option label="胃癌" value="胃癌"></el-option>
-          <el-option label="糖尿病" value="糖尿病"></el-option>
+          <el-option v-for="item in tableList" :key="item" :label="item" :value="item"></el-option>
         </el-select>
       </el-form-item>
       <el-form-item label="备注:" prop="notes">
@@ -47,33 +45,87 @@
 
 <script>
 
+import {getRequest} from "@/utils/api";
+
 export default {
   name: "createTask",
   data() {
     return {
       formData: {
-        modelName: '',
-        assignee: '',
+        modelname: '',
+        assignee: sessionStorage.getItem("user")
+            ? sessionStorage.getItem("user")
+            : "",
         diseasename: '',
         notes: ''
       },
       active: 1,
-
+      uid: sessionStorage.getItem("uid")
+          ? parseInt(sessionStorage.getItem("uid"))
+          : 0,
+      tableList:[]
     }
   },
-
+  created() {
+    this.getDiseaseName()
+  },
   methods: {
     toDataC() {
       // 处理表单提交逻辑
       console.log('Form submitted:', this.formData);
-      this.$store.commit('taskToDataChoose',this.formData)
-      this.$router.replace('/dataChoose')
-    },
-    test(){
-      console.log("ct")
-      console.log(this.formData)
-    }
+      if(this.formData.modelname==''){
+        this.$alert("请填写模型名称", "提示", {
+          confirmButtonText: '确定',
+          callback: action => {
+            this.$message({
+              type: 'error',
+              message: '请填写模型名称'
+            });
+          }
+        })
+      }
 
+      if(this.formData.diseasename==''){
+        this.$alert("请选择所属疾病", "提示", {
+          confirmButtonText: '确定',
+          callback: action => {
+            this.$message({
+              type: 'error',
+              message: '请选择所属疾病'
+            });
+          }
+        })
+      }
+
+      if (this.formData.modelname !=='' && this.formData.diseasename !==''){
+        getRequest(`/Model/isRepeatModel/${this.formData.modelname}`).then(
+            res => {
+              if(!res){
+                this.formData.modelname = ''
+                this.$alert("模型名称与已有模型重复，请重新输入", "提示", {
+                  confirmButtonText: '确定',
+                  callback: action => {
+                    this.$message({
+                      type: 'error',
+                      message: '模型名称与已有模型重复，请重新输入'
+                    });
+                  }
+                })
+
+              }else {
+                this.$store.commit('taskToDataChoose',this.formData)
+                this.$router.replace('/dataChoose')
+              }
+
+            }
+        )
+      }
+    },
+    getDiseaseName(){
+      getRequest('/DataManager/getDiseaseName').then(res => {
+        this.tableList = res
+      })
+    }
   }
 }
 </script>

@@ -50,7 +50,11 @@
           </el-card>
         </div>
         <!--   参数输入     -->
-        <div v-if="isCard">
+        <div v-if="isCard"
+             element-loading-text="模型正在训练，请稍后"
+             element-loading-spinner="el-icon-loading"
+             element-loading-background="rgba(0, 0, 0, 0.8)"
+             v-loading="loading">
           <h1
               style="margin-left: 20px;margin-top: 10px">
            请输入算法所需超参数：
@@ -114,7 +118,7 @@ export default {
       isPrompt: false,
       isCard: false,
       resultData:{ },
-
+      loading:false,
     }
   },
   computed: {
@@ -178,10 +182,11 @@ export default {
           }
         })
         // 初始化 selectedAlgorithms 数组
-        this.unSelectedAlgorithms = this.algorithms.map(algorithm => ({
+        this.unSelectedAlgorithms = this.algorithms.map((algorithm, index) => ({
           name: algorithm.name,
-          selected: false,
+          selected: index === 0, // 如果是数组中的第一个元素，则设置为 true，否则为 false
         }));
+        this.updateSelectedAlgorithms()
 
       }catch (error) {
         console.error("Failed to get algorithms:", error);
@@ -280,7 +285,26 @@ export default {
     promptParameters(){
       this.$store.commit('selectedAlgorithms',this.selectedAlgorithms)
       this.$store.commit('completeParameter',this.completeParameter)
-      this.$router.replace('resultShow');
+      let trainAl= {}
+      let target =  this.featureChooseData.target
+      let fea = this.featureChooseData.trainFea
+      let tableName = this.tableName
+      let completeParameter = this.completeParameter
+      trainAl = {
+        target,fea,tableName,completeParameter
+      }
+      this.loading = true
+      postRequest("/Model/trainAl",trainAl).then(
+
+          res => {
+
+            this.resultData = res
+            this.$store.commit('setResultData',this.resultData)
+            this.loading = false
+            this.$router.replace('resultShow');
+          })
+
+
       console.log(this.selectedAlgorithms)
 
 

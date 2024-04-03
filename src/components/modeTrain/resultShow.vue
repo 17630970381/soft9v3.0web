@@ -23,8 +23,7 @@
                     @click="modelShow">
           模型演示
         </el-button>
-        <el-button style="margin-top: 20px;width: 130px"  type="primary"  @click="saveModel">保存模型</el-button>
-        <el-button style="margin-top: 20px;width: 130px"  type="primary"  @click="test">test</el-button>
+        <el-button style="margin-top: 20px;width: 130px"  type="primary"  @click="saveModels()">保存模型</el-button>
       </div>
     <!--  主体展示     -->
       <div class="small-div right">
@@ -32,15 +31,16 @@
         <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal" @select="handleSelect">
           <el-menu-item v-for="(item, index) in selectedAlgorithms" :key="index" :index="item">{{ item }}</el-menu-item>
         </el-menu>
-        <div v-if="sequence === 1" id="downloadArea"
-             element-loading-text="模型正在训练，请稍后"
-             element-loading-spinner="el-icon-loading"
-             element-loading-background="rgba(0, 0, 0, 0.8)"
-             v-loading="loading">
+        <div v-if="sequence === 1" id="downloadArea">
+<!--             element-loading-text="模型正在训练，请稍后"-->
+<!--             element-loading-spinner="el-icon-loading"-->
+<!--             element-loading-background="rgba(0, 0, 0, 0.8)"-->
+
             <div style="display: flex; justify-content: space-between; align-items: center;">
               <h1 style="margin: 20px 20px 20px 20px; font-size: 25px;display: inline-block">模型效果评价</h1>
               <div>
                 <el-button style="margin-top: 20px;margin-right: 10px; width: 100px"  @click="downloadPDF" type="primary">下载报告</el-button>
+                <el-button style="margin-top: 20px;margin-right: 30px;  width: 120px"  @click="downloadCSV" type="primary">下载测试数据</el-button>
               </div>
             </div>
             <div style="margin-top: 10px">
@@ -53,7 +53,7 @@
                 <el-table-column prop="alName" label="算法名称"> </el-table-column>
                 <el-table-column prop="sampleName" label="样本名称"></el-table-column>
                 <el-table-column prop="totalSamples" label="总样本量"></el-table-column>
-                <el-table-column prop="positiveSamples" label="正样本量"></el-table-column>
+                <el-table-column prop="positiveSamples" label="总特征数"></el-table-column>
                 <el-table-column prop="accuracy" label="准确度"></el-table-column>
                 <el-table-column prop="precision" label="精确度"></el-table-column>
                 <el-table-column prop="recall" label="召回率"></el-table-column>
@@ -67,7 +67,7 @@
                 <el-tag style="margin: 5px 10px;">说明:横轴是召回率，纵轴器精确率;曲线上的一个点代表着在某一阈值下，
                   模型将大于该阈值的结果判定为正样本，将低于该阈值的样本判定为负样本，通过阈值的变动而绘制出PR曲线，
                   所以PR曲线综合考虑了不同阈值下的召回率与精确率。</el-tag>
-                <img :src="require('@/assets/20240322201734_RF/precision_recall_curve.png')" alt="Image">
+                <img :src="require(`@/assets/${dynamicVariable}/precision_recall_curve.png`)" alt="Image">
               </div>
 
               <div style="text-align: center;">
@@ -75,7 +75,7 @@
                 <el-tag style="margin: 5px 10px;">说明:
                   ROC（Receiver Operating Characteristic）曲线是一种用于评估二元分类器性能的图形工具。
                   它显示了在不同阈值下真正例率（True Positive Rate，TPR）与假正例率（False Positive Rate，FPR）之间的关系。</el-tag>
-                <img :src="require('@/assets/20240322201734_RF/roc_curve.png')" alt="Image">
+                <img :src="require(`@/assets/${dynamicVariable}/roc_curve.png`)" alt="Image">
               </div>
 
               <div style="text-align: center;">
@@ -83,7 +83,7 @@
                 <el-tag style="margin: 5px 10px;">说明:
                   混淆矩阵（Confusion Matrix）是一种用于评估分类模型性能的表格，特别是在监督学习中用于评估分类任务的结果。
                   它将模型的预测结果与真实结果进行比较，从而提供了对分类器性能的直观认识。</el-tag>
-                <img :src="require('@/assets/20240322201734_RF/confusion_matrix.png')" alt="Image">
+                <img :src="require(`@/assets/${dynamicVariable}/confusion_matrix.png`)" alt="Image">
               </div>
 
               <div style="text-align: center;">
@@ -91,7 +91,7 @@
                 <el-tag style="margin: 5px 10px;">说明:
                   特征重要度（Feature Importance）是在机器学习领域中用于衡量模型中各个特征对于预测结果的贡献程度的指标。
                   在训练完模型之后，特征重要度可以帮助我们理解模型是如何做出预测决策的，以及哪些特征对于模型的性能起到了关键作用。</el-tag>
-                <img :src="require('@/assets/20240322201734_RF/feature_importance.png')" alt="Image">
+                <img :src="require(`@/assets/${dynamicVariable}/feature_importance.png`)" alt="Image">
               </div>
             </div>
         </div>
@@ -113,12 +113,12 @@
             <el-card  v-if="predictionResult === '0'"
                 style="margin-top: 20px;margin-left: 20px;width: 50%;
                 background-color: #3cadad; border-radius: 30px">
-              <p style="font-size: 20px;">该数据患有{{ diseasename }}的概率较低</p>
+              <p style="font-size: 20px;">该数据患有{{formData.diseasename }}的概率较低</p>
             </el-card>
             <el-card v-if="predictionResult === '1'"
                      style="margin-top: 20px;margin-left: 20px;width: 50%;
                       background-color: #ce1f1f; border-radius: 30px">
-              <p style="font-size: 20px;font-weight: bold">该数据患有{{ diseasename }}的概率较高，请及时就医!!</p>
+              <p style="font-size: 20px;font-weight: bold">该数据患有{{formData.diseasename }}的概率较高，请及时就医!!</p>
             </el-card>
           </div>
         </div>
@@ -129,7 +129,7 @@
 
 <script>
 import Vue from "vue";
-import {postRequest} from "@/api/user";
+import {getRequest, postRequest} from "@/api/user";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import {mapState} from "vuex";
@@ -156,7 +156,6 @@ Vue.directive('validate-number', {
 
 export default {
   name: "resultShow",
-  ...mapState(['resultData']),
   computed: {
     formData() {
       return this.$store.state.formData
@@ -184,22 +183,23 @@ export default {
 
     completeParameter(){
       return this.$store.state.completeParameter
-    }
+    },
 
 
   },
   data() {
     return {
-      diseasename:"",
-      uid:516005890,
+      uid:localStorage.getItem("uid")
+          ? parseInt(localStorage.getItem("uid"))
+          : 0,
       active:5,
       sequence: 1,
       tableData1: [{
-        modelname: '测试',
+        modelname: '',
         alName:'',
-        sampleName: '胃癌',
-        totalSamples: '431',
-        positiveSamples: '188',
+        sampleName: '',
+        totalSamples: '',
+        positiveSamples: '',
         accuracy:'',
         precision:'',
         recall:'',
@@ -210,7 +210,7 @@ export default {
       pictureUrl:"",
       // 测试死数据
 
-      resultData:{
+      // resultData:{
         //  "RF":[{"uid": 516005890 ,"modelname":"test1",
         //    "evaluate": "{'accuracy': 0.71696, 'precision': 0.71780, 'recall': 0.71395, 'f1': 0.76285}",
         //    "picture": "'@\\assets\\20240319195319_RF'",
@@ -221,9 +221,9 @@ export default {
         //   "picture": "@\\assets\\20240319195314_DT",
         //   "pkl":"E:\\soft\\software9-3\\software9\\src\\main\\resources\\Algorithm\\PKL\\20240319195319_RF.pkl"
         // }]
-      },
-      activeIndex: 'RF',
-      electionAl: 'RF',
+      // },
+      activeIndex: '',
+      electionAl: '',
 
       //模型演示
       selectedAlgorithmFeatures: [],
@@ -234,9 +234,9 @@ export default {
       predictionResult: '',
       isResultDataEmpty: true,
       selectedData: [],
-      loading: true,
-      loading2: false
-
+      loading: false,
+      loading2: false,
+      dynamicVariable:"",
     }
   },
   created() {
@@ -244,12 +244,7 @@ export default {
     this.load()
 
   },
-  mounted() {
 
-
-
-
-  },
   watch: {
     electionAl(newAlgorithm, oldAlgorithm) {
       // electionAl 变化时更新 selectedAlgorithmFeatures
@@ -260,34 +255,45 @@ export default {
   },
   methods: {
     load(){
-      let trainAl= {}
-      let target =  this.featureChooseData.target
-      let fea = this.featureChooseData.trainFea
-      let tableName = this.tableName
-      let completeParameter = this.completeParameter
-      trainAl = {
-        target,fea,tableName,completeParameter
+      this.activeIndex = this.selectedAlgorithms[0]
+      this.electionAl = this.selectedAlgorithms[0]
+      console.log(this.electionAl)
+      console.log(this.selectedAlgorithms)
+      // let trainAl= {}
+      // let target =  this.featureChooseData.target
+      // let fea = this.featureChooseData.trainFea
+      // let tableName = this.tableName
+      // let completeParameter = this.completeParameter
+      // trainAl = {
+      //   target,fea,tableName,completeParameter
+      // }
+      // postRequest("/Model/trainAl",trainAl).then(res => {
+      //   this.resultData = res
+      //   console.log(this.resultData)
+      //
+      //   this.loading = false
+      // })
+      this.selectedData = this.resultData[this.electionAl] || []
+      console.log(this.selectedData)
+      this.tableData1[0].alName = this.electionAl
+      const str = this.selectedData[0].evaluate
+      const jsonObj = JSON.parse(str.replace(/'/g, '"'));
+      const resultMap = new Map();
+      for (const key in jsonObj) {
+        resultMap.set(key, jsonObj[key]);
       }
-      postRequest("/Model/trainAl",trainAl).then(res => {
-        this.resultData = res
-        console.log(this.resultData)
-        this.selectedData = this.resultData[this.electionAl] || []
-        console.log(this.selectedData)
-        this.tableData1[0].alName = this.electionAl
-        const str = this.selectedData[0].evaluate
-        const jsonObj = JSON.parse(str.replace(/'/g, '"'));
-        const resultMap = new Map();
-        for (const key in jsonObj) {
-          resultMap.set(key, jsonObj[key]);
-        }
-        this.tableData1[0].accuracy = resultMap.get('accuracy')
-        this.tableData1[0].precision = resultMap.get('precision')
-        this.tableData1[0].recall = resultMap.get('recall')
-        this.tableData1[0].f1Score = resultMap.get('f1')
-        this.pictureUrl = this.selectedData[0].picture
-        this.updateSelectedAlgorithmFeatures()
-        this.loading = false
-      })
+      this.tableData1[0].accuracy = resultMap.get('accuracy')
+      this.tableData1[0].precision = resultMap.get('precision')
+      this.tableData1[0].recall = resultMap.get('recall')
+      this.tableData1[0].f1Score = resultMap.get('f1')
+      this.pictureUrl = this.selectedData[0].picture
+      this.tableData1[0].modelname = this.formData.modelname
+      this.tableData1[0].sampleName = this.formData.diseasename
+      const match = this.pictureUrl.match(/(\d+_\w+)/);
+      this.dynamicVariable = match ? match[1] : null;
+      this.getNumber()
+      this.updateSelectedAlgorithmFeatures()
+
 
     },
     toFeatureChoose(){
@@ -303,11 +309,12 @@ export default {
       this.sequence = 2
     },
     test(){
-      console.log(this.selectedAlgorithms)
+      this.getNumber()
     },
     handleSelect(key){
       this.electionAl = key
       this.tableData1[0].alName = key
+      this.selectedData = this.resultData[this.electionAl] || []
       const str = this.selectedData[0].evaluate
       const jsonObj = JSON.parse(str.replace(/'/g, '"'));
       const resultMap = new Map();
@@ -319,7 +326,9 @@ export default {
       this.tableData1[0].recall = resultMap.get('recall')
       this.tableData1[0].f1Score = resultMap.get('f1')
       this.pictureUrl = this.selectedData[0].picture
-
+      const match = this.pictureUrl.match(/(\d+_\w+)/);
+      this.dynamicVariable = match ? match[1] : null;
+      console.log(this.tableData1)
     },
 
     getPictureUrl(imageName) {
@@ -355,7 +364,41 @@ export default {
       })
     },
     // 保存模型
-    saveModel(){
+    async saveModels() {
+      for (let i = 0; i < this.selectedAlgorithms.length; i++) {
+        let modelname = this.formData.modelname;
+        let diseasename = this.formData.diseasename;
+        let publisher = this.formData.assignee;
+        let remark = this.formData.notes;
+        let uid = this.uid;
+        let al = this.selectedAlgorithms[i];
+        let modeurl = this.resultData[al][0].pkl;
+        let feature1 = this.featureChooseData.trainFea;
+        let feature = feature1.join(",");
+        let pkl = this.resultData[al][0].pkl;
+        let evaluate = this.resultData[al][0].evaluate;
+        let picture = this.resultData[al][0].picture;
+        let tablename = this.tableName;
+        let model = {
+         modelname, diseasename, publisher, remark, uid, modeurl, feature
+        };
+        let modelResult = {
+          modelname, evaluate, picture, pkl, uid, al, tablename, diseasename
+         };
+         let requestData = Object.assign({}, modelResult, model);
+         console.log(requestData);
+
+         try {
+           let response = await postRequest('/Model/modelResult', requestData);
+           if (response) {
+             console.log(`模型${i}上传成功`);
+           }
+         } catch (error) {
+           console.error(`模型${i}上传失败：`, error);
+         }
+      }
+
+      // 所有模型保存完成后的操作
       this.$alert('模型已保存', '', {
         confirmButtonText: '确定',
         callback: action => {
@@ -365,7 +408,7 @@ export default {
           });
         }
       });
-      this.$router.replace('/modelTrain')
+      this.$router.replace('/modelTrain');
     },
 
     downloadPDF() {
@@ -387,6 +430,53 @@ export default {
         pdf.save('download.pdf');
       });
     },
+    convertToCSV(data) {
+      const csvRows = [];
+      const headers = Object.keys(data[0]);
+      // 添加表头
+      csvRows.push(headers.join(','));
+      // 添加数据行
+      for (const row of data) {
+        const values = headers.map(header => {
+          const escaped = ('' + row[header]).replace(/"/g, '\\"');
+          return `"${escaped}"`;
+        });
+        csvRows.push(values.join(','));
+      }
+
+      // 将CSV行连接成CSV字符串
+      return csvRows.join('\n');
+    },
+    downloadCSV() {
+      let tableName = ""
+      if(this.electionAl === 'RF'){
+        tableName = 'rf_test_data'
+      }else if(this.electionAl === 'DT'){
+        tableName = 'dt_test_data'
+      }
+      getRequest(`/Model/getInfoByTableName/${tableName}`).then(res => {
+        const csvString = this.convertToCSV(res.data);
+        const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', 'data.csv');
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      })
+
+    },
+
+    getNumber(){
+      getRequest(`/Model/getNumber/${this.tableName}`).then(
+          res => {
+            this.tableData1[0].totalSamples = res[0]
+            this.tableData1[0].positiveSamples = res[1]
+          }
+      )
+    }
 
   },
 
