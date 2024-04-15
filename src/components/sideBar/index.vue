@@ -14,30 +14,17 @@
             <i class="el-icon-box"></i>
             <span style="font-size:20px">多病种疾病风险预测工具软件</span></span
           >
-          <!--            <template slot="title">当前服务器：</template>-->
-          <el-menu-item index="2" style="float: right" @click="LogOut"
-            ><i class="el-icon-close"></i>退出登录</el-menu-item
-          >
-          <span  index="3" style="float: right;color:#fff"
-            ><i class="el-icon-user"></i>欢迎你，{{LoginUserName}}</span
-          >
-          <!-- <el-menu-item index="4" style="float: right">
-            <span @click="openDialog()">软件介绍</span>
-            <i class="el-icon-question"></i>
-            <el-dialog
-            title="软件介绍"
-            :visible="describVision"
-            width="50%"
-            @close="closedialog()"
-            @closed="closedialog()">
-              <p style="line-height: 30px;">{{description1}}</p>
-              <p style="line-height: 30px;">{{description2}}</p>
-              <img src="@/assets/description.jpg" alt="软件流程图" width="100%">
-            </el-dialog>
-          </el-menu-item> -->
-          <!--          <el-menu-item index="3" disabled>消息中心</el-menu-item>-->
-          <!--          <el-menu-item index="4"><a href="https://www.ele.me" target="_blank">订单管理</a></el-menu-item>-->
+
+          <el-dropdown style="float: right;margin-right: 30px">
+            <span  class="el-dropdown-link" style="float: right;color:#fff;font-size: 15px"><i class="el-icon-user"></i>欢迎你，{{LoginUserName}}</span><i style="color: #fff" class="el-icon-arrow-down el-icon--right"></i>
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item>个人信息</el-dropdown-item>
+              <el-dropdown-item>修改密码</el-dropdown-item>
+              <el-dropdown-item @click.native="LogOut">退出登录</el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
         </el-menu>
+
       </el-header>
       <el-container>
         <el-aside width="200px" class="side">
@@ -200,4 +187,12 @@ export default {
   margin-left: 40px;
 }
 
+
+.el-dropdown-link {
+  cursor: pointer;
+  color: #409EFF;
+}
+.el-icon-arrow-down {
+  font-size: 12px;
+}
 </style>

@@ -72,7 +72,7 @@
           <div
               style="margin-top: 20px"
           >
-            <div style="height: calc(100vh - 620px);overflow-y: scroll">
+            <div v-if="isHaveHis" style="height: calc(100vh - 620px);overflow-y: scroll">
               <div v-for="(feature, index) in selectedAlgorithmFeatures" :key="index"
                    style="margin-bottom: 10px;">
                 <label style="display: block">{{  getChName(feature.name) }}: </label>
@@ -86,6 +86,14 @@
                   <el-input @blur="checkRange(feature)" @keydown.enter.native="onEnterKey"  @keydown="validateInput($event)" :disabled="disabled" v-model="feature.value"  style="width: 70%" v-validate-number/>
                   <span>{{getRangeByFeature(feature.name)}}</span>
                 </template>
+                <span  v-if="!isNumeric(feature.value)" style="color: red;margin-left: 5px">只能输入数字!</span>
+              </div>
+            </div>
+            <div v-else style="height: calc(100vh - 620px);overflow-y: scroll">
+              <div v-for="(feature, index) in selectedAlgorithmFeatures" :key="index"
+                   style="margin-bottom: 10px;">
+                <label style="display: block">{{feature.name }}:</label>
+                  <el-input @blur="checkRange(feature)" @keydown.enter.native="onEnterKey"  @keydown="validateInput($event)" :disabled="disabled" v-model="feature.value"  style="width: 70%" v-validate-number/>
                 <span  v-if="!isNumeric(feature.value)" style="color: red;margin-left: 5px">只能输入数字!</span>
               </div>
             </div>
