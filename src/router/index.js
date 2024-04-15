@@ -51,7 +51,7 @@ const routes = [
       {
         path: "/modelTrain",
         name: "ModelTrain",
-        component: () => import("@/components/modeTrain/createTask.vue"),
+        component: () => import("@/components/modeTrain/dataChoose.vue"),
       },
       {
         path: "/dataChoose",
@@ -75,10 +75,11 @@ const routes = [
       },
       //   模型训练结束
       //   疾病预测开始
+
       {
-        path: "/diseasePre",
-        name: "diseasePre",
-        component: () => import("@/components/diseasePrediction/diseasePre.vue"),
+        path: "/diseasePre_new",
+        name: "diseasePre_new",
+        component: () => import("@/components/diseasePrediction/diseasePre_new.vue"),
       },
       {
         path: "/predictionInfo",

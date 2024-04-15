@@ -3,8 +3,7 @@
   <div>
     <div style="border-bottom: #868585 solid 1px; padding-bottom: 10px">
       <el-steps :active="active">
-        <el-step title="任务信息" icon="el-icon-edit"></el-step>
-        <el-step title="选择数据" icon="el-icon-upload"></el-step>
+        <el-step title="基本信息" icon="el-icon-edit"></el-step>
         <el-step title="特征选择" icon="el-icon-picture"></el-step>
         <el-step title="算法选择" icon="el-icon-picture"></el-step>
         <el-step title="运算结果" icon="el-icon-picture"></el-step>
@@ -64,33 +63,33 @@
             <!--  结果图  -->
               <div style="text-align: center;">
                 <h3 style="margin: 10px;">PR曲线</h3>
-                <el-tag style="margin: 5px 10px;">说明:横轴是召回率，纵轴器精确率;曲线上的一个点代表着在某一阈值下，
+                <div class="shuoming" style="margin: 5px 10px;">说明:横轴是召回率，纵轴器精确率;曲线上的一个点代表着在某一阈值下，
                   模型将大于该阈值的结果判定为正样本，将低于该阈值的样本判定为负样本，通过阈值的变动而绘制出PR曲线，
-                  所以PR曲线综合考虑了不同阈值下的召回率与精确率。</el-tag>
+                  所以PR曲线综合考虑了不同阈值下的召回率与精确率。</div>
                 <img :src="require(`@/assets/${dynamicVariable}/precision_recall_curve.png`)" alt="Image">
               </div>
 
               <div style="text-align: center;">
                 <h3 style="margin: 10px;">ROC曲线</h3>
-                <el-tag style="margin: 5px 10px;">说明:
+                <div class="shuoming" style="margin: 5px 10px;">说明:
                   ROC（Receiver Operating Characteristic）曲线是一种用于评估二元分类器性能的图形工具。
-                  它显示了在不同阈值下真正例率（True Positive Rate，TPR）与假正例率（False Positive Rate，FPR）之间的关系。</el-tag>
+                  它显示了在不同阈值下真正例率（True Positive Rate，TPR）与假正例率（False Positive Rate，FPR）之间的关系。</div>
                 <img :src="require(`@/assets/${dynamicVariable}/roc_curve.png`)" alt="Image">
               </div>
 
               <div style="text-align: center;">
                 <h3 style="margin: 10px;">混淆矩阵</h3>
-                <el-tag style="margin: 5px 10px;">说明:
+                <div class="shuoming" style="margin: 5px 10px;">说明:
                   混淆矩阵（Confusion Matrix）是一种用于评估分类模型性能的表格，特别是在监督学习中用于评估分类任务的结果。
-                  它将模型的预测结果与真实结果进行比较，从而提供了对分类器性能的直观认识。</el-tag>
-                <img :src="require(`@/assets/${dynamicVariable}/confusion_matrix.png`)" alt="Image">
+                  它将模型的预测结果与真实结果进行比较，从而提供了对分类器性能的直观认识。</div>
+                <img  :src="require(`@/assets/${dynamicVariable}/confusion_matrix.png`)" alt="Image">
               </div>
 
               <div style="text-align: center;">
                 <h3 style="margin: 10px;">特征重要度</h3>
-                <el-tag style="margin: 5px 10px;">说明:
+                <div class="shuoming"  style="margin: 5px 10px;">说明:
                   特征重要度（Feature Importance）是在机器学习领域中用于衡量模型中各个特征对于预测结果的贡献程度的指标。
-                  在训练完模型之后，特征重要度可以帮助我们理解模型是如何做出预测决策的，以及哪些特征对于模型的性能起到了关键作用。</el-tag>
+                  在训练完模型之后，特征重要度可以帮助我们理解模型是如何做出预测决策的，以及哪些特征对于模型的性能起到了关键作用。</div>
                 <img :src="require(`@/assets/${dynamicVariable}/feature_importance.png`)" alt="Image">
               </div>
             </div>
@@ -192,7 +191,7 @@ export default {
       uid:localStorage.getItem("uid")
           ? parseInt(localStorage.getItem("uid"))
           : 0,
-      active:5,
+      active:4,
       sequence: 1,
       tableData1: [{
         modelname: '',
@@ -484,6 +483,12 @@ export default {
 </script>
 
 <style scoped>
+
+.shuoming{
+  background-color: rgb(236,245,255);
+  color: rgb(64,158,255);
+  border-radius: 20px;
+}
 .resultShow {
   display: flex;
   width: 100%;

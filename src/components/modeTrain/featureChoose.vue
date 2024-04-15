@@ -3,8 +3,7 @@
   <div>
     <div style="border-bottom: #868585 solid 1px; padding-bottom: 10px">
       <el-steps :active="active">
-        <el-step title="任务信息" icon="el-icon-edit"></el-step>
-        <el-step title="选择数据" icon="el-icon-upload"></el-step>
+        <el-step title="基本信息" icon="el-icon-edit"></el-step>
         <el-step title="特征选择" icon="el-icon-picture"></el-step>
         <el-step title="算法选择" icon="el-icon-picture"></el-step>
         <el-step title="运算结果" icon="el-icon-picture"></el-step>
@@ -21,11 +20,17 @@
             <span class="lineStyle">▍</span>
             <span class="featureTitle">选择作为标签的特征(因变量)：</span>
             <span style="">(请先选择因变量，才可进行自变量的选择)</span>
+            <span style="margin-left: 10px;font-weight: bolder;">特征搜索：</span>
+            <el-input style="width: 10%;display: inline-block;margin-left: 2px" placeholder="请输入想要搜索的特征名"
+            v-model="keyFea"></el-input>
+            <el-button type="primary" style="margin-left: 5px" @click="seechFea">搜索</el-button>
+            <span style="font-weight: lighter;color: #9d9b9b">(搜索到的特征将被置于第一个特征的位置)</span>
           </div>
           <div class="left-align" style="margin-top: 20px;display: flex; flex-wrap: wrap;">
             <el-radio-group v-model="target" >
               <el-radio v-for="feature in fea" :key="feature" :label="feature" style="display: inline-block;" >
-                <span style="width: 260px; height: 20px; display: inline-block; line-height: 20px;">{{ feature }}</span>
+                <span style="width: 240px; height: 20px; display: inline-block; line-height: 20px;
+ overflow: hidden; white-space: nowrap; text-overflow: ellipsis;" :title="feature">{{ feature }}</span>
                 <el-progress :percentage="featuresMissingRate[feature]"
                              :format="format"
                              :color="getProgressStatus(featuresMissingRate[feature])"
@@ -38,12 +43,18 @@
          <span class="lineStyle">▍</span
          ><span class="featureTitle">参与训练的特征(自变量):</span>
             <el-checkbox style="margin-left: 50px" v-model="selectAll" @change="handleSelectAll" :disabled="target === ''"/> 全选
+            <span style="margin-left: 10px;font-weight: bolder;">特征搜索：</span>
+            <el-input style="width: 10%;display: inline-block;margin-left: 2px" placeholder="请输入想要搜索的特征名"
+                      v-model="searchTF"></el-input>
+            <el-button type="primary" style="margin-left: 5px" @click="seechTrainFea">搜索</el-button>
+            <span style="font-weight: lighter;color: #9d9b9b">(搜索到的特征将被置于第一个特征的位置)</span>
           </div>
 
           <div class="left-align" style="margin-top: 20px;display: flex; flex-wrap: wrap;">
             <el-checkbox-group v-model="trainFea">
               <el-checkbox  v-for="feature in availableFeatures" :key="feature"  :label="feature" :disabled="target === ''" style="display: inline-block;">
-                <span style="width: 260px; height: 20px; display: inline-block; line-height: 20px;">{{ feature }}</span>
+                <span style="width: 240px; height: 20px; display: inline-block; line-height: 20px;
+                  overflow: hidden; white-space: nowrap; text-overflow: ellipsis;" :title="feature">{{ feature }}</span>
                 <el-progress   :percentage="featuresMissingRate[feature]"
                                :format="format"
                                :color="getProgressStatus(featuresMissingRate[feature])"
@@ -89,18 +100,21 @@ export default {
       return this.$store.state.tableName
     },
 
-    fea() {
-      return this.$store.state.fea
-    }
+    // fea() {
+    //   return this.$store.state.fea
+    // }
 
   },
   data() {
     return {
-      active:3,
+      active:2,
       featuresMissingRate: {},
       target: "",
       trainFea: [],
       selectAll: false, // 全选状态
+      fea:[],
+      keyFea:'',
+      searchTF:''
     }
   },
 
@@ -112,9 +126,15 @@ export default {
   },
 
   created() {
-    this.getMissingRates()
+    this.getFea(this.tableName)
   },
   methods: {
+    getFea(tableName){
+      getRequest(`/Model/getFeaByTableName/${tableName}`).then(res => {
+        this.fea = res
+      })
+      this.getMissingRates(this.tableName)
+    },
     toAlChoose() {
       const dataToUpdate = {
         target: this.target,
@@ -168,12 +188,36 @@ export default {
     },
 
     format(percentage) {
-      return percentage === 100 ? '满' : `${percentage}%`;
+      return percentage === 100 ? `${percentage}%` : `${percentage}%`;
     },
 
     test(){
       console.log(this.featuresMissingRate['PCT'])
     },
+
+    seechFea(){
+      let index = this.fea.indexOf(this.keyFea);
+
+// 如果关键字存在于数组中，则将其移动到数组的第一个位置
+      if (index !== -1) {
+        this.fea.unshift(this.fea.splice(index, 1)[0]);
+      }else {
+        this.$message('没有找到此特征');
+      }
+    },
+    seechTrainFea(){
+      console.log(this.availableFeatures)
+      let index = this.fea.indexOf(this.searchTF);
+      console.log(index)
+      if(this.searchTF === this.target){
+        this.$message('没有找到此特征');
+      }else if (index !== -1) {
+        this.fea.unshift(this.fea.splice(index, 1)[0]);
+      }else {
+        this.$message('没有找到此特征');
+      }
+    }
+
   },
 }
 </script>

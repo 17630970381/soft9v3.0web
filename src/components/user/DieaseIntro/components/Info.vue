@@ -57,16 +57,8 @@
         width="30%"
         :before-close="resetForm">
       <el-form ref="form" :model="form" label-width="100px">
-        <el-form-item label="疾病">
-          <el-select v-model="form.name" placeholder="请选择疾病">
-            <el-option
-                v-for="disease in diseaseOptions"
-                :key="disease.value"
-                :label="disease.label"
-                :value="disease.value"
-            ></el-option>
-            <el-option label="其他" value="其他"></el-option>
-          </el-select>
+        <el-form-item label="中文名">
+          <el-input v-model="form.name" placeholder="请输入其他疾病名称"></el-input>
         </el-form-item>
 
         <!-- 其他疾病输入框 -->
@@ -328,11 +320,12 @@ export default {
           }
         })
         this.dialogVisible = false
-        this.init();
+
         diseasePost().then((res) => {
           this.diseaseList = res;
         });
         this.resetForm()
+        this.init()
       }
 
     }

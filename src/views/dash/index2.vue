@@ -2,28 +2,58 @@
 <div>
   <!-- 统计总数  -->
   <div class="topStatistic">
-    <el-card class="top_statistic_card">
-      <el-card class="statistic_item">
-        <div class="text_place">
-          <i class="el-icon-s-grid"></i> 专病集个数:{{ topData.specialityCount }}
-        </div>
-      </el-card>
-      <el-card class="statistic_item">
-        <div class="text_place">
-          <i class="el-icon-s-data"></i> 样本总量:{{ topData.sampleCount }}
-        </div>
-      </el-card>
-      <el-card class="statistic_item">
-        <div class="text_place">
-          <i class="el-icon-time"></i> 起始时间:<p></p>{{ topData.startTime }}
-        </div>
-      </el-card>
-      <el-card class="statistic_item">
-        <div class="text_place">
-          <i class="el-icon-s-claim"></i> 模型总数:{{ topData.modelCount }}
-        </div>
-      </el-card>
-    </el-card>
+    <div class="topBigDiv">
+      <div class="left">
+        <el-card class="card">
+          <div slot="header" class="clearfix">
+            <span class="lineStyle">▍</span><span>快捷入口</span>
+          </div>
+          <div class="quickEntryBox">
+            <div v-for="(item, index) in quickEntry" :key="index">
+              <div class="singleBox" @click="quickLink(index)">
+                <img
+                    :src="item.img"
+                    class="imgStyle"
+                    style="border-radius: 15px"
+                />
+                <div style="text-align: center">{{ item.title }}</div>
+              </div>
+            </div>
+          </div>
+        </el-card>
+      </div>
+
+      <div class="right">
+        <el-card class="card" :body-style="{ padding: '0px', paddingLeft: '20px', paddingRight: '20px', display: 'flex', flexWrap: 'wrap' }">
+          <div slot="header" class="clearfix">
+            <span class="lineStyle">▍</span><span>统计信息</span>
+          </div>
+
+          <div class="cardGroup">
+            <el-card class="statistic_item">
+              <div class="text_place">
+                <i class="el-icon-s-grid"></i> 专病集个数:{{ topData.specialityCount }}
+              </div>
+            </el-card>
+            <el-card class="statistic_item">
+              <div class="text_place">
+                <i class="el-icon-s-data"></i> 样本总量:{{ topData.sampleCount }}
+              </div>
+            </el-card>
+
+            <el-card class="statistic_item">
+              <div class="text_place">
+                <i class="el-icon-s-claim"></i> 模型总数:{{ topData.modelCount }}
+              </div>
+            </el-card>
+          </div>
+        </el-card>
+
+      </div>
+    </div>
+<!--    <el-card class="top_statistic_card">-->
+<!--      -->
+<!--    </el-card>-->
   </div>
   <!-- 三个表 -->
   <div class="midStatistic">
@@ -104,6 +134,34 @@ export default {
   components: {Bar, firstGraph,firstMidMid,firstMidRight,firstBottom,Sprit},
   data() {
     return{
+      quickEntry: [
+        {
+          title: "健康资讯",
+          img: require("../../assets/JKZX.png"),
+          router: "/DieaseIntro",
+        },
+        {
+          title: "数据管理",
+          img: require("../../assets/lianxi.png"),
+          router: "/dataManage",
+        },
+
+        {
+          title: "模型训练",
+          img: require("../../assets/modelTrain.png"),
+          router: "/modelTrain",
+        },
+        {
+          title: "任务管理",
+          img: require("../../assets/singlePredict.png"),
+          router: "/modelManage",
+        },
+        {
+          title: "疾病预测",
+          img: require("../../assets/batchPredict.png"),
+          router: "/diseasePre_new",
+        },
+      ],
       topData: {
         specialityCount: '',
         sampleCount: '',
@@ -243,7 +301,10 @@ export default {
             }
           }
       )
-    }
+    },
+    quickLink(index) {
+      this.$router.push(this.quickEntry[index].router);
+    },
   },
 }
 </script>
@@ -253,7 +314,7 @@ export default {
 <style scoped>
 .topBigDiv {
   box-sizing: border-box;
-  height: 30vh;
+  height: 20vh;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -367,7 +428,7 @@ export default {
 
   .el-card {
     display: inline-block;
-    width: 21%;
+    width: 15%;
     height: 100px;
     margin: 1%;
     padding: 10px;
@@ -419,16 +480,30 @@ export default {
 }
 
 .statistic_item {
-  position: relative;
+  height:120px;
+  //position: relative;
+  //width: 300px;
+}
+
+.cardGroup{
+  width: 100%;
+  height: 15vh;
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  column-gap: 30px;
+  justify-content: space-evenly;
+  align-content: center;
 }
 
 .statistic_item .text_place {
-  position: absolute;
-  top: 20px;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  position: relative;
+  //position: absolute;
+  //top: 20px;
+  //left: 50%;
+  //transform: translate(-50%, -50%);
+  //position: relative;
+  line-height: 100px;
   font-size: 20px;
   font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
 }
+
 </style>

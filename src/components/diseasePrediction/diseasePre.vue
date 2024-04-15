@@ -270,6 +270,7 @@ export default {
       this.selectedAlgorithmFeatures = selectedAlgorithm
           ? selectedAlgorithm.features.map(name => ({ name, value: '' }))
           : [];
+      console.log(this.selectedAlgorithmFeatures)
     },
 
     //原parameter

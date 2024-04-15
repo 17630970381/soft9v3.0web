@@ -62,19 +62,19 @@
               <i class="el-icon-menu"></i>
               <span slot="title">数据管理</span>
             </el-menu-item>
-            <el-menu-item index="/tableManage">
-              <i class="el-icon-menu"></i>
-              <span slot="title">字段管理</span>
-            </el-menu-item>
+<!--            <el-menu-item index="/tableManage">-->
+<!--              <i class="el-icon-menu"></i>-->
+<!--              <span slot="title">字段管理</span>-->
+<!--            </el-menu-item>-->
             <el-menu-item index="/modelTrain">
               <i class="el-icon-menu"></i>
               <span slot="title">模型训练</span>
             </el-menu-item>
             <el-menu-item index="/modelManage">
               <i class="el-icon-menu"></i>
-              <span slot="title">模型管理</span>
+              <span slot="title">任务管理</span>
             </el-menu-item>
-            <el-menu-item index="/predictionInfo">
+            <el-menu-item index="/diseasePre_new">
               <i class="el-icon-menu"></i>
               <span slot="title">疾病预测</span>
             </el-menu-item>

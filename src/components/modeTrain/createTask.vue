@@ -13,16 +13,16 @@
 
   <!-- 任务信息 -->
   <div  style="margin-top: 200px;"  class="form-container">
-    <el-form :model="formData" label-width="80px" style="width: 70%;margin-top: 10px" >
+    <el-form :rules="rules" :model="formData" label-width="100px" style="width: 70%;margin-top: 10px" >
       <div class="form-row">
-        <el-form-item label="模型名称:" prop="taskName" >
+        <el-form-item prop="modelname" label="模型名称:"  >
           <el-input v-model="formData.modelname" style="width: 100%; font-size: 18px;"></el-input>
         </el-form-item>
         <el-form-item label="负责人:" prop="assignee">
           <el-input v-model="formData.assignee" disabled style="width: 100%; font-size: 18px;"></el-input>
         </el-form-item>
       </div>
-      <el-form-item label="所属疾病:" prop="disease">
+      <el-form-item  label="所属疾病:" prop="diseasename">
         <!-- 参与人员的表单项，可以根据需求选择合适的输入组件 -->
         <el-select v-model="formData.diseasename" placeholder="请选择疾病" style="width: 100%; font-size: 18px;">
           <el-option v-for="item in tableList" :key="item" :label="item" :value="item"></el-option>
@@ -63,7 +63,13 @@ export default {
       uid: sessionStorage.getItem("uid")
           ? parseInt(sessionStorage.getItem("uid"))
           : 0,
-      tableList:[]
+      tableList:[],
+      rules: {
+        modelname: [
+          { required: true, message: "请输入模型名称", trigger: "blur" },
+        ],
+        diseasename: [{ required: true, message: "请选择要训练的疾病种类", trigger: "blur" }],
+      },
     }
   },
   created() {
@@ -113,7 +119,7 @@ export default {
                 })
 
               }else {
-                this.$store.commit('taskToDataChoose',this.formData)
+                // this.$store.commit('taskToDataChoose',this.formData)
                 this.$router.replace('/dataChoose')
               }
 

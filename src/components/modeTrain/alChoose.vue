@@ -3,8 +3,7 @@
   <div>
     <div style="border-bottom: #868585 solid 1px; padding-bottom: 10px">
       <el-steps :active="active">
-        <el-step title="任务信息" icon="el-icon-edit"></el-step>
-        <el-step title="选择数据" icon="el-icon-upload"></el-step>
+        <el-step title="基本信息" icon="el-icon-edit"></el-step>
         <el-step title="特征选择" icon="el-icon-picture"></el-step>
         <el-step title="算法选择" icon="el-icon-picture"></el-step>
         <el-step title="运算结果" icon="el-icon-picture"></el-step>
@@ -104,7 +103,7 @@ export default {
   name: "alChoose",
   data() {
     return {
-      active:4,
+      active:3,
       algorithms: [],
       selectedAlgorithms: [],
       unSelectedAlgorithms: [],

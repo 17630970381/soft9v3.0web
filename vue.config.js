@@ -5,7 +5,7 @@ module.exports = defineConfig({
   lintOnSave: false,
 
   devServer: {
-    host: "localhost",
+    host: "10.16.49.224",
     port: 8080,
     // 代理配置
     proxy: {
