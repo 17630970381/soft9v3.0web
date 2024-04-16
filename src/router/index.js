@@ -37,6 +37,18 @@ const routes = [
     redirect: "/SoftwareIntro",
     component: SideBar,
     children: [
+      //个人中心
+      {
+        path: "/userCenter",
+        name: "userCenter",
+        component: () => import("@/components/userCenter/userCenter.vue"),
+      },
+      //修改密码
+      {
+        path: "/updatePassword",
+        name: "updatePassword",
+        component: () => import("@/components/userCenter/updatePassword.vue"),
+      },
       {
         path: "/dash",
         name: "dash",
@@ -153,46 +165,18 @@ const routes = [
         path: "/diseasePre",
         name: "diseasePre",
         component: () => import("@/components/diseasePrediction/diseasePre.vue"),
-      }
-    ],
-  },
-  {
-    path: "/UserSideBar",
-    name: "UserSideBar",
-    component: UserSideBar,
-    children: [
-      {
-        path: "Predict",
-        name: "Predict",
-        component: Predict,
       },
+      //日志管理
       {
-        path: "DieaseIntro",
-        name: "DieaseIntro",
-        component: DieaseIntro,
+        path: "/logManage",
+        name: "logManage",
+        component: () => import("@/components/logManage/logManage.vue"),
       },
+
     ],
   },
 
-  // {
-  //     path : '/metastasis',
-  //     name: 'metastasis',
-  //     component : metastasis
-  // },
-  // {
-  //     path:'/connectMining',
-  //     name:'connectMining',
-  //     component:connectMining,
-  // },{
-  //     path:'/dangePredict',
-  //     name:'dangePredict',
-  //     component:dangePredict,
-  // },
-  // {
-  //     path:'/importModel',
-  //     name:'importModel',
-  //     component:importModel,
-  // }
+
 ];
 
 const router = new VueRouter({

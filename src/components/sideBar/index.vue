@@ -18,13 +18,13 @@
           <el-dropdown style="float: right;margin-right: 30px">
             <span  class="el-dropdown-link" style="float: right;color:#fff;font-size: 15px"><i class="el-icon-user"></i>欢迎你，{{LoginUserName}}</span><i style="color: #fff" class="el-icon-arrow-down el-icon--right"></i>
             <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item>个人信息</el-dropdown-item>
-              <el-dropdown-item>修改密码</el-dropdown-item>
+              <el-dropdown-item @click.native="toUserCenter">个人信息</el-dropdown-item>
+              <el-dropdown-item @click.native="updatePass">修改密码</el-dropdown-item>
               <el-dropdown-item @click.native="LogOut">退出登录</el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
         </el-menu>
-
+<!--        <user-center @update-success="handleUpdateSuccess"></user-center>-->
       </el-header>
       <el-container>
         <el-aside width="200px" class="side">
@@ -40,35 +40,32 @@
               <i class="el-icon-menu"></i>
               <span slot="title">首页</span>
             </el-menu-item>
-
-            <el-menu-item index="/DieaseIntro">
-              <i class="el-icon-menu"></i>
-              <span slot="title">健康资讯</span>
-            </el-menu-item>
             <el-menu-item index="/dataManage">
               <i class="el-icon-menu"></i>
               <span slot="title">数据管理</span>
             </el-menu-item>
-<!--            <el-menu-item index="/tableManage">-->
-<!--              <i class="el-icon-menu"></i>-->
-<!--              <span slot="title">字段管理</span>-->
-<!--            </el-menu-item>-->
-            <el-menu-item index="/modelTrain">
+            <el-submenu index="2">
+              <template slot="title"><i class="el-icon-message"></i>任务管理</template>
+              <el-menu-item-group>
+                <el-menu-item index="/modelManage">
+                  <i class="el-icon-menu"></i>
+                  <span slot="title">历史任务管理</span>
+                </el-menu-item>
+                <el-menu-item index="/modelTrain">
+                  <i class="el-icon-menu"></i>
+                  <span slot="title">模型训练</span>
+                </el-menu-item>
+                <el-menu-item index="/diseasePre_new">
+                  <i class="el-icon-menu"></i>
+                  <span slot="title">模型调用</span>
+                </el-menu-item>
+              </el-menu-item-group>
+            </el-submenu>
+            <el-menu-item index="/logManage">
               <i class="el-icon-menu"></i>
-              <span slot="title">模型训练</span>
+              <span slot="title">日志管理</span>
             </el-menu-item>
-            <el-menu-item index="/modelManage">
-              <i class="el-icon-menu"></i>
-              <span slot="title">任务管理</span>
-            </el-menu-item>
-            <el-menu-item index="/diseasePre_new">
-              <i class="el-icon-menu"></i>
-              <span slot="title">疾病预测</span>
-            </el-menu-item>
-<!--            <el-menu-item index="/Batch">-->
-<!--              <i class="el-icon-menu"></i>-->
-<!--              <span slot="title">人群患病风险预测</span>-->
-<!--            </el-menu-item>-->
+
 
 
 
@@ -98,7 +95,12 @@
 
 <script>
 // import AppMain from "@/components/AppMain";
+import updatePassword from "@/components/userCenter/updatePassword.vue";
+import UpdatePassword from "@/components/userCenter/updatePassword.vue";
+import UserCenter from "@/components/userCenter/userCenter.vue";
+
 export default {
+  components: {UserCenter, UpdatePassword},
   // components: { AppMain },
   data() {
     return {
@@ -113,22 +115,23 @@ export default {
     this.LoginUserName = sessionStorage.getItem("user")
   },
   methods: {
+
+    handleUpdateSuccess() {
+      // 更新操作，例如重新获取数据等
+      this.LoginUserName = sessionStorage.getItem("user")
+    },
     LogOut(){
       sessionStorage.clear();
       this.LoginUserName = "";
       this.$router.replace("/")
+    },
+    toUserCenter(){
+      this.$router.replace("/userCenter")
+    },
+    updatePass(){
+      this.$router.replace("/updatePassword")
     }
-    // openDialog(){
-    //   this.describVision = true;
-    //   console.log("open",this.describVision)
-    // },
-    // handleOpen(key, keyPath) {
-    //   console.log(key, keyPath);
-    // },
-    // closedialog(){
-    //   this.describVision = false;
-    //   console.log('close',this.describVision)
-    // }
+
   },
 };
 </script>
