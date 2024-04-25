@@ -1,4 +1,4 @@
-<template>
+<template xmlns="http://www.w3.org/1999/html">
 <div>
 <div class="container">
   <div class="left">
@@ -27,6 +27,7 @@
     <div style="margin-left: 20px; " v-if="modelSelected !== ''">
       <el-button @click="Handle" >手动输入</el-button>
       <el-button @click="Histories" :disabled="!isHaveHis">历史数据</el-button>
+<!--      <el-button @click="test">test</el-button>-->
       <span v-if="!isHaveHis" style="color: #868585;font-size: 15px">(该任务所用参数不可调用历史数据)</span>
     </div>
     <div v-else style="display: flex;justify-content: center; align-items: center;">
@@ -83,7 +84,7 @@
                   </el-radio-group>
                 </template>
                 <template v-else>
-                  <el-input @blur="checkRange(feature)" @keydown.enter.native="onEnterKey"  @keydown="validateInput($event)" :disabled="disabled" v-model="feature.value"  style="width: 70%" v-validate-number/>
+                  <el-input  @keydown.enter.native="onEnterKey"  @keydown="validateInput($event)" :disabled="disabled" v-model="feature.value"  style="width: 70%" v-validate-number/>
                   <span>{{getRangeByFeature(feature.name)}}</span>
                 </template>
                 <span  v-if="!isNumeric(feature.value)" style="color: red;margin-left: 5px">只能输入数字!</span>
@@ -93,7 +94,7 @@
               <div v-for="(feature, index) in selectedAlgorithmFeatures" :key="index"
                    style="margin-bottom: 10px;">
                 <label style="display: block">{{feature.name }}:</label>
-                  <el-input @blur="checkRange(feature)" @keydown.enter.native="onEnterKey"  @keydown="validateInput($event)" :disabled="disabled" v-model="feature.value"  style="width: 70%" v-validate-number/>
+                  <el-input @keydown.enter.native="onEnterKey"  @keydown="validateInput($event)" :disabled="disabled" v-model="feature.value"  style="width: 70%" v-validate-number/>
                 <span  v-if="!isNumeric(feature.value)" style="color: red;margin-left: 5px">只能输入数字!</span>
               </div>
             </div>
@@ -106,45 +107,116 @@
             </div>
           </div>
         </div>
-        <div class="smallRight" style="display: flex; justify-content: center; align-items: center; height: calc(100vh - 620px)">
+        <div class="smallRight" style="height: calc(100vh - 620px);overflow-y: auto">
           <div v-if="predictionResult1.length > 0">
             <div v-if="modelDetail[0].diseasename === '多疾病' " class="smallRight">
-              <el-card style="text-align: center">
-                <div style="margin-bottom: 5px">该患者患有慢阻肺的概率为：{{ predictionResult1[0][modelSelected][0] }}</div>
-                <div style="margin-bottom: 5px"> 该患者患有糖尿病的概率为：{{ predictionResult1[0][modelSelected][1] }}</div>
+              <el-card>
+                <div style="margin-bottom: 5px">该患者患有慢阻肺的概率为：{{ (predictionResult1[0][modelSelected][0] * 100).toFixed(2) + '%' }}</div>
+                <div style="margin-bottom: 5px"> 该患者患有糖尿病的概率为：{{ (predictionResult1[0][modelSelected][1] * 100).toFixed(2) + '%' }}</div>
                 <div style="text-align: center" v-if="predictionResult1[0][modelSelected][0] > 0.8 ||predictionResult1[0][modelSelected][0] > 0.8 "> 请及时就医</div>
               </el-card>
             </div>
-            <div v-else class="smallRight">
-              <el-card  v-if="predictionResult[modelSelected] == '0' " style="text-align: center">
-                <div style="text-align: center;background: #00ff92">
-                  <h1 style="font-size: 30px">低风险</h1>
-                </div>
-                <div style="text-align: center">
-                  <h3 style="color: #303133">您患{{ modelDetail[0].diseasename }}的风险很低，请保持现有生活习惯。</h3>
-                </div>
-              </el-card>
-              <el-card v-if="predictionResult[modelSelected] == '1' " style="text-align: center">
-                <el-card :body-style="{ height:'260px',padding: '10px'}" id="highRiskCard" style="text-align: center">
-                  <!-- 卡片头 -->
-                  <div slot="header" id="cardHead">
-                    <i class="el-icon-warning"></i>
-                    <span >高风险</span>
-                  </div>
-                  <!-- 卡片内容 -->
-                  <div style="padding: 14px;text-align: center" id="cardContent"  >
-                    <div>
-                      <h3 style="color: #303133">您患{{ modelDetail[0].diseasename }}的风险很高</h3>
-                      <h3 style="color: #D80835">请尽快就医</h3>
-
-                    </div>
-                  </div>
-                </el-card>
-              </el-card>
+            <h1 v-else style="margin-left: 10px;margin-bottom: 10px">该患者患{{modelDetail[0].diseasename}}的概率为：{{(predictionResult[modelSelected] * 100).toFixed(2) + '%'}}</h1>
+            <div style="margin-left: 10px;overflow-y: auto">
+              <el-table
+                  :data="detailData"
+                  stripe
+                  :header-cell-style="{ backgroundColor: '#a8aaad', color: 'black', fontWeight: 'bold'}"
+                  style="width: 100%">
+                <el-table-column
+                    prop="feature"
+                    label="特征"
+                >
+                </el-table-column>
+                <el-table-column
+                    prop="importance"
+                    label="特征影响度">
+                </el-table-column>
+                <el-table-column
+                    prop="fpercentage"
+                    label="所选数据集前百分比">
+                </el-table-column>
+                <el-table-column
+                    prop="fvalue"
+                    label="前百分比平均值">
+                </el-table-column>
+                <el-table-column
+                    prop="bpercentage"
+                    label="所选数据集后百分比">
+                </el-table-column>
+                <el-table-column
+                    prop="bvalue"
+                    label="后百分比平均值">
+                </el-table-column>
+              </el-table>
             </div>
+            <div style="margin-top: 20px">
+              <div v-if="mergeData2.length > 0">
+                <h1 style="margin-left: 10px;margin-bottom: 10px;color: red;font-size: 20px" >异常值提醒!!：</h1>
+                <div  style="margin-left: 10px">
+                  <el-table
+                      :data="mergeData2"
+                      stripe
+                      :header-cell-style="{ backgroundColor: '#a8aaad', color: 'black', fontWeight: 'bold'}"
+                      style="width: 100%">
+                    <el-table-column
+                        prop="feature"
+                        label="特征"
+                    >
+                    </el-table-column>
+                    <el-table-column
+                        prop="value"
+                        label="当前值">
+                    </el-table-column>
+                    <el-table-column
+                        prop="fvalue"
+                        label="前百分比平均值">
+                    </el-table-column>
+                    <el-table-column
+                        prop="bvalue"
+                        label="后百分比平均值">
+                    </el-table-column>
+                    <el-table-column
+                        prop="warning"
+                        label="异常值提示">
+                    </el-table-column>
+                  </el-table>
+                </div>
+              </div>
+              <div v-else>
+                <h1 style="margin-left: 10px;margin-bottom: 10px" >该患者无异常指标</h1>
+              </div>
+            </div>
+<!--            <div v-else class="smallRight">-->
+<!--              <el-card  v-if="predictionResult[modelSelected] == '0' " style="text-align: center">-->
+<!--                <div style="text-align: center;background: #00ff92">-->
+<!--                  <h1 style="font-size: 30px">低风险</h1>-->
+<!--                </div>-->
+<!--                <div style="text-align: center">-->
+<!--                  <h3 style="color: #303133">您患{{ modelDetail[0].diseasename }}的风险很低，请保持现有生活习惯。</h3>-->
+<!--                </div>-->
+<!--              </el-card>-->
+<!--              <el-card v-if="predictionResult[modelSelected] == '1' " style="text-align: center">-->
+<!--                <el-card :body-style="{ height:'260px',padding: '10px'}" id="highRiskCard" style="text-align: center">-->
+<!--                  &lt;!&ndash; 卡片头 &ndash;&gt;-->
+<!--                  <div slot="header" id="cardHead">-->
+<!--                    <i class="el-icon-warning"></i>-->
+<!--                    <span >高风险</span>-->
+<!--                  </div>-->
+<!--                  &lt;!&ndash; 卡片内容 &ndash;&gt;-->
+<!--                  <div style="padding: 14px;text-align: center" id="cardContent"  >-->
+<!--                    <div>-->
+<!--                      <h3 style="color: #303133">您患{{ modelDetail[0].diseasename }}的风险很高</h3>-->
+<!--                      <h3 style="color: #D80835">请尽快就医</h3>-->
+
+<!--                    </div>-->
+<!--                  </div>-->
+<!--                </el-card>-->
+<!--              </el-card>-->
+<!--            </div>-->
           </div>
           <div v-else>
-            <el-card>
+            <el-card style="display: flex; justify-content: center; align-items: center; height: calc(100vh - 620px)">
               <h3>
                 预测结果将在此展示，请先输入左侧各参数的值，以此来进行预测
               </h3>
@@ -155,11 +227,13 @@
     </div>
 
     <!--  历史数据  -->
+
     <el-button :disabled="multipleSelection.length <= 0"
         style="margin-left: 20px;margin-top: 20px" v-if="modelSelected !== '' && isAuto && historyData.length >0" type="warning"
        @click="batchPrediction">批量预测</el-button>
     <el-button style="margin-left: 18px;margin-top: 20px" v-if="Result.length > 0"
                @click="resultShow">结果展示</el-button>
+
     <div style="width: 98%;margin-left: 20px;margin-top: 5px;height: calc(100vh - 250px);overflow: auto" v-if="modelSelected !== '' && isAuto"
          element-loading-text="正在获取数据，请稍后"
          element-loading-spinner="el-icon-loading"
@@ -222,7 +296,7 @@
     </div>
 
       <el-dialog title="结果展示" :visible.sync="dialogTableVisible" >
-        <el-button type="primary" style="margin-bottom: 10px" @click="downloadExcel">下载为csv</el-button>
+        <el-button type="primary" style="margin-bottom: 10px" @click="downloadExcel">下载数据</el-button>
         <div style="height: calc(100vh - 500px);overflow-y: auto">
           <el-table :data="mergeData"
                     :header-cell-style="{ backgroundColor: '#cecece', color: 'black', fontWeight: 'bold' }">
@@ -243,7 +317,6 @@
       </el-dialog>
   </div>
 </div>
-
 </div>
 
 </template>
@@ -273,7 +346,8 @@ Vue.directive('validate-number', {
 
 import {getRequest} from "@/utils/api";
 import {postRequest} from "@/api/user";
-
+import * as XLSX from 'xlsx'
+import FileSaver from 'file-saver';
 export default {
   name: "diseasePre_new",
   created() {
@@ -326,6 +400,9 @@ export default {
       searchKeyword: '',
       highlightedRowIndex: -1,// 用于标识高亮行的索引
       fileManage:[],
+      /*异常值显示*/
+      detailData:[],
+      mergeData2:[],
     }
   },
   watch: {
@@ -522,6 +599,11 @@ export default {
 
       // 只有当data.label只属于某个节点的children时才执行getRequest
       if (isChildLabelOnly) {
+        this.predictionResult1 = []
+        this.detailData = []
+        this.mergeData2 = []
+        this.alFlag = false
+        this.disabled = false
         this.modelSelected = data.label
         // 执行getRequest
         getRequest(`/modelResult/getModelResultAndModel/${this.modelSelected}`).then(res => {
@@ -615,8 +697,47 @@ export default {
             console.log(this.predictionResult[this.modelname])
 
           })
+
         }
       })
+      this.getDetailData()
+    },
+    getDetailData() {
+      getRequest(`/Detail/getAll/${this.modelDetail[0].modelname}`).then(res => {
+        this.detailData = res
+        console.log(this.detailData)
+        this.selectedAlgorithmFeatures.forEach((selectedFeature) => {
+          let detailItem = this.detailData.find(item => item.feature === selectedFeature.name);
+
+          if (detailItem) {
+
+
+            let fvalue = parseFloat(detailItem.fvalue);
+            let bvalue = parseFloat(detailItem.bvalue);
+            let value = parseFloat(selectedFeature.value);
+            if (!isNaN(fvalue) && !isNaN(bvalue) && !isNaN(value)){
+              let warning = "";
+              if (value > bvalue) {
+                warning = "该特征的值过高";
+              } else if (value < fvalue) {
+                warning = "该特征的值过低";
+              }
+
+              if (warning !== "") {
+                this.mergeData2.push({
+                  feature: selectedFeature.name,
+                  value: value,
+                  fvalue: fvalue,
+                  bvalue: bvalue,
+                  warning: warning
+                });
+              }
+            }
+
+          }
+        });
+      })
+
     },
     reuse(){
       const fieldArray = this.tableData[0].feature.split(",");
@@ -759,21 +880,43 @@ export default {
       console.log(this.mergeData);
     },
     downloadExcel() {
-      const header = ['Patient ID', 'Name', 'Sex', this.tag1, this.tag2];
-      const csvContent = [
-        header.join(','), // CSV 头部
-        ...this.mergeData.map(row => `${row.patientId},${row.name},${row.sexname},${row.values.join(',')}`)
-      ].join('\n');
+      const tag1 = this.tag1; // 获取当前的 tag1 值
+      const tag2 = this.tag2; // 获取当前的 tag2 值
+      const header = ['Patient ID', 'Name', 'Sex', tag1, tag2];
 
-      // 创建一个 Blob 对象
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const worksheet = XLSX.utils.json_to_sheet([
+        header,
+        ...this.mergeData.map((row) => [
+          row.patientId,
+          row.name,
+          row.sexname,
+          row.values[0], // Tag 1
+          row.values[1], // Tag 2
+        ]),
+      ]);
 
-      // 创建一个 a 标签用于下载
+
+      // 创建一个新的工作簿并添加工作表
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+
+      // 导出工作簿为二进制字符串
+      const excelBuffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+
+      // 创建一个 Blob 对象，用于下载
+      const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+      // 创建一个临时的下载链接
       const link = document.createElement('a');
-      link.href = window.URL.createObjectURL(blob);
-      link.download = 'result.csv'; // 下载文件名
+      link.href = URL.createObjectURL(blob);
+      link.download = 'result.xlsx'; // 下载的文件名
+
+      // 触发下载
+      document.body.appendChild(link);
       link.click();
 
+      // 清理DOM
+      document.body.removeChild(link);
     },
 
     conPre(){
@@ -806,6 +949,9 @@ export default {
         return 'warning-row';
       }
       return ''
+    },
+    test(){
+      console.log(this.mergeData)
     }
 
   }
@@ -845,12 +991,12 @@ export default {
 
 }
 .smallLft {
-  flex: 50%;
+  flex: 40%;
   border-right: #cecbcb 1px solid;
 }
 
 .smallRight {
-  flex: 50%;
+  flex: 60%;
 }
 
 /* 根据高亮行的索引给表格中的第一行添加特定样式 */

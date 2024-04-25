@@ -106,6 +106,6 @@ export default {
 <style scoped>
 #firstGraph {
   height: 400px;
-  width: 500px;
+  width: 350px;
 }
 </style>

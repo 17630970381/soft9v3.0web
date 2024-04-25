@@ -65,7 +65,7 @@
 <!--            <el-option v-for="item in diagName" :key="item" :label="item" :value="item"></el-option>-->
 <!--          </el-select>-->
         </div>
-        <div id="chartBox" style="height: 400px;width: 500px;" v-if="charBoxVisiable">
+        <div id="chartBox" style="height: 400px;width: 400px;" v-if="charBoxVisiable">
           <firstGraph style="margin-left: 50px" :diseaName="diseaseName" :diagName="diagName" :graphdata="series"></firstGraph>
         </div>
       </el-card>
@@ -73,7 +73,7 @@
         <div slot="header" class="clearfix">
           <span class="lineStyle">▍</span><span>疾病占比</span>
         </div>
-        <div id="chartBox" style="height: 400px;width: 500px;" v-if="charBoxVisiable2">
+        <div id="chartBox" style="height: 400px;width: 400px;" v-if="charBoxVisiable2">
           <firstMidMid style="margin-left: 80px" :midMid="midMid">
           </firstMidMid>
         </div>
@@ -86,7 +86,7 @@
             </el-option>
           </el-select>
         </div>
-          <div id="chartBox" style="height: 400px;width: 550px;" v-loading="fill_rate_loading" element-loading-text="后台加载中">
+          <div id="chartBox" style="height: 400px;width: 400px;" v-loading="fill_rate_loading" element-loading-text="后台加载中">
             <Sprit  style="margin-left: 90px" v-if="this.sprit_names.length !==0" :sprit_names="sprit_names" :sprit_values="sprit_values" :height="400" :width="550" :title="table_value">
             </Sprit>
         </div>
@@ -104,17 +104,17 @@
 <!--      </div>-->
 <!--    </el-card>-->
 <!--  </div>-->
-  <div class="bottomStatistic">
-    <el-card class="bottom_statistic_card">
-      <div slot="header" class="clearfix">
-        <span class="lineStyle">▍</span><span>正负样本占比</span>
-      </div>
-      <div id="chartBox">
-        <Bar   v-if="this.bar_x.length !==0 && this.bar_pos.length!==0 && this.bar_neg.length!=0" style="height: 400px;width: 1400px;margin-left: 350px" :bar_x="bar_x" :bar_neg="bar_neg" :bar_pos="bar_pos">
-        </Bar>
-      </div>
-    </el-card>
-  </div>
+<!--  <div class="bottomStatistic">-->
+<!--    <el-card class="bottom_statistic_card">-->
+<!--      <div slot="header" class="clearfix">-->
+<!--        <span class="lineStyle">▍</span><span>正负样本占比</span>-->
+<!--      </div>-->
+<!--      <div id="chartBox">-->
+<!--        <Bar   v-if="this.bar_x.length !==0 && this.bar_pos.length!==0 && this.bar_neg.length!=0" style="height: 400px;width: 1400px;margin-left: 350px" :bar_x="bar_x" :bar_neg="bar_neg" :bar_pos="bar_pos">-->
+<!--        </Bar>-->
+<!--      </div>-->
+<!--    </el-card>-->
+<!--  </div>-->
 
 </div>
 </template>
@@ -135,15 +135,12 @@ export default {
   data() {
     return{
       quickEntry: [
-        {
-          title: "健康资讯",
-          img: require("../../assets/JKZX.png"),
-          router: "/DieaseIntro",
-        },
+
         {
           title: "数据管理",
           img: require("../../assets/lianxi.png"),
           router: "/dataManage",
+
         },
 
         {
@@ -157,7 +154,7 @@ export default {
           router: "/modelManage",
         },
         {
-          title: "疾病预测",
+          title: "历史任务调用",
           img: require("../../assets/batchPredict.png"),
           router: "/diseasePre_new",
         },
@@ -284,23 +281,23 @@ export default {
           }
       );
 
-      getRequest("merge/get_pos_neg").then(
-          (res) => {
-            if (res.code == 200) {
-              this.bar_x=Object.keys(res.data);
-              let array = Object.values(res.data);
-              for (let index = 0; index < array.length; index++) {
-                const element = array[index];
-                this.bar_neg.push(element.neg);
-                this.bar_pos.push(element.pos);
-                console.log(element.pos)
-              }
-            }
-            else {
-              this.$message.error("获取数据失败");
-            }
-          }
-      )
+      // getRequest("merge/get_pos_neg").then(
+      //     (res) => {
+      //       if (res.code == 200) {
+      //         this.bar_x=Object.keys(res.data);
+      //         let array = Object.values(res.data);
+      //         for (let index = 0; index < array.length; index++) {
+      //           const element = array[index];
+      //           this.bar_neg.push(element.neg);
+      //           this.bar_pos.push(element.pos);
+      //           console.log(element.pos)
+      //         }
+      //       }
+      //       else {
+      //         this.$message.error("获取数据失败");
+      //       }
+      //     }
+      // )
     },
     quickLink(index) {
       this.$router.push(this.quickEntry[index].router);
@@ -314,7 +311,7 @@ export default {
 <style scoped>
 .topBigDiv {
   box-sizing: border-box;
-  height: 20vh;
+  height: 250px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -441,6 +438,7 @@ export default {
 
 .midStatistic {
   width: 100%;
+  height: 560px;
 }
 
 .mid_statistic_card {
@@ -487,7 +485,7 @@ export default {
 
 .cardGroup{
   width: 100%;
-  height: 15vh;
+  height: 180px;
   display: grid;
   grid-template-columns: repeat(3,1fr);
   column-gap: 30px;

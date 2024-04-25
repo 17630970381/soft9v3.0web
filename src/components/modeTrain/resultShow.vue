@@ -10,7 +10,11 @@
       </el-steps>
     </div>
 
-    <div class="resultShow">
+    <div element-loading-text="正在保存模型，请稍后"
+         element-loading-spinner="el-icon-loading"
+         element-loading-background="rgba(0, 0, 0, 0.8)"
+         v-loading="saveLoding"
+         class="resultShow">
     <!--  三个选择按钮    -->
       <div class="small-div left">
         <el-button style="margin-top: 30px;margin-left: 9px;width: 130px"
@@ -18,11 +22,12 @@
                     @click="modelEvaluation">
           模型评估
         </el-button>
-        <el-button style="margin-top: 20px;width: 130px"  type="primary"
-                    @click="modelShow">
-          模型演示
-        </el-button>
+<!--        <el-button style="margin-top: 20px;width: 130px"  type="primary"-->
+<!--                    @click="modelShow">-->
+<!--          模型演示-->
+<!--        </el-button>-->
         <el-button style="margin-top: 20px;width: 130px"  type="primary"  @click="saveModels()">保存模型</el-button>
+<!--        <el-button style="margin-top: 20px;width: 130px"  type="primary"  @click="test">test</el-button>-->
       </div>
     <!--  主体展示     -->
       <div class="small-div right">
@@ -39,7 +44,7 @@
               <h1 style="margin: 20px 20px 20px 20px; font-size: 25px;display: inline-block">模型效果评价</h1>
               <div>
                 <el-button style="margin-top: 20px;margin-right: 10px; width: 100px"  @click="downloadPDF" type="primary">下载报告</el-button>
-                <el-button style="margin-top: 20px;margin-right: 30px;  width: 120px"  @click="downloadCSV" type="primary">下载测试数据</el-button>
+                <el-button style="margin-top: 20px;margin-right: 30px;  width: 120px"  @click="downloadCSV" type="primary">下载结果数据</el-button>
               </div>
             </div>
             <div style="margin-top: 10px">
@@ -95,32 +100,32 @@
             </div>
         </div>
         <!--    模型演示    -->
-        <div v-if="sequence === 2" element-loading-text="正在进行预测，请稍后"
-             element-loading-spinner="el-icon-loading"
-             element-loading-background="rgba(0, 0, 0, 0.8)"
-             v-loading="loading2">
-          <div style="margin-left: 20px;margin-top: 20px">
-            <span style="display: block;margin-bottom: 5px;font-size: 30px;">当前所选算法： {{electionAl}}</span>
-            <div v-for="(feature, index) in selectedAlgorithmFeatures" :key="index"
-                 style="margin-bottom: 10px;display: flex; flex-direction: column;">
-              <label>{{ feature.name }}: </label>
-              <el-input v-model="feature.value"  v-validate-number style="width: 50%"/>
-            </div>
-            <el-button @click="promptTest" type="success">提交数据，开始预测</el-button>
-          </div>
-          <div>
-            <el-card  v-if="predictionResult === '0'"
-                style="margin-top: 20px;margin-left: 20px;width: 50%;
-                background-color: #3cadad; border-radius: 30px">
-              <p style="font-size: 20px;">该数据患有{{formData.diseasename }}的概率较低</p>
-            </el-card>
-            <el-card v-if="predictionResult === '1'"
-                     style="margin-top: 20px;margin-left: 20px;width: 50%;
-                      background-color: #ce1f1f; border-radius: 30px">
-              <p style="font-size: 20px;font-weight: bold">该数据患有{{formData.diseasename }}的概率较高，请及时就医!!</p>
-            </el-card>
-          </div>
-        </div>
+<!--        <div v-if="sequence === 2" element-loading-text="正在进行预测，请稍后"-->
+<!--             element-loading-spinner="el-icon-loading"-->
+<!--             element-loading-background="rgba(0, 0, 0, 0.8)"-->
+<!--             v-loading="loading2">-->
+<!--          <div style="margin-left: 20px;margin-top: 20px">-->
+<!--            <span style="display: block;margin-bottom: 5px;font-size: 30px;">当前所选算法： {{electionAl}}</span>-->
+<!--            <div v-for="(feature, index) in selectedAlgorithmFeatures" :key="index"-->
+<!--                 style="margin-bottom: 10px;display: flex; flex-direction: column;">-->
+<!--              <label>{{ feature.name }}: </label>-->
+<!--              <el-input v-model="feature.value"  v-validate-number style="width: 50%"/>-->
+<!--            </div>-->
+<!--            <el-button @click="promptTest" type="success">提交数据，开始预测</el-button>-->
+<!--          </div>-->
+<!--          <div>-->
+<!--            <el-card  v-if="predictionResult === '0'"-->
+<!--                style="margin-top: 20px;margin-left: 20px;width: 50%;-->
+<!--                background-color: #3cadad; border-radius: 30px">-->
+<!--              <p style="font-size: 20px;">该数据患有{{formData.diseasename }}的概率较低</p>-->
+<!--            </el-card>-->
+<!--            <el-card v-if="predictionResult === '1'"-->
+<!--                     style="margin-top: 20px;margin-left: 20px;width: 50%;-->
+<!--                      background-color: #ce1f1f; border-radius: 30px">-->
+<!--              <p style="font-size: 20px;font-weight: bold">该数据患有{{formData.diseasename }}的概率较高，请及时就医!!</p>-->
+<!--            </el-card>-->
+<!--          </div>-->
+<!--        </div>-->
       </div>
     </div>
   </div>
@@ -132,7 +137,7 @@ import {getRequest, postRequest} from "@/api/user";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import {mapState} from "vuex";
-
+import * as XLSX from 'xlsx'
 Vue.directive('validate-number', {
   bind(el) {
     el.addEventListener('input', function(event) {
@@ -184,13 +189,21 @@ export default {
       return this.$store.state.completeParameter
     },
 
+    pvalue(){
+      return this.$store.state.pvalue
+    },
+
+    bvalue(){
+      return this.$store.state.bvalue
+    }
+
 
   },
   data() {
     return {
-      uid:localStorage.getItem("uid")
-          ? parseInt(localStorage.getItem("uid"))
-          : 0,
+      uid:sessionStorage.getItem("uid")
+          ? sessionStorage.getItem("uid")
+          : "",
       active:4,
       sequence: 1,
       tableData1: [{
@@ -235,6 +248,7 @@ export default {
       selectedData: [],
       loading: false,
       loading2: false,
+      saveLoding:false,
       dynamicVariable:"",
     }
   },
@@ -308,7 +322,7 @@ export default {
       this.sequence = 2
     },
     test(){
-      this.getNumber()
+      console.log(this.uid)
     },
     handleSelect(key){
       this.electionAl = key
@@ -364,7 +378,9 @@ export default {
     },
     // 保存模型
     async saveModels() {
-      for (let i = 0; i < this.selectedAlgorithms.length; i++) {
+      this.saveLoding = true
+      let i = 0
+      for (i = 0; i < this.selectedAlgorithms.length; i++) {
         let modelname = this.formData.modelname;
         let diseasename = this.formData.diseasename;
         let publisher = this.formData.assignee;
@@ -378,8 +394,11 @@ export default {
         let evaluate = this.resultData[al][0].evaluate;
         let picture = this.resultData[al][0].picture;
         let tablename = this.tableName;
+        let target = this.featureChooseData.target
+        let p_calculation_rates = this.pvalue / 100
+        let b_calculation_rates = this.bvalue / 100
         let model = {
-         modelname, diseasename, publisher, remark, uid, modeurl, feature
+         modelname, diseasename, publisher, remark, uid, modeurl, feature,p_calculation_rates,b_calculation_rates,target
         };
         let modelResult = {
           modelname, evaluate, picture, pkl, uid, al, tablename, diseasename
@@ -407,7 +426,8 @@ export default {
           });
         }
       });
-      this.$router.replace('/modelTrain');
+      this.saveLoding = false
+      this.$router.replace('/modelManage');
     },
 
     downloadPDF() {
@@ -447,25 +467,48 @@ export default {
       return csvRows.join('\n');
     },
     downloadCSV() {
-      let tableName = ""
-      if(this.electionAl === 'RF'){
-        tableName = 'rf_test_data'
-      }else if(this.electionAl === 'DT'){
-        tableName = 'dt_test_data'
+      // let tableName = ""
+      // if(this.electionAl === 'RF'){
+      //   tableName = 'rf_test_data'
+      // }else if(this.electionAl === 'DT'){
+      //   tableName = 'dt_test_data'
+      // }
+      // getRequest(`/Model/getInfoByTableName/${tableName}`).then(res => {
+      //   const csvString = this.convertToCSV(res.data);
+      //   const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+      //   const link = document.createElement('a');
+      //   const url = URL.createObjectURL(blob);
+      //   link.setAttribute('href', url);
+      //   link.setAttribute('download', 'data.csv');
+      //   link.style.visibility = 'hidden';
+      //   document.body.appendChild(link);
+      //   link.click();
+      //   document.body.removeChild(link);
+      // })
+      let tableName = "";
+      if (this.electionAl === 'RF') {
+        tableName = 'rf_test_data';
+      } else if (this.electionAl === 'DT') {
+        tableName = 'dt_test_data';
       }
       getRequest(`/Model/getInfoByTableName/${tableName}`).then(res => {
-        const csvString = this.convertToCSV(res.data);
-        const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+        // 假设 res.data 是一个数组，每个元素代表 Excel 文件中的一行数据
+        const worksheet = XLSX.utils.json_to_sheet(res.data);
+        const workbook = XLSX.utils.book_new(); // 创建一个新的工作簿
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1"); // 将工作表添加到工作簿
+        const excelBuffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' }); // 将工作簿写入 ArrayBuffer
+        const blob = new Blob([excelBuffer], { type: 'application/octet-stream' }); // 创建 Blob 对象以下载
         const link = document.createElement('a');
         const url = URL.createObjectURL(blob);
         link.setAttribute('href', url);
-        link.setAttribute('download', 'data.csv');
+        link.setAttribute('download', 'data.xlsx'); // 设置下载文件的名称
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      })
-
+        link.click(); // 触发下载
+        document.body.removeChild(link); // 下载完成后移除链接
+      }).catch(error => {
+        console.error("An error occurred: ", error);
+      });
     },
 
     getNumber(){

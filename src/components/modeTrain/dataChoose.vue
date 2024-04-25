@@ -13,7 +13,7 @@
     <div style="margin: 5px 0;">
       <el-form :rules="rules" :model="formData" label-width="100px" style="width: 70%;margin-top: 10px">
       <div style="display: flex">
-        <el-form-item prop="modelname" label="模型名称:" style="margin-right: 20px;">
+        <el-form-item prop="modelname" label="任务名:" style="margin-right: 20px;">
           <el-input v-model="formData.modelname" style="width: 100%; font-size: 18px;"></el-input>
         </el-form-item>
         <el-form-item label="负责人:" prop="assignee">
@@ -108,7 +108,7 @@
     </div>
 
     <!-- 数据选择 -->
-    <div>
+    <div style="text-align: center">
       <el-button @click="toFeatureChoose()">
         下一步
       </el-button>
@@ -131,9 +131,10 @@ export default {
   },
   data() {
     return {
+
       uid: sessionStorage.getItem("uid")
-          ? parseInt(sessionStorage.getItem("uid"))
-          : 0,
+          ?sessionStorage.getItem("uid")
+          : "",
       operators:"",
       active:1,
       tableName:"",

@@ -74,7 +74,8 @@
         
         rules: {
           username: [
-            { required: true, message: "请输入用户名", trigger: "blur" },
+            { required: true },
+            { min: 2, max: 8, message: '长度在 2 到 8 个字符', trigger: 'blur' }
           ],
           password: [{ required: true, message: "请输入密码", trigger: "blur" }],
           repPassword:[{validator:checkPwd2,trigger:"blur"}]
@@ -92,7 +93,7 @@
             const params={
                 username:this.registerForm.username,
                 password:this.registerForm.password,
-                role:0
+                role:1
             }
             postRequest("/user/signUp", params).then((resp) => {
               if (resp) {

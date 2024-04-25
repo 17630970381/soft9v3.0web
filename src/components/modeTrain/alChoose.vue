@@ -80,17 +80,41 @@
               </el-col>
             </el-row>
             <h1 v-if="isPrompt">所有算法超参以保存，不可再修改参数</h1>
+            <div>
+              <h1>选择参数<span style="font-size: 15px;color: #868585">（该参数作为后续任务调用的结果展示）</span></h1>
+              <h2>人群均值前百分比</h2>
+              <div class="block">
+                <el-slider
+                    v-model="pvalue"
+                    show-input
+                    :max="50"
+                >
+                </el-slider>
+              </div>
+              <h2>人群均值后百分比</h2>
+              <div class="block">
+                <el-slider
+                    v-model="bvalue"
+                    show-input
+                    :max="50">
+                </el-slider>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+      <div>
 
+      </div>
     </div>
+
     <!--  底部提交  -->
 
-    <div v-if="selectedAlgorithms.length > 0">
+    <div v-if="selectedAlgorithms.length > 0" style="margin-top: 50px">
       <el-button @click="goToFea">上一步</el-button>
       <el-button @click="promptParameters" v-if="isPrompt"  type="primary">提交训练</el-button>
       <el-button @click="saveParameters" v-if="!isPrompt"  type="success">保存当前输入超参</el-button>
+<!--      <el-button @click="test">test</el-button>-->
     </div>
   </div>
 </template>
@@ -118,6 +142,9 @@ export default {
       isCard: false,
       resultData:{ },
       loading:false,
+      /*滑块*/
+      pvalue: 0,
+      bvalue: 0,
     }
   },
   computed: {
@@ -299,6 +326,8 @@ export default {
 
             this.resultData = res
             this.$store.commit('setResultData',this.resultData)
+            this.$store.commit('pvalue',this.pvalue)
+            this.$store.commit('bvalue',this.bvalue)
             this.loading = false
             this.$router.replace('resultShow');
           })
@@ -313,8 +342,12 @@ export default {
       this.$router.replace('featureChoose')
     },
 
+    //格式化滑块值
+
+
     test() {
-      console.log(this.resultData)
+      console.log(this.pvalue)
+      console.log(this.bvalue)
     },
   },
 
@@ -330,7 +363,7 @@ export default {
 }
 
 .small-div {
-  height: 70vh; /* 或者适应你的实际高度需求 */
+  height: 60vh; /* 或者适应你的实际高度需求 */
 
 }
 

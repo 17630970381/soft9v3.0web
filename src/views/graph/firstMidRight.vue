@@ -79,7 +79,7 @@ export default {
 
 <style scoped>
 #firstMidRight {
-  width: 500px;
-  height: 300px;
+  height: 400px;
+  width: 350px;
 }
 </style>

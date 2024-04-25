@@ -6,6 +6,7 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
+    sideBarPath: '',
     toolBar : true,
     allTableData:[],
     dataList: [],
@@ -46,6 +47,9 @@ export default new Vuex.Store({
     selectedModelName:[],
     //模型详情
     modelname:"",
+    //模型训练中算法参数选择
+    pvalue:0,
+    bvalue:0,
   },
   getters: {
     getAllTableData(state){
@@ -162,6 +166,16 @@ export default new Vuex.Store({
     },
     putTableName(state,data){
       state.tableName = data
+    },
+    //模型训练中算法参数选择
+    pvalue(state,data){
+      state.pvalue = data
+    },
+    bvalue(state,data){
+      state.bvalue = data
+    },
+    SetSideBarPath(state,value){
+      state.sideBarPath = value;
     }
   },
   actions: {

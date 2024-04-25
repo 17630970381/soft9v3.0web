@@ -40,7 +40,7 @@
       <div style="margin-top: 15px;display: flex;
   flex-wrap: wrap;" >
         <el-card v-for="(card, index) in mergedList" :key="index"
-                 style="width: 550px;height: 310px; margin-left: 30px;
+                 style="width: 550px;height: 320px; margin-left: 30px;
                margin-bottom: 10px;word-wrap: break-word;overflow: auto;">
           <div style="font-size: 20px;margin-bottom: 10px">任务名称：<span style="font-weight: bold;">{{ card.modelname }}</span></div>
           <div style="font-size: 20px;margin-bottom: 10px">疾病名称：<span style="font-weight: bold;">{{ card.diseasename }}</span> </div>
@@ -313,4 +313,5 @@ export default {
   padding: 5px 0; /* 添加上下内边距 */
 
 }
+
 </style>

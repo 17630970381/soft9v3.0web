@@ -85,7 +85,7 @@ export default {
 
 <style scoped>
 #firstMidMid {
-  width: 100%;
-  height: 100%;
+  height: 400px;
+  width: 350px;
 }
 </style>

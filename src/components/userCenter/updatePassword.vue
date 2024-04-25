@@ -23,7 +23,7 @@
 </template>
 <script>
 import {getRequest, postRequest} from "@/utils/api";
-
+import sha256 from 'crypto-js/sha256'; // 导入SHA-256加密算法
 
 export default {
   name:"updatePassword",
@@ -35,8 +35,8 @@ export default {
         confirmNewPass:"",
       },
       uid: sessionStorage.getItem("uid")
-        ? parseInt(sessionStorage.getItem("uid"))
-        : 0,
+          ? sessionStorage.getItem("uid")
+          : "",
       user: sessionStorage.getItem("user")
           ? sessionStorage.getItem("user")
           : "",
@@ -45,10 +45,12 @@ export default {
           {  required: true ,message:"请输入原密码"},
         ],
         newPass: [
-            { required: true,message:"请输入新密码"}
+            { required: true,message:"请输入新密码"},
+            { min: 2, max: 16, message: '长度在 2 到 16 个字符', trigger: 'blur' },
         ],
         confirmNewPass:[
-            { required: true,message:"请确认新密码" }
+            { required: true,message:"请确认新密码" },
+          { min: 2, max: 16, message: '长度在 2 到 16 个字符', trigger: 'blur' },
         ],
       },
     }
@@ -67,7 +69,7 @@ export default {
       }
       let request = {
         username: this.user,
-        password: this.form.newPass
+        password: sha256(this.form.newPass).toString()
       };
       postRequest('/user/updatePas',request).then(res => {
         if(res.code === 200){
@@ -87,11 +89,11 @@ export default {
         this.$message.error("请先输入原密码")
         return;
       }else {
+        // 对新密码进行SHA-256加密
         let requestBody = {
           username: this.user,
-          password: this.form.originPass
+          password: sha256(this.form.originPass).toString()
         };
-
         postRequest(`/user/VerifyPas`,requestBody
         ).then(res => {
           if (res.data === false) {

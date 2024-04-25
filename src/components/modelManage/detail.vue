@@ -76,11 +76,28 @@
       <div
           style="margin-top: 20px"
       >
-        <div style="height: calc(100vh - 300px);overflow-y: scroll">
+        <div v-if="tableData1[0].sampleName === '多疾病' " style="height: calc(100vh - 300px);overflow-y: scroll">
           <div v-for="(feature, index) in selectedAlgorithmFeatures" :key="index"
                style="margin-bottom: 10px;">
-            <label style="display: block">{{ feature.name }}: </label>
-            <el-input  @keydown.enter.native="onEnterKey"  @keydown="validateInput($event)" :disabled="disabled" v-model="feature.value"  style="width: 80%" v-validate-number/>
+            <label style="display: block">{{  getChName(feature.name) }}: </label>
+            <template v-if="getRangeByFeature(feature.name) == '{1,2}'">
+              <el-radio-group v-model="feature.value">
+                <el-radio label="1">男</el-radio>
+                <el-radio label="2">女</el-radio>
+              </el-radio-group>
+            </template>
+            <template v-else>
+              <el-input @blur="checkRange(feature)" @keydown.enter.native="onEnterKey"  @keydown="validateInput($event)" :disabled="disabled" v-model="feature.value"  style="width: 70%" v-validate-number/>
+              <span>{{getRangeByFeature(feature.name)}}</span>
+            </template>
+            <span  v-if="!isNumeric(feature.value)" style="color: red;margin-left: 5px">只能输入数字!</span>
+          </div>
+        </div>
+        <div v-else style="height: calc(100vh - 300px);overflow-y: scroll">
+          <div v-for="(feature, index) in selectedAlgorithmFeatures" :key="index"
+               style="margin-bottom: 10px;">
+            <label style="display: block">{{feature.name }}:</label>
+            <el-input  @keydown.enter.native="onEnterKey"  @keydown="validateInput($event)" :disabled="disabled" v-model="feature.value"  style="width: 70%" v-validate-number/>
             <span  v-if="!isNumeric(feature.value)" style="color: red;margin-left: 5px">只能输入数字!</span>
           </div>
         </div>
@@ -88,46 +105,126 @@
           <el-button v-if="!alFlag" @click="saveData" type="primary">保存所输入数值</el-button>
           <el-button v-if="alFlag" @click="promptDta"  type="success">提交数据，开始预测</el-button>
         </div>
+<!--        <el-button @click="test">test</el-button>-->
       </div>
     </div>
-    <div class="right" style="display: flex; justify-content: center; align-items: center; height: calc(100vh - 300px)">
-      <div v-if="predictionResult1.length > 0">
+    <div class="right" style=" height: calc(100vh - 300px);overflow-y: auto">
+      <div v-if="predictionResult1.length > 0" >
         <div v-if="tableData1[0].sampleName === '多疾病' " class="small-div right">
           <el-card style="text-align: center">
-            <div style="margin-bottom: 5px">该患者患有慢阻肺的概率为：{{ predictionResult1[0][modelname][0] }}</div>
-            <div style="margin-bottom: 5px"> 该患者患有糖尿病的概率为：{{ predictionResult1[0][modelname][1] }}</div>
+            <div style="margin-bottom: 5px">该患者患有慢阻肺的概率为：{{ (predictionResult1[0][modelname][0] * 100).toFixed(2) + '%'  }}</div>
+            <div style="margin-bottom: 5px"> 该患者患有糖尿病的概率为：{{ (predictionResult1[0][modelname][1] * 100).toFixed(2) + '%' }}</div>
             <div style="text-align: center" v-if="predictionResult1[0][modelname][0] > 0.8 ||predictionResult1[0][modelname][0] > 0.8 "> 请及时就医</div>
           </el-card>
         </div>
-        <div v-else class="small-div right">
-          <el-card  v-if="predictionResult[modelname] == '0' " style="text-align: center">
-            <div style="text-align: center;background: #00ff92">
-              <h1 style="font-size: 30px">低风险</h1>
-            </div>
-            <div style="text-align: center">
-              <h3 style="color: #303133">您患{{ tableData1[0].sampleName }}的风险很低，请保持现有生活习惯。</h3>
-            </div>
-          </el-card>
-          <el-card v-if="predictionResult[modelname] == '1' " style="text-align: center">
-            <el-card :body-style="{ height:'260px',padding: '10px'}" id="highRiskCard" style="text-align: center">
-              <!-- 卡片头 -->
-              <div slot="header" id="cardHead">
-                <i class="el-icon-warning"></i>
-                <span >高风险</span>
-              </div>
-              <!-- 卡片内容 -->
-              <div style="padding: 14px;text-align: center" id="cardContent"  >
-                <div>
-                  <h3 style="color: #303133">您患{{ tableData1[0].sampleName }}的风险很高</h3>
-                  <h3 style="color: #D80835">请尽快就医</h3>
-
-                </div>
-              </div>
-            </el-card>
-          </el-card>
+        <h1 v-else style="margin-left: 10px;margin-bottom: 10px;font-size: 25px">该患者患{{tableData1[0].sampleName}}的概率为：{{(predictionResult[modelname] * 100).toFixed(2) + '%'}}</h1>
+        <div style="margin-left: 10px">
+          <el-table
+              :data="detailData"
+              stripe
+              :header-cell-style="{ backgroundColor: '#a8aaad', color: 'black', fontWeight: 'bold'}"
+              style="width: 100%">
+            <el-table-column
+                prop="feature"
+                label="特征"
+                >
+            </el-table-column>
+            <el-table-column
+                prop="importance"
+                label="特征影响度">
+            </el-table-column>
+            <el-table-column
+                prop="fpercentage"
+                label="所选数据集前百分比">
+            </el-table-column>
+            <el-table-column
+                prop="fvalue"
+                label="前百分比平均值">
+            </el-table-column>
+            <el-table-column
+                prop="bpercentage"
+                label="所选数据集后百分比">
+            </el-table-column>
+            <el-table-column
+                prop="bvalue"
+                label="后百分比平均值">
+            </el-table-column>
+          </el-table>
         </div>
+        <div style="margin-top: 20px">
+          <div v-if="mergeData.length > 0">
+            <h1 style="margin-left: 10px;margin-bottom: 10px;color: red;font-size: 20px" >异常值提醒!!：</h1>
+            <div  style="margin-left: 10px">
+              <el-table
+                  :data="mergeData"
+                  stripe
+                  :header-cell-style="{ backgroundColor: '#a8aaad', color: 'black', fontWeight: 'bold'}"
+                  style="width: 100%">
+                <el-table-column
+                    prop="feature"
+                    label="特征"
+                >
+                </el-table-column>
+                <el-table-column
+                    prop="value"
+                    label="当前值">
+                </el-table-column>
+                <el-table-column
+                    prop="fvalue"
+                    label="前百分比平均值">
+                </el-table-column>
+                <el-table-column
+                    prop="bvalue"
+                    label="后百分比平均值">
+                </el-table-column>
+                <el-table-column
+                    prop="warning"
+                    label="异常值提示">
+                </el-table-column>
+              </el-table>
+            </div>
+          </div>
+          <div v-else>
+            <h1 style="margin-left: 10px;margin-bottom: 10px" >该患者无异常指标</h1>
+          </div>
+        </div>
+<!--        <div v-if="tableData1[0].sampleName === '多疾病' " class="small-div right">-->
+<!--          <el-card style="text-align: center">-->
+<!--            <div style="margin-bottom: 5px">该患者患有慢阻肺的概率为：{{ predictionResult1[0][modelname][0] }}</div>-->
+<!--            <div style="margin-bottom: 5px"> 该患者患有糖尿病的概率为：{{ predictionResult1[0][modelname][1] }}</div>-->
+<!--            <div style="text-align: center" v-if="predictionResult1[0][modelname][0] > 0.8 ||predictionResult1[0][modelname][0] > 0.8 "> 请及时就医</div>-->
+<!--          </el-card>-->
+<!--        </div>-->
+<!--        <div v-else class="small-div right">-->
+<!--          <el-card  v-if="predictionResult[modelname] == '0' " style="text-align: center">-->
+<!--            <div style="text-align: center;background: #00ff92">-->
+<!--              <h1 style="font-size: 30px">低风险</h1>-->
+<!--            </div>-->
+<!--            <div style="text-align: center">-->
+<!--              <h3 style="color: #303133">您患{{ tableData1[0].sampleName }}的风险很低，请保持现有生活习惯。</h3>-->
+<!--            </div>-->
+<!--          </el-card>-->
+<!--          <el-card v-if="predictionResult[modelname] == '1' " style="text-align: center">-->
+<!--            <el-card :body-style="{ height:'260px',padding: '10px'}" id="highRiskCard" style="text-align: center">-->
+<!--              &lt;!&ndash; 卡片头 &ndash;&gt;-->
+<!--              <div slot="header" id="cardHead">-->
+<!--                <i class="el-icon-warning"></i>-->
+<!--                <span >高风险</span>-->
+<!--              </div>-->
+<!--              &lt;!&ndash; 卡片内容 &ndash;&gt;-->
+<!--              <div style="padding: 14px;text-align: center" id="cardContent"  >-->
+<!--                <div>-->
+<!--                  <h3 style="color: #303133">您患{{ tableData1[0].sampleName }}的风险很高</h3>-->
+<!--                  <h3 style="color: #D80835">请尽快就医</h3>-->
+
+<!--                </div>-->
+<!--              </div>-->
+<!--            </el-card>-->
+<!--          </el-card>-->
+<!--        </div>-->
+
       </div>
-      <div v-else>
+      <div v-else style="display: flex; justify-content: center; align-items: center; height: calc(100vh - 300px)">
         <el-card>
           <h3>
             预测结果将在此展示，请先输入左侧各参数的值，以此来进行预测
@@ -214,12 +311,68 @@ export default {
       predictionResult1:[],
       predictionResult:{},
       prevent:'',
+      fileManage:[],
+      detailData:[],
+      mergeData:[],
     }
   },
   created() {
     this.getModelDetail()
+    this.getFeatureManage()
   },
   methods:{
+    getMinMaxFromString(rangeString) {
+
+      console.log("rangeString")
+      console.log(rangeString)
+      // const trimmedString = rangeString.replace(/[{}]/g, ''); // 去除大括号
+      const regex = /(\d+(\.\d+)?)/g;
+      const rangeArray = rangeString.match(regex);
+
+      if (rangeArray.length >= 2) {
+        const min = parseFloat(rangeArray[0]);
+        const max = parseFloat(rangeArray[1]);
+        console.log(min); // 输出: 2.95
+        console.log(max); // 输出: 21.79
+        return {min, max};
+      } else {
+        return null
+      }
+    },
+    checkRange(feature){
+      console.log(feature)
+
+      const range = this.getRangeByFeature(feature.name);
+      const { min, max } = this.getMinMaxFromString(range);
+      console.log("min, max")
+      console.log(min, max)
+
+      if (feature.value < min || feature.value > max) {
+        // 超出范围的处理
+        this.$message.error(`值超出范围：${min} - ${max}`);
+      }
+
+    },
+    getRangeByFeature(featureName) {
+      const feature = this.fileManage.find(item => item.featureName === featureName);
+      if (feature) {
+        return `取值范围: ${feature.range}`;
+      } else {
+        return ''; // 如果找不到对应的特征，返回空字符串
+      }
+    },
+    getFeatureManage() {
+      getRequest('/TableData/FeatureMatch').then(res => {
+        console.log("getFeatureManage")
+        this.fileManage = res.data
+        console.log(this.fileManage)
+      })
+    },
+    getChName(featureName) {
+      const feature = this.fileManage.find(item => item.featureName === featureName);
+      return feature ? `${feature.chName}(${feature.unit})` : '';
+    },
+
     onEnterKey(event) {
       if (event.key === 'Enter') {
         if (this.alFlag) {
@@ -255,7 +408,11 @@ export default {
       })
     },
     test(){
-      console.log(this.dynamicVariable)
+      console.log(this.getDetailData())
+      console.log("this.selectedAlgorithmFeatures")
+      console.log(this.selectedAlgorithmFeatures)
+      console.log("this.mergeData")
+      console.log(this.mergeData)
     },
     toModelMan(){
       this.$router.replace('/modelManage')
@@ -344,6 +501,46 @@ export default {
           })
         }
       })
+      this.getDetailData()
+
+    },
+    /*获取详细数据*/
+    getDetailData() {
+        getRequest(`/Detail/getAll/${this.modelname}`).then(res => {
+          this.detailData = res
+          console.log(this.detailData)
+          this.selectedAlgorithmFeatures.forEach((selectedFeature) => {
+            let detailItem = this.detailData.find(item => item.feature === selectedFeature.name);
+
+            if (detailItem) {
+
+
+              let fvalue = parseFloat(detailItem.fvalue);
+              let bvalue = parseFloat(detailItem.bvalue);
+              let value = parseFloat(selectedFeature.value);
+              if (!isNaN(fvalue) && !isNaN(bvalue) && !isNaN(value)){
+                let warning = "";
+                if (value > bvalue) {
+                  warning = "该特征的值过高";
+                } else if (value < fvalue) {
+                  warning = "该特征的值过低";
+                }
+
+                if (warning !== "") {
+                  this.mergeData.push({
+                    feature: selectedFeature.name,
+                    value: value,
+                    fvalue: fvalue,
+                    bvalue: bvalue,
+                    warning: warning
+                  });
+                }
+              }
+
+            }
+          });
+        })
+
     },
     validateInput(event) {
       // 允许输入的字符：数字、小数点、退格键、删除键
@@ -355,6 +552,7 @@ export default {
     isNumeric(value) {
       return /^-?\d*\.?\d*$/.test(value);
     },
+
 
 
 

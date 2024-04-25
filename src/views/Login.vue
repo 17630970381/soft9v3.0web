@@ -41,7 +41,8 @@
               </div>
             </el-form-item>
             <el-form-item>
-              <el-checkbox v-model="checked">记住我</el-checkbox>
+
+              <el-button style="float: right" size="small" @click="findPass">忘记密码</el-button>
             </el-form-item>
             <el-form-item style="margin: 10px 0;text-align: right">
               <el-button type="primary"
@@ -154,6 +155,9 @@ export default {
     },
     updateCaptcha(){
       this.captchaUrl = '/captcha?time'+ new Date()
+    },
+    findPass(){
+      this.$router.replace('/findPass')
     }
   },
 };
