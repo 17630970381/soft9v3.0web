@@ -205,6 +205,7 @@ export default {
     this.getCategory();
     this.getDataDiseases()
     this.getDataDiseases2()
+    localStorage.removeItem('modelname');
   },
 
   methods: {

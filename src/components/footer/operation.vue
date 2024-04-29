@@ -122,6 +122,7 @@ export default {
     getRequest("/File/getOptFile").then((res) => {
       this.url = res
     });
+    localStorage.removeItem('modelname');
   }
 }
 </script>

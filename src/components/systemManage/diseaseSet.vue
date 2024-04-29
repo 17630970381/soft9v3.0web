@@ -170,6 +170,7 @@ export default {
   },
   created() {
     this.getCategory();
+    localStorage.removeItem('modelname');
   },
   methods: {
     getCategory(){

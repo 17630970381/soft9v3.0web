@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import storage from '../utils/storage'
 import taskModule from "@/store/taskModule";
+import persistPlugin from './persistPlugin'
 Vue.use(Vuex)
 
 export default new Vuex.Store({
@@ -218,5 +219,7 @@ export default new Vuex.Store({
     disFactor: taskModule,
     f_Factor: taskModule,
     factorDis: taskModule,
-  }
+  },
+
+  // plugins: [persistPlugin],
 })

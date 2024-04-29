@@ -11,9 +11,9 @@
     </div>
     <div>
       <!-- 特征选择 -->
-      <div>
-        <div style="text-align: center;margin-top: 10px;background: #c5c5c5;border-radius: 50px">
-          <span style="font-weight: bold">特征下方为该特征在数据集中该特征的填充率</span>
+      <div style="height: 70vh;overflow-y: scroll">
+        <div style="text-align: center;margin-top: 10px;background: #c5c5c5;border-radius: 50px;">
+          <span style="font-weight: bold">特征下方为该特征在数据集中该特征的完备率</span>
         </div>
         <div style="margin-top: 10px;margin-left: 20px ">
           <div>
@@ -63,14 +63,15 @@
             </el-checkbox-group>
           </div>
         </div>
-        <div class="center-align" style="margin-top: 30px">
-          <el-button @click="featureToData()">
-            上一步
-          </el-button>
-          <el-button @click="toAlChoose()">
-            下一步
-          </el-button>
-        </div>
+
+      </div>
+      <div class="center-align" style="margin-top: 30px">
+        <el-button @click="featureToData()">
+          上一步
+        </el-button>
+        <el-button @click="toAlChoose()">
+          下一步
+        </el-button>
       </div>
     </div>
 

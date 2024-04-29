@@ -154,6 +154,7 @@ export default {
     getRequest("/File/getIntroFile").then((res) => {
       this.url = res
     });
+    localStorage.removeItem('modelname');
   }
 }
 </script>

@@ -58,7 +58,7 @@
                 <el-table-column label="操作">
                     <template slot-scope="scope">
                         <el-button type="primary" icon="el-icon-edit" circle
-                            @click="getEditDataById(scope.row.id, scope.row.tableName, scope.row.tableStatus)"></el-button>
+                            @click="getDataDiseases(); getEditDataById(scope.row.id, scope.row.tableName, scope.row.tableStatus)"></el-button>
                         <el-popconfirm confirm-button-text='确定' cancel-button-text='取消' icon="el-icon-info"
                             icon-color="red" title="确定删除该数据表吗？" @confirm="deleteAdminDataManage(scope.row.id, scope.row.uid, scope.row.tableId, scope.row.tableSize, scope.row.tableName)">
                             <el-button type="danger" icon="el-icon-delete" circle slot="reference"
@@ -127,7 +127,7 @@
                 ></el-input>
                 </el-form-item>
                 <el-form-item label="请选择病种">
-                    <div class="block">                        
+                    <div class="block">
                         <el-cascader
                             :options="disOptions"
                             :props="{ checkStrictly: true }"
@@ -160,9 +160,17 @@
                 <el-form-item label="用户角色" label-width="120">
                     <el-input v-model="adminDataManageForm.createUser" autocomplete="off" disabled size="medium"></el-input>
                 </el-form-item>
-                <el-form-item label="所属类别" label-width="120">
-                    <el-input v-model="adminDataManageForm.classPath" autocomplete="off" disabled size="medium"></el-input>
-                    
+                <el-form-item label="请选择病种">
+                   <div class="block">
+                     <el-cascader
+                         clearable
+                         :options="disOptions"
+                         :props="{ checkStrictly: true }"
+                         v-model="selectedOptions2"
+                         @change="handleCascaderChange"
+                     ></el-cascader>
+
+                   </div>
                 </el-form-item>
                 <el-form-item label="发布时间" label-width="120">
                     <el-input v-model="adminDataManageForm.createTime" autocomplete="off" disabled size="medium"></el-input>
@@ -324,16 +332,18 @@ export default {
                     value: "1",
                     label: "否",
                 },
-            ], 
+            ],
+          selectedOptions2:[],
         };
     },
 
     created() {
+      localStorage.removeItem('modelname');
         this.init();
         this.getAllAdminDataTable();
 
         this.checkTableName = this.debounce(() => {
-            getRequest("/api/DataTable/inspection", {
+            getRequest("/TableData/DataTable/inspection", {
                 newname: this.dialogForm.tableName,
             }).then((res) => {
                 console.log(res);
@@ -500,14 +510,14 @@ export default {
             payload.append("file", data.file);
             payload.append("pid", this.pid);
             payload.append("tableName", this.dialogForm.tableName);
-            payload.append("userName", sessionStorage.getItem("username"));
+            payload.append("userName", sessionStorage.getItem("user"));
 
             payload.append("ids", this.selectedOptions)
 
-            payload.append("uid", sessionStorage.getItem("userid") - 0);   
+            payload.append("uid", sessionStorage.getItem("uid"));
             payload.append("tableStatus", "2");
             payload.append("tableSize", fileSizeInMB);
-            payload.append("current_uid", sessionStorage.getItem("userid") - 0);
+            payload.append("current_uid", sessionStorage.getItem("uid"));
           
             this.options = {
                 method: "post",
@@ -678,7 +688,7 @@ export default {
                 tableId:tableId,    
                 tableSize:tableSize,            
                 tableName: tableName,
-                current_uid: sessionStorage.getItem("userid") - 0
+                current_uid: sessionStorage.getItem("uid")
             }).then(res => {
                 if (res.code == 200) {
                     this.$message.success("删除数据表成功")
@@ -698,8 +708,9 @@ export default {
             }).then(res => {
                 if (res.code == 200) {
                     this.editAdminDataManageVisible = true;
-                    this.adminDataManageForm = res.data;
-                    console.log("res.data:", res.data)               
+                    this.adminDataManageForm = res.data.object;
+                    this.selectedOptions2 = res.data.ids;
+                    console.log("res.data:", res.data.object,res.data.ids)
                 } else {
                     this.$message.error("获取用户信息失败")
                     this.getAllAdminDataTable();
@@ -707,30 +718,57 @@ export default {
                 }
             })
         },
-        confirmEditAdminDataManage() {
-            this.adminDataManageForm.tableStatus=this.is_cancel; 
-            console.log("edit", this.adminDataManageForm.tableStatus)           
-            getRequest(`/api/sysManage/updateAdminDataManage`, {
-                id: this.adminDataManageForm.id,
-                tableid: this.adminDataManageForm.tableId,
-                oldTableName: this.oldTableName,
-                tableName: this.adminDataManageForm.tableName,
-                tableStatus: this.adminDataManageForm.tableStatus,
-                
-            }).then(res => {
-                if (res.code == 200) {
-                    this.$message.success("修改成功");
-                    this.getAllAdminDataTable();
-                    // this.pagehelper();
-                } else {
-                    this.$message.error("修改失败");
-                    this.getAllAdminDataTable();
-                    // this.pagehelper();
-
-                }
-            })
-            this.editAdminDataManageVisible=false;
+      async confirmEditAdminDataManage() {
+        if (this.selectedOptions2.length < 1){
+          this.$message({
+            type: "warning",
+            message: "请选择该数据表应该属于什么病种",
+          });
+          return;
         }
+        this.adminDataManageForm.tableStatus=this.is_cancel;
+        console.log("edit", this.adminDataManageForm.tableStatus, this.selectedOptions2);
+
+        const payload = new FormData();
+        payload.append("id", this.adminDataManageForm.id);
+        payload.append("tableid",this.adminDataManageForm.tableId);
+        payload.append("oldTableName", this.oldTableName);
+        payload.append("tableName", this.adminDataManageForm.tableName);
+        payload.append("tableStatus", this.adminDataManageForm.tableStatus)
+        payload.append("pids", this.selectedOptions2);
+        payload.append("current_uid", sessionStorage.getItem("uid") - 0);
+
+        this.options = {
+          method: "post",
+          data: payload,
+          url: "/api/sysManage/updateAdminDataManage",
+          headers: {
+
+          },
+        };
+        await this.$axios(this.options).then((res) => {
+          // 返回表头信息
+          console.log(res);
+          if (res?.code == "200") {
+            this.$message({
+              showClose: true,
+              type: "success",
+              message: "更改成功",
+
+            });
+            // this.featuresVision = true;
+          } else {
+            this.$message({
+              showClose: true,
+              type: "error",
+              message: "更改失败",
+            });
+
+          }
+        });
+        this.getAllAdminDataTable();
+        this.editAdminDataManageVisible=false;
+      }
     },
 
 };

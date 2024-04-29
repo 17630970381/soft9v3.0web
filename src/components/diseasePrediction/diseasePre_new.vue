@@ -1,4 +1,4 @@
-<template xmlns="http://www.w3.org/1999/html">
+<template xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
 <div>
 <div class="container">
   <div class="left">
@@ -9,7 +9,7 @@
     <div style="margin-left: 5px;border-bottom: #868585 dashed 1px">
       <h3>模型总数：{{modelNum}}</h3>
     </div>
-    <div style="text-align: center;margin: 20px 0;border-bottom: #868585 dashed 1px"">
+    <div style="text-align: center;margin: 20px 0;border-bottom: #868585 dashed 1px">
       <h3>选择下方模型名称可进行疾病预测</h3>
     </div>
     <el-tree :data="treeData"
@@ -109,13 +109,12 @@
         </div>
         <div class="smallRight" style="height: calc(100vh - 620px);overflow-y: auto">
           <div v-if="predictionResult1.length > 0">
-            <div v-if="modelDetail[0].diseasename === '多疾病' " class="smallRight">
-              <el-card>
+              <el-card v-if="modelDetail[0].diseasename === '多疾病' ">
                 <div style="margin-bottom: 5px">该患者患有慢阻肺的概率为：{{ (predictionResult1[0][modelSelected][0] * 100).toFixed(2) + '%' }}</div>
                 <div style="margin-bottom: 5px"> 该患者患有糖尿病的概率为：{{ (predictionResult1[0][modelSelected][1] * 100).toFixed(2) + '%' }}</div>
                 <div style="text-align: center" v-if="predictionResult1[0][modelSelected][0] > 0.8 ||predictionResult1[0][modelSelected][0] > 0.8 "> 请及时就医</div>
+
               </el-card>
-            </div>
             <h1 v-else style="margin-left: 10px;margin-bottom: 10px">该患者患{{modelDetail[0].diseasename}}的概率为：{{(predictionResult[modelSelected] * 100).toFixed(2) + '%'}}</h1>
             <div style="margin-left: 10px;overflow-y: auto">
               <el-table
@@ -187,43 +186,17 @@
                 <h1 style="margin-left: 10px;margin-bottom: 10px" >该患者无异常指标</h1>
               </div>
             </div>
-<!--            <div v-else class="smallRight">-->
-<!--              <el-card  v-if="predictionResult[modelSelected] == '0' " style="text-align: center">-->
-<!--                <div style="text-align: center;background: #00ff92">-->
-<!--                  <h1 style="font-size: 30px">低风险</h1>-->
-<!--                </div>-->
-<!--                <div style="text-align: center">-->
-<!--                  <h3 style="color: #303133">您患{{ modelDetail[0].diseasename }}的风险很低，请保持现有生活习惯。</h3>-->
-<!--                </div>-->
-<!--              </el-card>-->
-<!--              <el-card v-if="predictionResult[modelSelected] == '1' " style="text-align: center">-->
-<!--                <el-card :body-style="{ height:'260px',padding: '10px'}" id="highRiskCard" style="text-align: center">-->
-<!--                  &lt;!&ndash; 卡片头 &ndash;&gt;-->
-<!--                  <div slot="header" id="cardHead">-->
-<!--                    <i class="el-icon-warning"></i>-->
-<!--                    <span >高风险</span>-->
-<!--                  </div>-->
-<!--                  &lt;!&ndash; 卡片内容 &ndash;&gt;-->
-<!--                  <div style="padding: 14px;text-align: center" id="cardContent"  >-->
-<!--                    <div>-->
-<!--                      <h3 style="color: #303133">您患{{ modelDetail[0].diseasename }}的风险很高</h3>-->
-<!--                      <h3 style="color: #D80835">请尽快就医</h3>-->
-
-<!--                    </div>-->
-<!--                  </div>-->
-<!--                </el-card>-->
-<!--              </el-card>-->
-<!--            </div>-->
           </div>
           <div v-else>
-            <el-card style="display: flex; justify-content: center; align-items: center; height: calc(100vh - 620px)">
-              <h3>
-                预测结果将在此展示，请先输入左侧各参数的值，以此来进行预测
-              </h3>
-            </el-card>
-          </div>
+          <el-card style="display: flex; justify-content: center; align-items: center; height: calc(100vh - 620px)">
+            <h3>
+              预测结果将在此展示，请先输入左侧各参数的值，以此来进行预测
+            </h3>
+          </el-card>
+        </div>
         </div>
       </div>
+
     </div>
 
     <!--  历史数据  -->
@@ -231,9 +204,62 @@
     <el-button :disabled="multipleSelection.length <= 0"
         style="margin-left: 20px;margin-top: 20px" v-if="modelSelected !== '' && isAuto && historyData.length >0" type="warning"
        @click="batchPrediction">批量预测</el-button>
+    <el-button
+               style="margin-left: 10px;margin-top: 20px" v-if=" isAuto " type="success"
+               @click="conBatchPrediction">条件筛选</el-button>
     <el-button style="margin-left: 18px;margin-top: 20px" v-if="Result.length > 0"
                @click="resultShow">结果展示</el-button>
+<!--    <el-button @click="test">test</el-button>-->
+    <el-dialog
+        element-loading-text="正在筛选，请稍后"
+        element-loading-spinner="el-icon-loading"
+        element-loading-background="rgba(0, 0, 0, 0.8)"
+        v-loading="confilterLoding"
+        title="条件选择" :visible.sync="conBatchPredictionDialogTableVisible" width="80%">
+      <h3  style="margin-bottom: 10px;margin-left: 103px;font-size: 15px">每项均不是必选项</h3>
+      <el-form ref="form" :model="form" label-width="150px">
+        <el-form-item label="性别:"  >
+          <div>
+            <el-radio-group v-model="form.sex">
+              <el-radio label="男性">男</el-radio>
+              <el-radio label="女性">女</el-radio>
+            </el-radio-group>
+          </div>
+        </el-form-item>
+        <el-form-item label="出生日期范围:">
+          <el-date-picker
+              style="width: 50%;"
+              v-model="form.date"
+              type="daterange"
+              :picker-options="pickerOptions"
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+              value-format="yyyy-MM-dd"
+              >
+          </el-date-picker>
+        </el-form-item>
+        <el-form-item label="民族:">
+          <el-checkbox-group v-model="form.nation">
+            <el-checkbox v-for="item in nationName" :key="item" :label="item">
+              {{ item }}
+            </el-checkbox>
+          </el-checkbox-group>
+        </el-form-item>
+        <el-form-item label="婚姻状态:">
+          <el-checkbox-group v-model="form.maritalStatus">
+            <el-checkbox v-for="item in maritalStatusName" :key="item" :label="item">
+              {{ item }}
+            </el-checkbox>
+          </el-checkbox-group>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="onSubmit">开始筛选</el-button>
+          <el-button type="warning" @click="cancel">取消</el-button>
+        </el-form-item>
+      </el-form>
 
+    </el-dialog>
     <div style="width: 98%;margin-left: 20px;margin-top: 5px;height: calc(100vh - 250px);overflow: auto" v-if="modelSelected !== '' && isAuto"
          element-loading-text="正在获取数据，请稍后"
          element-loading-spinner="el-icon-loading"
@@ -315,8 +341,8 @@
           <el-button  @click="conPre" type="success">继续预测</el-button>
         </div>
       </el-dialog>
+   </div>
   </div>
-</div>
 </div>
 
 </template>
@@ -353,6 +379,7 @@ export default {
   created() {
     this.getTree()
     this.getModelNum()
+    localStorage.removeItem('modelname');
   },
   data() {
     return {
@@ -403,6 +430,44 @@ export default {
       /*异常值显示*/
       detailData:[],
       mergeData2:[],
+      /*条件筛选*/
+      conBatchPredictionDialogTableVisible:false,
+      form:{
+        sex:"",
+        date:'',
+        nation:[],
+        maritalStatus:[],
+      },
+      nationName:[],
+      maritalStatusName:[],
+      confilterLoding: false,
+      pickerOptions: {
+        shortcuts: [{
+          text: '最近一周',
+          onClick(picker) {
+            const end = new Date();
+            const start = new Date();
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+            picker.$emit('pick', [start, end]);
+          }
+        }, {
+          text: '最近一个月',
+          onClick(picker) {
+            const end = new Date();
+            const start = new Date();
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+            picker.$emit('pick', [start, end]);
+          }
+        }, {
+          text: '最近三个月',
+          onClick(picker) {
+            const end = new Date();
+            const start = new Date();
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+            picker.$emit('pick', [start, end]);
+          }
+        }]
+      },
     }
   },
   watch: {
@@ -443,7 +508,6 @@ export default {
 
   },
   methods: {
-
     /*范围限制*/
     getChName(featureName) {
       const feature = this.fileManage.find(item => item.featureName === featureName);
@@ -479,7 +543,6 @@ export default {
         return ''; // 如果找不到对应的特征，返回空字符串
       }
     },
-
     validateInput(event) {
       console.log("validateInput")
       // 允许输入的字符：数字、小数点、退格键、删除键
@@ -528,7 +591,6 @@ export default {
       }
     },
     /*获取字段管理*/
-
     toTags(){
       console.log(this.modelSelected)
 // 使用正则表达式匹配括号内的内容，然后再根据 & 符号拆分成疾病列表
@@ -641,9 +703,6 @@ export default {
       })
     },
     /*模型调用*/
-
-
-
     saveData(){
       for (let i = 0; i < this.selectedAlgorithmFeatures.length; i++) {
         if (!this.selectedAlgorithmFeatures[i].value) {
@@ -758,7 +817,6 @@ export default {
       this.isHand = false
       this.isAuto = true
     },
-
     /*历史数据*/
     whetherexists(){
       this.isHand = true
@@ -778,11 +836,14 @@ export default {
       getRequest('/Model/upallmerge').then(res =>{
         if(res){
           this.historyData = res.data
-          this.loading2 = false
+
           console.log(this.historyData)
           this.displayedData = [...this.historyData]
         }
       })
+      this.getNation()
+      this.getMaritalStatus()
+      this.loading2 = false
     },
     handleSelectionChange(val) {
       this.multipleSelection = val;
@@ -825,7 +886,55 @@ export default {
         this.dialogTableVisible = true
       });
     },
+    conBatchPrediction(){
+      this.conBatchPredictionDialogTableVisible = true
+    },
+    getNation(){
+      getRequest('/Model/getNation').then(res => {
+        if (res){
+          this.nationName = res.data
+        }else {
+          this.$message.error("获取民族列表失败")
+        }
+      })
+    },
+    getMaritalStatus() {
+      getRequest('/Model/getMaritalStatus').then(res => {
+        if (res) {
+          this.maritalStatusName = res.data
+        }else {
+          this.$message.error("获取婚姻状况列表失败")
+        }
+      })
+    },
+    onSubmit(){
+      this.confilterLoding = true
+      let form = {
+        sex:this.form.sex,
+        date1:this.form.date[0],
+        date2:this.form.date[1],
+        nation:this.form.nation,
+        maritalStatus:this.form.maritalStatus,
+      }
+      console.log(form)
+      postRequest(`/Model/getAllMergeByCondition`,form).then( res =>{
 
+        this.historyData = res.data
+        this.confilterLoding = false
+        this.conBatchPredictionDialogTableVisible = false
+
+      })
+    },
+
+    cancel(){
+      this.form={
+        sex:"",
+        date:'',
+        nation:[],
+        maritalStatus:[],
+      }
+      this.conBatchPredictionDialogTableVisible = false
+    },
     predictPatient(patientId) {
       this.predictionLoding = true
       // 更新选项框的状态
@@ -852,11 +961,9 @@ export default {
         this.dialogTableVisible = true
       });
     },
-
     resultShow(){
       this.dialogTableVisible = true
     },
-
     toMergeData(){
       this.Result.forEach(valueObj => {
         // 遍历 data 数组，在其中查找匹配的患者ID
@@ -918,11 +1025,11 @@ export default {
       // 清理DOM
       document.body.removeChild(link);
     },
-
     conPre(){
       this.dialogTableVisible = false
     },
     resetTable() {
+
       this.highlightedRowIndex = -1;
       this.searchKeyword = ''
       this.getAllMerge()
@@ -951,7 +1058,9 @@ export default {
       return ''
     },
     test(){
-      console.log(this.mergeData)
+      console.log(this.nationName)
+      console.log(this.maritalStatusName)
+      console.log(this.form)
     }
 
   }
@@ -981,13 +1090,15 @@ export default {
 }
 .custom-node {
   /* 添加您想要的自定义字体样式 */
-  font-family: Arial, sans-serif;
   font-size: 16px;
-  font-weight: bold;
-  color: #333; /* 设置字体颜色 */
-  margin-bottom: 10px;
-  line-height: 40px; /* 设置行高 */
-  padding: 5px 0; /* 添加上下内边距 */
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding-right: 8px;
+  overflow: hidden;
+
 
 }
 .smallLft {
@@ -1011,4 +1122,5 @@ export default {
 .highlighted-row {
   background: #f0f9eb !important;
 }
+
 </style>

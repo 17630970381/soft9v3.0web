@@ -69,6 +69,7 @@ export  default {
   },
   created() {
     this.load()
+    localStorage.removeItem('modelname');
   },
   methods:{
     load(){

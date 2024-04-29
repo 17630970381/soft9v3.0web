@@ -18,7 +18,18 @@ axios.defaults.baseURL='/api'
 //     console.log(error)
 // })
 
+const instance = axios.create({
+    timeout: 100000, // 设置请求超时时间，单位是毫秒
+});
 
+// 发送请求
+instance.get('/api/data')
+    .then(response => {
+        // 处理响应数据
+    })
+    .catch(error => {
+        // 处理错误
+    });
 
 //响应拦截器
 axios.interceptors.response.use(success=>{

@@ -80,7 +80,7 @@
             :data="tableData"
             v-if="dataTableVision"
             style="width: 100%"
-            :header-cell-style="{ backgroundColor: '#65a1e0', color: 'black', fontWeight: 'bold'}"
+            :header-cell-style="{ backgroundColor: '#c1c1c5', color: 'black', fontWeight: 'bold'}"
             border
             stripe
             height="780"
@@ -174,6 +174,9 @@ export default {
 
   methods: {
     getTree(){
+      if(localStorage.getItem("modelname") !== ''){
+        this.formData.modelname = localStorage.getItem("modelname")
+      }
       getRequest('/DataManager/getDiseaseTableName').then(res=> {
         if(res){
           this.transformToTree(res)
@@ -204,12 +207,12 @@ export default {
 
     toFeatureChoose(){
       if(this.formData.modelname==''){
-        this.$alert("请填写模型名称", "提示", {
+        this.$alert("请填写任务名称", "提示", {
           confirmButtonText: '确定',
           callback: action => {
             this.$message({
               type: 'error',
-              message: '请填写模型名称'
+              message: '请填写任务名称'
             });
           }
         })
@@ -261,7 +264,9 @@ export default {
                     message: '已取消选择'
                   });
                 });
+                localStorage.setItem('modelname',this.formData.modelname)
                 this.$router.replace('/dataChoose')
+
               }
 
             }
@@ -410,11 +415,15 @@ export default {
 
 .custom-node {
   /* 添加您想要的自定义字体样式 */
-  font-family: Arial, sans-serif;
-  font-weight: bold;
-  color: #333; /* 设置字体颜色 */
-  font-size: 16px;
 
+  font-size: 16px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding-right: 8px;
+  overflow: hidden;
 
 }
 

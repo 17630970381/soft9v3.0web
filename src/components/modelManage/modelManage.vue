@@ -94,7 +94,7 @@ export default {
      publisher:'',
      cardDataList:[],
      pageNum:1,
-     pageSize:9,
+     pageSize:8,
      total: 0,
      diseaseList:[],
      defaultProps: {
@@ -113,6 +113,7 @@ export default {
     this.getDisease()
     this.getTree()
     this.getModelNum()
+    localStorage.removeItem('modelname');
   },
   methods: {
     getTree(){
@@ -188,6 +189,7 @@ export default {
       getRequest(`/Model/selectByPage/?pageNum=${this.pageNum}&pageSize=${this.pageSize}&disease=${this.disease}&modelname=${this.modelname}&publisher=${this.publisher}`
       ).then(
           res => {
+            console.log(res.data.records)
             this.cardDataList = res.data.records
             this.total = res.data.total
             console.log(this.cardDataList)
@@ -304,13 +306,13 @@ export default {
 
 .custom-node {
   /* 添加您想要的自定义字体样式 */
-  font-family: Arial, sans-serif;
-  font-size: 16px;
-  font-weight: bold;
-  color: #333; /* 设置字体颜色 */
-  margin-bottom: 10px;
-  line-height: 40px; /* 设置行高 */
-  padding: 5px 0; /* 添加上下内边距 */
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  padding-right: 8px;
+  overflow: hidden;
 
 }
 

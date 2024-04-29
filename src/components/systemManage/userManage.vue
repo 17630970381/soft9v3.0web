@@ -339,6 +339,7 @@ export default {
   created() {
     this.getUserTable(1);
     this.getUserAll()
+    localStorage.removeItem('modelname');
   },
 
   methods: {

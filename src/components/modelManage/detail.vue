@@ -50,14 +50,22 @@
         <img  :src="require(`@/assets/${dynamicVariable}/confusion_matrix.png`)" alt="Image">
       </div>
 
-      <div v-if="this.modelname !== '多疾病(慢阻肺&糖尿病)'" style="text-align: center;">
+      <div style="text-align: center;" v-if="tableData1[0].alName === 'RF'">
         <h3 style="margin: 10px;">特征重要度</h3>
         <div class="shuoming"  style="margin: 5px 10px;">说明:
           特征重要度（Feature Importance）是在机器学习领域中用于衡量模型中各个特征对于预测结果的贡献程度的指标。
           在训练完模型之后，特征重要度可以帮助我们理解模型是如何做出预测决策的，以及哪些特征对于模型的性能起到了关键作用。</div>
         <img :src="require(`@/assets/${dynamicVariable}/feature_importance.png`)" alt="Image">
       </div>
-      <div v-else style="text-align: center;">
+
+<!--      <div v-if="this.modelname !== '多疾病(慢阻肺&糖尿病)'" style="text-align: center;">-->
+<!--        <h3 style="margin: 10px;">特征重要度</h3>-->
+<!--        <div class="shuoming"  style="margin: 5px 10px;">说明:-->
+<!--          特征重要度（Feature Importance）是在机器学习领域中用于衡量模型中各个特征对于预测结果的贡献程度的指标。-->
+<!--          在训练完模型之后，特征重要度可以帮助我们理解模型是如何做出预测决策的，以及哪些特征对于模型的性能起到了关键作用。</div>-->
+<!--        <img :src="require(`@/assets/${dynamicVariable}/feature_importance.png`)" alt="Image">-->
+<!--      </div>-->
+      <div v-if="this.modelname === '多疾病(慢阻肺&糖尿病)'" style="text-align: center;">
         <h3 style="margin: 10px;">糖尿病</h3>
         <img :src="require(`@/assets/${dynamicVariable}/confusion_matrix2.png`)" alt="Image">
       </div>
@@ -87,7 +95,7 @@
               </el-radio-group>
             </template>
             <template v-else>
-              <el-input @blur="checkRange(feature)" @keydown.enter.native="onEnterKey"  @keydown="validateInput($event)" :disabled="disabled" v-model="feature.value"  style="width: 70%" v-validate-number/>
+              <el-input  @keydown.enter.native="onEnterKey"  @keydown="validateInput($event)" :disabled="disabled" v-model="feature.value"  style="width: 70%" v-validate-number/>
               <span>{{getRangeByFeature(feature.name)}}</span>
             </template>
             <span  v-if="!isNumeric(feature.value)" style="color: red;margin-left: 5px">只能输入数字!</span>

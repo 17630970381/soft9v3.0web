@@ -90,7 +90,7 @@
                 <img  :src="require(`@/assets/${dynamicVariable}/confusion_matrix.png`)" alt="Image">
               </div>
 
-              <div style="text-align: center;">
+              <div style="text-align: center;" v-if="electionAl === 'RF'">
                 <h3 style="margin: 10px;">特征重要度</h3>
                 <div class="shuoming"  style="margin: 5px 10px;">说明:
                   特征重要度（Feature Importance）是在机器学习领域中用于衡量模型中各个特征对于预测结果的贡献程度的指标。
@@ -256,6 +256,9 @@ export default {
     this.predictionResult = ''
     this.load()
 
+  },
+  beforeDestroy() {
+    localStorage.removeItem('modelname');
   },
 
   watch: {
@@ -490,6 +493,12 @@ export default {
         tableName = 'rf_test_data';
       } else if (this.electionAl === 'DT') {
         tableName = 'dt_test_data';
+      } else if(this.electionAl === 'SVM') {
+        tableName = 'svm_test_data';
+      }else if(this.electionAl === 'LR') {
+        tableName = 'lr_test_data';
+      }else if(this.electionAl === 'XGBoost') {
+        tableName = 'xgboost_test_data';
       }
       getRequest(`/Model/getInfoByTableName/${tableName}`).then(res => {
         // 假设 res.data 是一个数组，每个元素代表 Excel 文件中的一行数据

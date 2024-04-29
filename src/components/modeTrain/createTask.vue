@@ -120,6 +120,7 @@ export default {
 
               }else {
                 // this.$store.commit('taskToDataChoose',this.formData)
+
                 this.$router.replace('/dataChoose')
               }
 
@@ -128,6 +129,7 @@ export default {
       }
     },
     getDiseaseName(){
+
       getRequest('/DataManager/getDiseaseName').then(res => {
         this.tableList = res
       })

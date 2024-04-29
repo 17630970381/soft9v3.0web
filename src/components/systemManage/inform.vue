@@ -163,6 +163,7 @@ export default {
   created() {
     this.getInformTable(1);
     this.getAllInform()
+    localStorage.removeItem('modelname');
   },
 
   methods: {
