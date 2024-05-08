@@ -43,10 +43,10 @@
                  style="width: 550px;height: 320px; margin-left: 30px;
                margin-bottom: 10px;word-wrap: break-word;overflow: auto;">
           <div style="font-size: 20px;margin-bottom: 10px">任务名称：<span style="font-weight: bold;">{{ card.modelname }}</span></div>
-          <div style="font-size: 20px;margin-bottom: 10px">疾病名称：<span style="font-weight: bold;">{{ card.diseasename }}</span> </div>
-          <div style="font-size: 20px;margin-bottom: 10px">创建时间：<span style="font-weight: bold;">{{ card.createtime }}</span></div>
+          <div style="font-size: 20px;margin-bottom: 10px">所用算法：<span style="font-weight: bold;">{{ card.alname }}</span> </div>
+          <div style="font-size: 20px;margin-bottom: 10px">最高准确率：<span style="font-weight: bold;">{{ card.mostacc }}</span></div>
           <div style="font-size: 20px;margin-bottom: 10px">创建人：<span style="font-weight: bold;">{{ card.publisher }} </span></div>
-          <div style="font-size: 20px;margin-bottom: 10px">所用算法：<span style="font-weight: bold;">{{ card.al }} </span></div>
+          <div style="font-size: 20px;margin-bottom: 10px">涉及疾病：<span style="font-weight: bold;">{{ card.diseasename }} </span></div>
           <div style="font-size: 20px;margin-bottom: 10px">所用数据集：<span style="font-weight: bold;">{{ card.tablename }} </span></div>
           <div style="margin-top: 20px;text-align: center;">
             <el-button @click="getDetail(card.modelname,card.diseasename)" type="primary">查看详情</el-button>
@@ -155,6 +155,8 @@ export default {
       this.load()
     },
     deleteCard(modelname,publisher) {
+      console.log('deleteCard')
+      console.log(modelname)
       if(this.currentUser !== publisher){
         this.$alert("您只能删除您自己创建的任务", "提示", {
           confirmButtonText: '确定',
@@ -186,7 +188,7 @@ export default {
       this.load()
     },
     load(){
-      getRequest(`/Model/selectByPage/?pageNum=${this.pageNum}&pageSize=${this.pageSize}&disease=${this.disease}&modelname=${this.modelname}&publisher=${this.publisher}`
+      getRequest(`/TaskManager/selectByPage/?pageNum=${this.pageNum}&pageSize=${this.pageSize}&disease=${this.disease}&modelname=${this.modelname}&publisher=${this.publisher}`
       ).then(
           res => {
             console.log(res.data.records)
@@ -260,7 +262,7 @@ export default {
 
       // 只有当data.label只属于某个节点的children时才执行getRequest
       if (isChildLabelOnly) {
-        getRequest(`/Model/selectByPage/?pageNum=${this.pageNum}&pageSize=${this.pageSize}&disease=${this.disease}&modelname=${data.label}&publisher=${this.publisher}`)
+        getRequest(`/TaskManager/selectByPage/?pageNum=${this.pageNum}&pageSize=${this.pageSize}&disease=${this.disease}&modelname=${data.label}&publisher=${this.publisher}`)
             .then(res => {
               this.cardDataList = res.data.records;
               this.total = res.data.total;

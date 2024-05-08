@@ -3,33 +3,7 @@ import { Message } from 'element-ui'
 import router from '../router'
 
 axios.defaults.baseURL='/api'
-
-
-// 请求拦截器
-// axios.interceptors.request.use(config => {
-//     config.headers = { 'Content-Type':'multipart/form-data' }
-//     // 如果存在 token，请求携带这个 token( 登录的时候 把 token 存入了 sessionStorage ）
-//     if (window.sessionStorage.getItem("tokenStr")) {
-//         // token 的key : Authorization ; value: tokenStr
-//         config.headers['Authorization'] = window.sessionStorage.getItem('tokenStr')
-//     }
-//     return config;
-// },error => {
-//     console.log(error)
-// })
-
-const instance = axios.create({
-    timeout: 100000, // 设置请求超时时间，单位是毫秒
-});
-
-// 发送请求
-instance.get('/api/data')
-    .then(response => {
-        // 处理响应数据
-    })
-    .catch(error => {
-        // 处理错误
-    });
+axios.defaults.timeout = 120000;
 
 //响应拦截器
 axios.interceptors.response.use(success=>{

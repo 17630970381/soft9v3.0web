@@ -7,6 +7,64 @@
         <span class="statistic"> 数据表: {{ datasetNum }} 个 </span>
       </div>
       <hr class="hr-dashed" />
+      <el-button class="el-icon-circle-plus-outline" style="width: 100%"  @click="dialogBigFormVisible=true; getDataDiseases()">导入数据表</el-button>
+      <el-dialog v-loading="loading" :element-loading-text="loadText" id="importDataTable" title="导入数据表"
+                 :visible.sync="dialogBigFormVisible" width="40%">
+        <el-form :model="bigDialogForm" ref="bigDialogFormRef" :rules="bigDialogForm.rules" label-width="110px">
+          <el-form-item label="选择数据表" prop="filesInfo">
+            <el-upload action="" class="upload" ref="uploadRef" :on-preview="handlePreview" :on-remove="handleRemove"
+                       :on-change="bigChangeFile" :auto-upload="false" accept=".csv" :limit="1" :multiple="false"
+                       :file-list="bigDialogForm.filesInfo" :http-request="(data) => {
+          bigUpRequest(data);
+        }
+          ">
+              <el-button slot="trigger" size="small" type="success">选取文件</el-button>
+              <div slot="tip" class="el-upload__tip">只能上传csv文件</div>
+            </el-upload>
+          </el-form-item>
+
+          <el-form-item label="数据表名称" prop="tableName">
+            <el-input v-model="bigDialogForm.tableName" placeholder="请输入数据表名称"></el-input>
+          </el-form-item>
+<!--          <el-form-item label="涉及疾病" prop="dataDisease">-->
+<!--            <el-input v-model="dialogForm.dataDisease" :disabled="true" style="width: 150px"></el-input>-->
+<!--          </el-form-item>-->
+          <el-form-item label="请选择病种"  prop="dataDisease">
+            <div class="block">
+              <el-cascader
+                  :options="disOptions"
+                  :props="{ checkStrictly: true }"
+                  v-model="bigDialogForm.dataDisease"
+                  @change="handleCascaderChange"
+              ></el-cascader>
+            </div>
+          </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="
+          dialogBigFormVisible = false;
+        resetForm('bigDialogFormRef');
+        ">取消</el-button>
+          <el-button @click="resetForm('bigDialogFormRef')">重置</el-button>
+          <el-button type="primary" @click="bigUploadFile">确定</el-button>
+        </div>
+
+        <!-- 解析表后字段分类弹窗 -->
+        <el-dialog v-loading="loading2" :element-loading-text="loadText2" append-to-body title="请选择多个疾病标签字段"
+                   :visible.sync="featuresVision">
+          <!-- <el-form class="featureLabel" label-width="auto"> -->
+          <el-checkbox-group v-model="labelList">
+            <el-checkbox style="width: 250px" border v-for="(name, index) in Object.keys(featuresMap)" :key="index"
+                         :label="name"></el-checkbox>
+          </el-checkbox-group>
+          <div slot="footer" class="dialog-footer">
+            <el-button type="primary" @click="compelete">完成上传</el-button>
+          </div>
+        </el-dialog>
+      </el-dialog>
+
+      <hr class="hr-dashed" />
+
       <el-input placeholder="输入关键字进行过滤" v-model="filterText">
       </el-input>
       <div class="treeArea">
@@ -581,7 +639,42 @@ export default {
       fields: [],
       labelList: [],
       table_loading: false,
-      filterText: ''
+      filterText: '',
+      /*显眼的上传数据表*/
+      dialogBigFormVisible: false,
+      disOptions: [],
+      pid:'',
+      myParentId:'',
+      myParentType:'',
+      myDiease:'',
+      bigDialogForm: {
+        filesInfo: [],
+        tableName: "",
+        isOnly: true,
+        dataDisease: "",
+        fields: [{ name: "", type: "" }],
+        rules: {
+          tableName: [
+            {
+              required: true,
+              message: "数据表名称不能为空",
+              trigger: "change",
+            },
+          ],
+          dataDisease: [
+            {
+              required: true,
+              message: "涉及疾病不能为空",
+              trigger: "blur",
+            },
+          ],
+          numFeatures: [
+            { required: true, message: "特征个数不能为空", trigger: "blur" },
+            { type: "integer", message: "特征个数需为整数", trigger: "blur" },
+            { min: 1, message: "特征个数需>1", trigger: "blur" },
+          ],
+        },
+      },
     };
   },
 
@@ -855,18 +948,6 @@ export default {
         }
       });
     },
-    getCatgory() {
-      getCategory(`/api/category?uid=${this.loginUserID}`).then((response) => {
-        this.treeData1 = response.data.slice(0, 1);
-        this.treeData2 = response.data.slice(1, 2);
-        this.treeData3 = response.data.slice(2, 3);
-        // 获取病种和数据集总数
-        this.diseaseNum = response.data[0].children.length;
-        getRequest("/TableDescribe/getTableNumber").then((res) => {
-          if (res.code == 200) this.datasetNum = res.data;
-        });
-      });
-    },
     uploadFile() {
       if (this.$refs["uploadRef"].uploadFiles.length < 1) {
         this.$message({
@@ -880,14 +961,132 @@ export default {
       if (!this.dialogForm.isOnly) {
         return false;
       }
+
       this.$refs["dialogFormRef"].validate((valid) => {
         if (valid) {
+
           this.loadText = "正在上传并解析文件";
           this.loading = true;
           this.$refs.uploadRef.submit();
         }
       });
     },
+
+    getParent(){
+      let len = this.bigDialogForm.dataDisease.length
+      let id = this.bigDialogForm.dataDisease[len - 1]
+      console.log(typeof id)
+
+      getRequest(`/api/getParentTYpeById/${id}`).then(res => {
+        console.log("res")
+        console.log(res)
+        this.myParentType = res.data
+        this.myDiease = res.data
+      })
+
+    },
+    bigUploadFile() {
+      if (this.$refs["uploadRef"].uploadFiles.length < 1) {
+        this.$message({
+          showClose: true,
+          type: "warning",
+          message: "请选择数据表",
+        });
+        return false;
+      }
+      this.checkTableName();
+      if (!this.bigDialogForm.isOnly) {
+        return false;
+      }
+
+      this.$refs["bigDialogFormRef"].validate((valid) => {
+        if (valid) {
+
+          this.loadText = "正在上传并解析文件";
+          this.loading = true;
+          this.$refs.uploadRef.submit();
+        }
+      });
+    },
+    bigUpRequest(data){
+      console.log("开始上传文件");
+      console.log(this.myParentType)
+      console.log(this.myDiease)
+      const fileSize = data.file.size;
+      const fileSizeInMB = (fileSize / (1024.0 * 1024.0)).toFixed(2)
+      let len = this.bigDialogForm.dataDisease.length
+      const parentId =  this.bigDialogForm.dataDisease[len-1]
+      const payload2 = new FormData();
+      payload2.append("file", data.file);
+      payload2.append("newName", this.bigDialogForm.tableName);
+      payload2.append("disease", this.myDiease);
+      payload2.append("user", sessionStorage.getItem("user"));
+      payload2.append("uid", sessionStorage.getItem("uid"));
+      payload2.append("parentId", parentId);
+      payload2.append("parentType",  this.myParentType);
+      payload2.append("status", "0");
+      payload2.append("size", fileSizeInMB);
+      payload2.append("is_upload", "1");
+      payload2.append("is_filter", "0");
+      this.options = {
+        method: "post",
+        data: payload2,
+        url: "/TableData/dataTable/upload",
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      };
+      // 多疾病下的上传文件需要打标签，用不同的接口
+      let paths = this.nodeData.label;
+      if (paths === "多疾病") {
+        this.options.url = "api/dataTable/parseAndUpload";
+      }
+
+      this.$axios(this.options).then((res) => {
+        console.log(this.options.data.get("uid"));
+        // 返回表头信息
+        this.loading = false;
+        console.log(res);
+        if (res?.code == "200") {
+          this.$message({
+            showClose: true,
+            type: "success",
+            message: "解析成功",
+          });
+          let featureList = res.data;
+          //把特征存为map的键
+          for (const item of featureList) {
+            this.$set(this.featuresMap, item, "diagnosis");
+          }
+          if (paths === "多疾病") {
+            this.featuresVision = true;
+          }
+          this.dialogBigFormVisible = false;
+          this.resetForm('bigDialogFormRef')
+          this.getCatgory();
+        } else {
+          this.$message({
+            showClose: true,
+            type: "error",
+            message: "解析失败",
+          });
+        }
+      });
+    },
+  // 获取病种和数据集总数
+    getCatgory() {
+      getCategory(`/api/category?uid=${this.loginUserID}`).then((response) => {
+        this.treeData1 = response.data.slice(0, 1);
+        this.treeData2 = response.data.slice(1, 2);
+        this.treeData3 = response.data.slice(2, 3);
+        // 获取病种和数据集总数
+        this.diseaseNum = response.data[0].children.length;
+        getRequest("/TableDescribe/getTableNumber").then((res) => {
+          if (res.code == 200) this.datasetNum = res.data;
+        });
+      });
+    },
+
     getTableDescribe(id, label) {
       this.showDataForm.tableName = label;
       getTableDes("/TableDescribe/tableDescribe", id)
@@ -1237,6 +1436,13 @@ export default {
         );
       }
     },
+    bigChangeFile() {
+      if (this.bigDialogForm.tableName.length < 1) {
+        this.bigDialogForm.tableName = this.removeFileExtension(
+            this.$refs["uploadRef"].uploadFiles[0].name
+        );
+      }
+    },
 
     changeStatus() {
       getRequest("/api/changeStatus", this.nodeData)
@@ -1252,6 +1458,24 @@ export default {
           .catch((error) => {
             console.log(error);
           });
+    },
+    handleCascaderChange(value) {
+      // console.log('Selected Options:',value, this.selectedOptions[this.selectedOptions.length-1]);
+      // 如果你希望同时更新 dataDisease
+      this.pid = value[value.length-1];
+      console.log("pid")
+      console.log(this.pid)
+      this.getParent()
+    },
+    getDataDiseases(){
+      getRequest(`/api/sysManage/selectDataDiseases`).then(res => {
+        if (res.code == 200) {
+          console.log("selectDataDiseases", res.data);
+          this.disOptions = res.data;
+        }else{
+          console.log("res", res.data)
+        }
+      })
     },
   },
 };

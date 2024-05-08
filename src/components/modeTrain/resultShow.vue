@@ -383,6 +383,23 @@ export default {
     async saveModels() {
       this.saveLoding = true
       let i = 0
+      let maxAccuracy = 0; // 初始化最大准确率为 0
+      for (let i = 0; i < this.selectedAlgorithms.length; i++) {
+        let al = this.selectedAlgorithms[i];
+        const str = this.resultData[al][0].evaluate;
+        const jsonObj = JSON.parse(str.replace(/'/g, '"'));
+        const resultMap = new Map();
+        for (const key in jsonObj) {
+          resultMap.set(key, jsonObj[key]);
+        }
+        let accuracy = resultMap.get('accuracy');
+        // 比较当前算法的准确率与最大准确率
+        if (accuracy > maxAccuracy) {
+          maxAccuracy = accuracy; // 更新最大准确率
+        }
+      }
+      let alname = this.selectedAlgorithms.join(',')
+      let mostacc = maxAccuracy.toString();
       for (i = 0; i < this.selectedAlgorithms.length; i++) {
         let modelname = this.formData.modelname;
         let diseasename = this.formData.diseasename;
@@ -406,7 +423,8 @@ export default {
         let modelResult = {
           modelname, evaluate, picture, pkl, uid, al, tablename, diseasename
          };
-         let requestData = Object.assign({}, modelResult, model);
+        let TaskManager = {modelname, al, mostacc,diseasename, publisher,tablename ,alname}
+         let requestData = Object.assign({}, modelResult, model, TaskManager);
          console.log(requestData);
 
          try {

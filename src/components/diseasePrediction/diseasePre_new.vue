@@ -175,9 +175,10 @@
                         prop="bvalue"
                         label="后百分比平均值">
                     </el-table-column>
-                    <el-table-column
-                        prop="warning"
-                        label="异常值提示">
+                    <el-table-column prop="warning" label="异常值提示">
+                      <template slot-scope="{ row }">
+                        <span :style="{ color: row.warning === '该特征的值过高' ? 'red' : row.warning === '该特征的值过低' ? '#25bef5' : 'inherit' }">{{ row.warning }}</span>
+                      </template>
                     </el-table-column>
                   </el-table>
                 </div>
@@ -508,6 +509,8 @@ export default {
 
   },
   methods: {
+    /*初始化请求*/
+
     /*范围限制*/
     getChName(featureName) {
       const feature = this.fileManage.find(item => item.featureName === featureName);
@@ -603,7 +606,7 @@ export default {
     },
     /*树形控件*/
     getTree(){
-      getRequest('/modelResult/getTableName').then(res=> {
+      getRequest('/modelResult/getTableNamePre').then(res=> {
         if(res){
           this.transformToTree(res)
         }
@@ -630,7 +633,7 @@ export default {
       console.log(this.treeData)
     },
     getModelNum(){
-      getRequest('/Model/getModelNum').then(res => {
+      getRequest('/Model/getModelNumPre').then(res => {
         if(res){
           this.modelNum = res
         }

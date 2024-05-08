@@ -111,6 +111,19 @@
 
                    ></el-slider>
                  </template>
+                 <template v-else-if="key === 'tol'">
+                   <el-slider
+                       v-model="param[key]"
+                       :disabled="isPrompt"
+                       :min="0.001"
+                       :max="1"
+                       :step="0.001"
+                       show-input-controls
+                       show-input
+                       controls-position="bottom"
+
+                   ></el-slider>
+                 </template>
                  <template v-else-if="param[key] === 'l1' || param[key] === 'l2' || param[key] === 'elasticnet' || param[key] === 'none' && electionAl === 'LR'">
                    <el-radio-group v-model="param[key]" :disabled="isPrompt">
                      <el-radio label="l1">l1</el-radio>

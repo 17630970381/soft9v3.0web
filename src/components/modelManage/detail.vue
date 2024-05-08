@@ -4,9 +4,30 @@
     <el-button @click="toModelMan" type="primary">返回</el-button>
     <el-button @click="result" >模型结果展示</el-button>
     <el-button @click="use" >模型调用</el-button>
+    <el-button v-if="isResult" @click="downloadPDF" >下载为PDF</el-button>
+    <el-button v-if="isResult" @click="choseFormat = true" >下载为图片</el-button>
   </div>
-  <div v-if="isResult">
+
+  <el-dialog
+      title="请选择要导出的图片格式"
+      :visible.sync="choseFormat"
+      width="30%">
+    <el-radio-group v-model="formatPic">
+      <el-radio label="image/jpeg">jpg</el-radio>
+      <el-radio label="image/png">png</el-radio>
+      <el-radio label="image/webp">webp</el-radio>
+    </el-radio-group>
+    <span slot="footer" class="dialog-footer">
+    <el-button @click="choseFormat = false">取 消</el-button>
+    <el-button type="primary" @click="downloadImage">确 定</el-button>
+  </span>
+  </el-dialog>
+  <div v-if="isResult"  id="downloadArea">
     <div style="margin-top: 10px">
+      <div style="margin-bottom: 5px">
+        <h3 style="display: inline-block">总样本量：{{totalSamples}}</h3>
+        <h3 style="display: inline-block;margin-left: 20px">总特征数：{{totalFeatures}}</h3>
+      </div>
       <el-table
           :data="tableData1"
           stripe
@@ -15,47 +36,70 @@
         <el-table-column prop="modelname" label="模型名称"> </el-table-column>
         <el-table-column prop="alName" label="算法名称"> </el-table-column>
         <el-table-column prop="sampleName" label="样本名称"></el-table-column>
-        <el-table-column prop="totalSamples" label="总样本量"></el-table-column>
-        <el-table-column prop="totalFeatures" label="总特征数"></el-table-column>
-        <el-table-column prop="accuracy" label="准确度"></el-table-column>
-        <el-table-column prop="precision" label="精确度"></el-table-column>
-        <el-table-column prop="recall" label="召回率"></el-table-column>
-        <el-table-column prop="f1Score" label="F1分数"></el-table-column>
+        <el-table-column prop="accuracy" label="准确度">
+          <template slot-scope="{ row }">
+            <span :class="{ 'bold': row.accuracy === maxValues.accuracy }">{{ row.accuracy }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="precision" label="精确度">
+          <template slot-scope="{ row }">
+            <span :class="{ 'bold': row.precision === maxValues.precision }">{{ row.precision }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="recall" label="召回率">
+          <template slot-scope="{ row }">
+            <span :class="{ 'bold': row.recall === maxValues.recall }">{{ row.recall }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="f1Score" label="F1分数">
+          <template slot-scope="{ row }">
+            <span :class="{ 'bold': row.f1Score === maxValues.f1Score }">{{ row.f1Score }}</span>
+          </template>
+        </el-table-column>
       </el-table>
     </div>
     <div >
       <!--  结果图  -->
-      <div style="text-align: center;">
+      <div style="text-align: center;" >
         <h3 style="margin: 10px;">PR曲线</h3>
         <div class="shuoming" style="margin: 5px 10px;">说明:横轴是召回率，纵轴器精确率;曲线上的一个点代表着在某一阈值下，
           模型将大于该阈值的结果判定为正样本，将低于该阈值的样本判定为负样本，通过阈值的变动而绘制出PR曲线，
           所以PR曲线综合考虑了不同阈值下的召回率与精确率。</div>
-        <img :src="require(`@/assets/${dynamicVariable}/precision_recall_curve.png`)" alt="Image">
+        <div v-for="(item, index) in dynamicVariable" :key="index" style="position: relative; display: inline-block;">
+          <span style="position: absolute; top: 2px; left: 50%; transform: translateX(-50%);font-weight: bolder">{{ item.split('_')[1] }}</span>
+          <img :src="require(`@/assets/${item}/precision_recall_curve.png`)" alt="Image" style="width: 500px; height: 450px;">
+        </div>
       </div>
 
-      <div style="text-align: center;">
+      <div style="text-align: center; ">
         <h3 style="margin: 10px;">ROC曲线</h3>
         <div class="shuoming" style="margin: 5px 10px;">说明:
           ROC（Receiver Operating Characteristic）曲线是一种用于评估二元分类器性能的图形工具。
           它显示了在不同阈值下真正例率（True Positive Rate，TPR）与假正例率（False Positive Rate，FPR）之间的关系。</div>
-        <img :src="require(`@/assets/${dynamicVariable}/roc_curve.png`)" alt="Image">
+        <div v-for="(item, index) in dynamicVariable" :key="index" style="position: relative; display: inline-block;">
+          <span style="position: absolute; top: 2px; left: 50%; transform: translateX(-50%);font-weight: bolder">{{ item.split('_')[1] }}</span>
+          <img :src="require(`@/assets/${item}/roc_curve.png`)" alt="Image" style="width: 500px; height: 450px;">
+        </div>
       </div>
 
-      <div style="text-align: center;">
+      <div style="text-align: center;" >
         <h3 style="margin: 10px;">混淆矩阵</h3>
         <div class="shuoming" style="margin: 5px 10px;">说明:
           混淆矩阵（Confusion Matrix）是一种用于评估分类模型性能的表格，特别是在监督学习中用于评估分类任务的结果。
           它将模型的预测结果与真实结果进行比较，从而提供了对分类器性能的直观认识。</div>
         <h3 style="margin: 10px; " v-if="this.modelname === '多疾病(慢阻肺&糖尿病)'">慢阻肺</h3>
-        <img  :src="require(`@/assets/${dynamicVariable}/confusion_matrix.png`)" alt="Image">
+        <div v-for="(item, index) in dynamicVariable" :key="index" style="position: relative; display: inline-block;">
+          <span  style="position: absolute; top: 2px; left: 45%; transform: translateX(-50%);font-weight: bolder">{{ item.split('_')[1] }}</span>
+          <img :src="require(`@/assets/${item}/confusion_matrix.png`)" alt="Image" style="width: 500px; height: 450px;">
+        </div>
       </div>
 
-      <div style="text-align: center;" v-if="tableData1[0].alName === 'RF'">
+      <div style="text-align: center;" v-if="tableData1.some(data => data.alName === 'RF')">
         <h3 style="margin: 10px;">特征重要度</h3>
-        <div class="shuoming"  style="margin: 5px 10px;">说明:
+        <div class="shuoming"  style="margin: 5px 10px;" >说明:
           特征重要度（Feature Importance）是在机器学习领域中用于衡量模型中各个特征对于预测结果的贡献程度的指标。
           在训练完模型之后，特征重要度可以帮助我们理解模型是如何做出预测决策的，以及哪些特征对于模型的性能起到了关键作用。</div>
-        <img :src="require(`@/assets/${dynamicVariable}/feature_importance.png`)" alt="Image">
+        <img :src="require(`@/assets/${isRF}/feature_importance.png`)"  alt="Image">
       </div>
 
 <!--      <div v-if="this.modelname !== '多疾病(慢阻肺&糖尿病)'" style="text-align: center;">-->
@@ -67,7 +111,7 @@
 <!--      </div>-->
       <div v-if="this.modelname === '多疾病(慢阻肺&糖尿病)'" style="text-align: center;">
         <h3 style="margin: 10px;">糖尿病</h3>
-        <img :src="require(`@/assets/${dynamicVariable}/confusion_matrix2.png`)" alt="Image">
+        <img :src="require(`@/assets/${dynamicVariable}/confusion_matrix2.png`)" alt="Image" style="width: 500px; height: 450px;">
       </div>
 
     </div>
@@ -75,15 +119,20 @@
 
   </div>
   <!--  模型调用  -->
+
   <div v-else class="container"
        element-loading-text="正在调用模型进行预测，请稍后"
        element-loading-spinner="el-icon-loading"
        element-loading-background="rgba(0, 0, 0, 0.8)"
        v-loading="loading">
+
     <div class="left" >
-      <div
-          style="margin-top: 20px"
-      >
+      <div>
+        <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal" @select="handleSelect">
+          <el-menu-item v-for="(item, index) in Algorithms" :key="index" :index="item">{{ item }}</el-menu-item>
+        </el-menu>
+      </div>
+      <div style="margin-top: 18px">
         <div v-if="tableData1[0].sampleName === '多疾病' " style="height: calc(100vh - 300px);overflow-y: scroll">
           <div v-for="(feature, index) in selectedAlgorithmFeatures" :key="index"
                style="margin-bottom: 10px;">
@@ -167,7 +216,8 @@
                   :data="mergeData"
                   stripe
                   :header-cell-style="{ backgroundColor: '#a8aaad', color: 'black', fontWeight: 'bold'}"
-                  style="width: 100%">
+                  style="width: 100%"
+                  :row-class-name="rowClassName">
                 <el-table-column
                     prop="feature"
                     label="特征"
@@ -185,9 +235,10 @@
                     prop="bvalue"
                     label="后百分比平均值">
                 </el-table-column>
-                <el-table-column
-                    prop="warning"
-                    label="异常值提示">
+                <el-table-column prop="warning" label="异常值提示">
+                  <template slot-scope="{ row }">
+                    <span :style="{ color: row.warning === '该特征的值过高' ? 'red' : row.warning === '该特征的值过低' ? '#25bef5' : 'inherit' }">{{ row.warning }}</span>
+                  </template>
                 </el-table-column>
               </el-table>
             </div>
@@ -196,41 +247,6 @@
             <h1 style="margin-left: 10px;margin-bottom: 10px" >该患者无异常指标</h1>
           </div>
         </div>
-<!--        <div v-if="tableData1[0].sampleName === '多疾病' " class="small-div right">-->
-<!--          <el-card style="text-align: center">-->
-<!--            <div style="margin-bottom: 5px">该患者患有慢阻肺的概率为：{{ predictionResult1[0][modelname][0] }}</div>-->
-<!--            <div style="margin-bottom: 5px"> 该患者患有糖尿病的概率为：{{ predictionResult1[0][modelname][1] }}</div>-->
-<!--            <div style="text-align: center" v-if="predictionResult1[0][modelname][0] > 0.8 ||predictionResult1[0][modelname][0] > 0.8 "> 请及时就医</div>-->
-<!--          </el-card>-->
-<!--        </div>-->
-<!--        <div v-else class="small-div right">-->
-<!--          <el-card  v-if="predictionResult[modelname] == '0' " style="text-align: center">-->
-<!--            <div style="text-align: center;background: #00ff92">-->
-<!--              <h1 style="font-size: 30px">低风险</h1>-->
-<!--            </div>-->
-<!--            <div style="text-align: center">-->
-<!--              <h3 style="color: #303133">您患{{ tableData1[0].sampleName }}的风险很低，请保持现有生活习惯。</h3>-->
-<!--            </div>-->
-<!--          </el-card>-->
-<!--          <el-card v-if="predictionResult[modelname] == '1' " style="text-align: center">-->
-<!--            <el-card :body-style="{ height:'260px',padding: '10px'}" id="highRiskCard" style="text-align: center">-->
-<!--              &lt;!&ndash; 卡片头 &ndash;&gt;-->
-<!--              <div slot="header" id="cardHead">-->
-<!--                <i class="el-icon-warning"></i>-->
-<!--                <span >高风险</span>-->
-<!--              </div>-->
-<!--              &lt;!&ndash; 卡片内容 &ndash;&gt;-->
-<!--              <div style="padding: 14px;text-align: center" id="cardContent"  >-->
-<!--                <div>-->
-<!--                  <h3 style="color: #303133">您患{{ tableData1[0].sampleName }}的风险很高</h3>-->
-<!--                  <h3 style="color: #D80835">请尽快就医</h3>-->
-
-<!--                </div>-->
-<!--              </div>-->
-<!--            </el-card>-->
-<!--          </el-card>-->
-<!--        </div>-->
-
       </div>
       <div v-else style="display: flex; justify-content: center; align-items: center; height: calc(100vh - 300px)">
         <el-card>
@@ -281,6 +297,8 @@ import {getRequest} from "@/utils/api";
 import resultShow from "@/components/modeTrain/resultShow.vue";
 import Reuse from "@/components/modelManage/reuse.vue";
 import {postRequest} from "@/api/user";
+import jsPDF from "jspdf";
+import html2canvas from 'html2canvas';
 
 export default {
   name:'detail',
@@ -293,6 +311,19 @@ export default {
       return this.$store.state.modelname
 
     },
+    maxValues() {
+      const maxAccuracy = Math.max(...this.tableData1.map(item => item.accuracy));
+      const maxPrecision = Math.max(...this.tableData1.map(item => item.precision));
+      const maxRecall = Math.max(...this.tableData1.map(item => item.recall));
+      const maxF1Score = Math.max(...this.tableData1.map(item => item.f1Score));
+
+      return {
+        accuracy: maxAccuracy,
+        precision: maxPrecision,
+        recall: maxRecall,
+        f1Score: maxF1Score
+      };
+    },
 
   },
   data(){
@@ -300,17 +331,16 @@ export default {
       selectedAlgorithmFeatures:[],
       loading:false,
       disabled:false,
-      dynamicVariable:"",
+      dynamicVariable:[],
       tableData1: [{
         modelname: '',
         alName:'',
         sampleName: '',
-        totalSamples: '',
-        totalFeatures: '',
         accuracy:'',
         precision:'',
         recall:'',
         f1Score:'',
+        pkl:'',
       }],
       resultData:{},
       pictureUrl:"",
@@ -322,6 +352,16 @@ export default {
       fileManage:[],
       detailData:[],
       mergeData:[],
+      isRF:"",
+      totalSamples: 0,
+      totalFeatures:0,
+      /*调用算法*/
+      Algorithms:[],
+      activeIndex:'',
+      path:'',
+      electionAl:'',
+      choseFormat:false,
+      formatPic:'',
     }
   },
   created() {
@@ -329,6 +369,13 @@ export default {
     this.getFeatureManage()
   },
   methods:{
+    rowClassName({ row }) {
+      if (row.warning === "该特征的值过高") {
+        return 'warning-high';
+      } else if (row.warning === "该特征的值过低") {
+        return 'warning-low';
+      }
+    },
     getMinMaxFromString(rangeString) {
 
       console.log("rangeString")
@@ -392,28 +439,73 @@ export default {
     },
     getModelDetail(){
       getRequest(`/Model/getModelDetail/${this.modelname}`).then(res =>{
-        this.tableData1[0].modelname = this.modelname
+        console.log('getModelDetail')
+        console.log(res)
+        let l = res.length
+        //
+        // this.tableData1[0].modelname = this.modelname
+        // const str = res[0].evaluate
+        // const jsonObj = JSON.parse(str.replace(/'/g, '"'));
+        // const resultMap = new Map();
+        // for (const key in jsonObj) {
+        //   resultMap.set(key, jsonObj[key]);
+        // }
+        // console.log(resultMap)
+        // this.tableData1[0].accuracy = resultMap.get('accuracy')
+        // this.tableData1[0].precision = resultMap.get('precision')
+        // this.tableData1[0].recall = resultMap.get('recall')
+        // this.tableData1[0].f1Score = resultMap.get('f1')
+        // this.tableData1[0].alName = res[0].al
+        // this.tableData1[0].sampleName = res[0].diseasename
+        for (let i = 0; i < res.length; i++) {
+          const item = res[i];
+          const str = item.evaluate;
+          const jsonObj = JSON.parse(str.replace(/'/g, '"'));
+          const resultMap = new Map();
+          for (const key in jsonObj) {
+            resultMap.set(key, jsonObj[key]);
+          }
 
-        const str = res[0].evaluate
-        const jsonObj = JSON.parse(str.replace(/'/g, '"'));
-        const resultMap = new Map();
-        for (const key in jsonObj) {
-          resultMap.set(key, jsonObj[key]);
+          const newData = {
+            modelname: this.modelname,
+            accuracy: resultMap.get('accuracy'),
+            precision: resultMap.get('precision'),
+            recall: resultMap.get('recall'),
+            f1Score: resultMap.get('f1'),
+            alName: item.al,
+            sampleName: item.diseasename,
+            pkl:item.pkl
+          };
+          this.Algorithms.push(item.al)
+          this.tableData1.push(newData);
+          this.pictureUrl = item.picture
+          const match = this.pictureUrl.match(/(\d+_\w+)/);
+          let tempDy = match ? match[1] : null
+          if(item.al === 'RF'){
+            this.isRF = tempDy
+          }
+          this.dynamicVariable.push(tempDy)
         }
-        console.log(resultMap)
-        this.tableData1[0].accuracy = resultMap.get('accuracy')
-        this.tableData1[0].precision = resultMap.get('precision')
-        this.tableData1[0].recall = resultMap.get('recall')
-        this.tableData1[0].f1Score = resultMap.get('f1')
-        this.tableData1[0].alName = res[0].al
-        this.tableData1[0].sampleName = res[0].diseasename
-        this.pictureUrl = res[0].picture
-        const match = this.pictureUrl.match(/(\d+_\w+)/);
-        this.dynamicVariable = match ? match[1] : null;
 
+        // this.pictureUrl = res[0].picture
+        // const match = this.pictureUrl.match(/(\d+_\w+)/);
+        // this.dynamicVariable = match ? match[1] : null;
+        // console.log('his.dynamicVariable')
+        // console.log(this.dynamicVariable)
         let tablename = res[0].tablename
         this.getNumber(tablename)
+        this.tableData1.shift();
+        this.activeIndex = this.Algorithms[0]
+
       })
+    },
+    getNumber(tablename){
+      getRequest(`/Model/getNumber/${tablename}`).then(
+          res => {
+            this.totalSamples = res[0]
+            this.totalFeatures = res[1]
+          }
+      )
     },
     test(){
       console.log(this.getDetailData())
@@ -425,14 +517,7 @@ export default {
     toModelMan(){
       this.$router.replace('/modelManage')
     },
-    getNumber(tablename){
-      getRequest(`/Model/getNumber/${tablename}`).then(
-          res => {
-            this.tableData1[0].totalSamples = res[0]
-            this.tableData1[0].totalFeatures = res[1]
-          }
-      )
-    },
+
     getPictureUrl(imageName) {
       // 手动拼接文件夹路径和图片名称
       let path = this.pictureUrl + '\\' + imageName
@@ -444,7 +529,12 @@ export default {
     },
     use(){
       this.isResult = false
+      this.path = this.tableData1[0].pkl
+      this.electionAl = this.tableData1[0].alName
+      console.log('use')
+      console.log(this.path)
       this.getFea2()
+
     },
     getFea2(){
       getRequest(`/Model/getFea/${this.modelname}`).then(res => {
@@ -453,6 +543,28 @@ export default {
         this.selectedAlgorithmFeatures = fieldArray.map(field => ({ name: field, value: '' }))
         console.log(this.selectedAlgorithmFeatures)
       })
+    },
+    handleSelect(key){
+      console.log('handleSelect')
+      this.electionAl = key
+      for (let i = 0; i < this.tableData1.length; i++) {
+        // 如果当前对象的 alName 值与您已知的值匹配
+        if (this.tableData1[i].alName === key) {
+          // 获取对应的 pkl 值
+          this.path = this.tableData1[i].pkl;
+          // 找到匹配的对象后可以终止循环
+          break;
+        }
+      }
+      console.log(this.path)
+      this.detailData = []
+      this.mergeData = []
+      this.alFlag = false
+      this.disabled = false
+      this.predictionResult1 = []
+      this.predictionResult = {}
+      this.getFea2()
+
     },
     saveData(){
       for (let i = 0; i < this.selectedAlgorithmFeatures.length; i++) {
@@ -468,8 +580,7 @@ export default {
     promptDta(){
       this.loading = true
       const values = this.selectedAlgorithmFeatures.map(feature => feature.value);
-      getRequest(`/Patient/getModelPathByModelName/${this.modelname}`).then(res => {
-        let path = res;
+        let path = this.path;
         let fea = values
         let onlineUse = {
           path, fea
@@ -508,21 +619,21 @@ export default {
 
           })
         }
-      })
+
       this.getDetailData()
 
     },
     /*获取详细数据*/
     getDetailData() {
-        getRequest(`/Detail/getAll/${this.modelname}`).then(res => {
+        let modelname = this.modelname + this.electionAl
+        console.log(modelname)
+        getRequest(`/Detail/getAll/${modelname}`).then(res => {
           this.detailData = res
           console.log(this.detailData)
           this.selectedAlgorithmFeatures.forEach((selectedFeature) => {
             let detailItem = this.detailData.find(item => item.feature === selectedFeature.name);
 
             if (detailItem) {
-
-
               let fvalue = parseFloat(detailItem.fvalue);
               let bvalue = parseFloat(detailItem.bvalue);
               let value = parseFloat(selectedFeature.value);
@@ -533,7 +644,6 @@ export default {
                 } else if (value < fvalue) {
                   warning = "该特征的值过低";
                 }
-
                 if (warning !== "") {
                   this.mergeData.push({
                     feature: selectedFeature.name,
@@ -560,6 +670,38 @@ export default {
     isNumeric(value) {
       return /^-?\d*\.?\d*$/.test(value);
     },
+    downloadPDF() {
+      // 获取要下载的元素
+      const element = document.getElementById('downloadArea');
+
+      // 使用 html2canvas 将元素转换为 Canvas
+      html2canvas(element).then(canvas => {
+        // 获取 Canvas 对象的图像数据
+        const imgData = canvas.toDataURL('image/png');
+
+        // 设置 PDF 尺寸（A4）
+        const pdf = new jsPDF('p', 'mm', 'a4');
+
+        // 添加 Canvas 图像数据到 PDF
+        pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
+
+        // 下载 PDF 文件
+        pdf.save('download.pdf');
+      });
+    },
+    downloadImage(){
+      const divElement = document.getElementById('downloadArea'); // 替换为您的 div 元素的 ID
+      html2canvas(divElement, { scale: 2 }).then(canvas => {
+        const link = document.createElement('a');
+        link.href = canvas.toDataURL(this.formatPic);
+        let url = this.formatPic.split('/')[1]
+        const fileName = 'downloaded_image';
+        const imageUrl = `${fileName}.${url}`;
+        link.download = imageUrl;
+        link.click();
+      });
+      this.choseFormat = false
+    }
 
 
 
@@ -586,5 +728,17 @@ export default {
 
 .right {
   flex: 50%;
+}
+
+.bold {
+  font-weight: bold;
+  font-size: 1.2em; /* 设置加粗加大后的字体大小 */
+}
+.warning-high {
+  color: red;
+}
+
+.warning-low {
+  color: #ffff00;
 }
 </style>
