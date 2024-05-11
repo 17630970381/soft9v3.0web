@@ -7,8 +7,252 @@
         <span class="statistic"> 数据表: {{ datasetNum }} 个 </span>
       </div>
       <hr class="hr-dashed" />
-      <el-button class="el-icon-circle-plus-outline" style="width: 100%"  @click="dialogBigFormVisible=true; getDataDiseases()">导入数据表</el-button>
-      <el-dialog v-loading="loading" :element-loading-text="loadText" id="importDataTable" title="导入数据表"
+
+<!--      <div class="bigData">-->
+<!--        <el-button class="el-icon-circle-plus-outline" style="width: 100%;"  @click="dialogBigFormVisible=true; getDataDiseases()">导入数据集</el-button>-->
+<!--      </div>-->
+      <div class = "tree_btn"  style="display: flex; justify-content: space-between;">
+        <el-button style="width: 50%;" @click="dialogBigFormVisible = true; getDataDiseases()"> <i
+            class="el-icon-circle-plus-outline"></i> 上传数据 </el-button>
+        <el-button style="width: 50%;margin-left:0" @click="filterDataDialogVisible = true; getDataDiseases();openFileterAddDataForm()"> <i
+            class="el-icon-circle-plus-outline"></i> 纳排数据 </el-button>
+      </div>
+
+      <!--   纳排数据按钮 表单==============================================================================    -->
+      <el-dialog title="新增纳排数据集" :visible.sync="filterDataDialogVisible" width="1150px">
+        <div class="addDataClass">
+          <div class="addDataBaseInfo">
+            <i class="el-icon-s-data"></i>
+            <span class="titleText">数据集：</span>
+            <el-input v-model="addDataForm.dataName" placeholder="请输入数据集名称" @blur="checkRepeatAddDataForm"></el-input>
+          </div>
+          <div class="addDataBaseInfo">
+            <i class="el-icon-user-solid"></i>
+            <span class="titleText">创建人：</span>
+            <el-input v-model="addDataForm.createUser" placeholder="请输入创建人姓名" disabled></el-input>
+          </div>
+          <div class="addDataBaseInfo createTimeArea">
+            <i class="el-icon-time"></i>
+            <span class="titleText">创建时间：</span>
+            <span>{{ showFeatureDataForm.createTime }}</span>
+          </div>
+          <div class="addDataBaseInfo">
+            <!-- <i class="el-icon-pie-chart"></i>
+            <span class="titleText">所属类别：</span>
+            <span class="belongType">{{ showFeatureDataForm.classPath }}</span> -->
+          </div>
+        </div>
+
+        <div class="addDataClass" style="margin-top: 1%;">
+          <div class="block">
+            <span class="demonstration">请选择疾病：</span>
+            <el-cascader :options="disOptions" :props="{ checkStrictly: true }" v-model="selectedOptions"
+                         @change="handleCascaderChange"></el-cascader>
+            <span class="demonstration" style="margin-left: 2%;">是否共享：</span>
+            <el-switch v-model="is_share" active-color="#13ce66" inactive-color="#ff4949" @change="is_share_change()" style="margin-left: 1%;"></el-switch>
+            <span v-if="is_share" style="margin-left: 1%;">共享用户名单：{{ share_username }}</span>
+          </div>
+        </div>
+
+        <div class="addDataClass" style="margin-top: 20px" >
+          <div class="addDataTitle">
+            <i class="el-icon-connection"></i>&nbsp;&nbsp;特征选择
+            <el-button type="primary" plain @click="getSelectItems"
+            >查看历史筛选条件</el-button
+            >
+          </div>
+          <div style="margin-top: 20px">
+            <el-button type="primary" plain icon="el-icon-plus" style="margin-right: 8px"
+                       @click="putToAddDataForm">添加新条件</el-button>
+            <el-button @click="chooseCharacter(addDataForm.characterList[0])"
+                       style="margin-right: 8px; margin-left: 0px">{{ addDataForm.characterList[0].button }}</el-button>
+            <span v-if="addDataForm.characterList[0].type === 'discrete'">
+            <el-select :value="'='" slot="prepend" placeholder="运算符" style="width: 90px; margin-right: 8px" disabled>
+              <el-option label="=" value="="></el-option>
+            </el-select>
+            <el-select v-model="addDataForm.characterList[0].value" placeholder="请选择特征取值" style="width: 300px">
+              <el-option v-for="item in addDataForm.characterList[0].range" :key="item" :label="item" :value="item">
+              </el-option>
+            </el-select>
+          </span>
+            <span v-else>
+            <el-select v-model="addDataForm.characterList[0].computeOpt" slot="prepend" placeholder="运算符"
+                       style="width: 90px; margin-right: 8px">
+              <el-option label=">" value=">"></el-option>
+              <el-option label="<" value="<"></el-option>
+              <el-option label="=" value="="></el-option>
+            </el-select>
+            <el-input v-model="addDataForm.characterList[0].value" placeholder="请输入特征取值"
+                      style="width: 300px"></el-input>
+            <span style="width: 200px; color: #858585">
+              单位：{{ addDataForm.characterList[0].unit }}</span>
+          </span>
+          </div>
+          <div style="margin-top: 20px" v-for="(characterItem, index) in addDataForm.characterList.slice(1)" :key="index">
+            <el-select v-model="characterItem.opt" slot="prepend" placeholder="条件选择"
+                       style="width: 130px; margin-right: 8px">
+              <el-option label="AND" value="0"></el-option>
+              <el-option label="OR" value="1"></el-option>
+              <el-option label="NOT" value="2"></el-option>
+            </el-select>
+            <el-button @click="chooseCharacter(characterItem)" style="width: 130px; margin-right: 8px">{{
+                characterItem.button }}</el-button>
+            <span v-if="characterItem.type === 'discrete'">
+            <el-select :value="'='" slot="prepend" placeholder="运算符" style="width: 90px; margin-right: 8px" disabled>
+              <el-option label="=" value="="></el-option>
+            </el-select>
+            <el-select v-model="characterItem.value" placeholder="请选择特征取值" style="width: 300px">
+              <el-option v-for="item in characterItem.range" :key="item" :label="item" :value="item">
+              </el-option>
+            </el-select>
+          </span>
+            <span v-else>
+            <el-select v-model="characterItem.computeOpt" slot="prepend" placeholder="运算符"
+                       style="width: 90px; margin-right: 8px">
+              <el-option label=">" value=">"></el-option>
+              <el-option label="<" value="<"></el-option>
+              <el-option label="=" value="="></el-option>
+            </el-select>
+            <el-input v-model="characterItem.value" placeholder="请输入特征取值" style="width: 300px"></el-input>
+            <span style="width: 200px; color: #858585">
+              单位：{{ characterItem.unit }}</span>
+          </span>
+            <el-button type="primary" plain icon="el-icon-delete" style="margin-left: 10px"
+                       @click="deleteToAddDataForm(characterItem)">删除</el-button>
+          </div>
+          <div style="
+            margin-top: 20px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: center;
+          ">
+            <button class="cool-button" v-if="selectedOptions.length >0 "  @click="submitCharacterConditionWithNodeId();checkRepeatAddDataForm;is_after_filterd=true;">
+              筛选病例
+            </button>
+          </div>
+          <!-- 显示筛选出来的表数据 -->
+          <el-table :data="addTableData" stripe style="width: 100%" height="500" v-show="showAddTableData"
+                    :header-cell-style="{ background: '#eee', color: '#606266' }" v-loading="addDataLoading"
+                    element-loading-text="正在抽取数据">
+            <el-table-column v-for="(value, key) in addTableData[0]" :key="key" :prop="key" :label="key" width="80"
+                             sortable>
+              <template slot-scope="{ row }">
+                <div class="truncate-text">{{ row[key] }}</div>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+
+        <span slot="footer" class="dialog-footer" >
+          <div style="color: #939393" v-if="addDataForm.dataName === ''">请输入数据集名称</div>
+        <el-button @click="cleanDataInput()">取 消</el-button>
+        <el-button v-if="is_after_filterd == true && addDataForm.dataName !== ''" type="primary" @click="addUserFilterTable()">新建表</el-button>
+      </span>
+        <el-dialog title="特征选择" :visible.sync="characterVisible" width="50%" append-to-body>
+          <el-container>
+            <el-aside width="180px">
+              <el-menu default-active="1" class="el-menu-vertical-demo">
+                <el-menu-item index="1" @click="exchangeCharacterList(0)">
+                  <span slot="title">人口学</span>
+                </el-menu-item>
+                <el-menu-item index="3" @click="exchangeCharacterList(2)">
+                  <span slot="title">生理指标</span>
+                </el-menu-item>
+                <el-menu-item index="4" @click="exchangeCharacterList(3)">
+                  <span slot="title">行为学</span>
+                </el-menu-item>
+              </el-menu>
+            </el-aside>
+            <el-main>
+              <el-radio-group v-model="characterId" class="charactersGroup">
+                <el-radio v-for="optItem in characterOptList" :key="optItem.characterId" :label="optItem.characterId"
+                          border style="
+                  margin-bottom: 10px;
+                  margin-left: 0px;
+                  margin-right: 10px;
+                ">{{ optItem.chName }}</el-radio>
+              </el-radio-group>
+            </el-main>
+          </el-container>
+          <span slot="footer" class="dialog-footer">
+          <el-button type="primary" @click="confirmCharacter()">确 定</el-button>
+        </span>
+        </el-dialog>
+      </el-dialog>
+      <el-dialog title="筛选历史记录" :visible.sync="dialogSelectItemsVisible">
+        <el-table :data="filterConditionsData" height="500">
+          <el-table-column
+              property="time"
+              label="筛选日期"
+              width="150"
+          ></el-table-column>
+          <el-table-column
+              property="user"
+              label="筛选人"
+              width="150"
+          ></el-table-column>
+          <template v-for="n in maxConditions">
+            <el-table-column
+                v-if="n > 1"
+                :key="`opt${n}`"
+                :label="`关系${n}`"
+                width="100"
+            >
+              <template v-slot="scope">
+              <span>{{
+                  scope.row.filterCondition[n - 1]
+                      ? scope.row.filterCondition[n - 1].showOpt
+                      : ""
+                }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column :key="`chName${n}`" :label="`特征${n}`" width="100">
+              <template v-slot="scope">
+              <span>{{
+                  scope.row.filterCondition[n - 1]
+                      ? scope.row.filterCondition[n - 1].chName
+                      : ""
+                }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column
+                :key="`computeOpt${n}`"
+                :label="`条件${n}`"
+                width="100"
+            >
+              <template v-slot="scope">
+              <span>{{
+                  scope.row.filterCondition[n - 1]
+                      ? scope.row.filterCondition[n - 1].computeOpt
+                      : ""
+                }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column :key="`value${n}`" :label="`取值${n}`" width="100">
+              <template v-slot="scope">
+              <span>{{
+                  scope.row.filterCondition[n - 1]
+                      ? scope.row.filterCondition[n - 1].value
+                      : ""
+                }}</span>
+              </template>
+            </el-table-column>
+          </template>
+          <el-table-column fixed="right" label="操作" width="100">
+            <template slot-scope="scope">
+              <el-button
+                  @click="handleFilterClick(scope.row)"
+                  type="text"
+                  size="small"
+              >应用</el-button
+              >
+            </template>
+          </el-table-column>
+        </el-table>
+      </el-dialog>
+      <!--   纳排数据按钮 表单==============================================================================    -->
+      <!--  顶部上传数据集==============================================================================    -->
+      <el-dialog v-loading="loading" :element-loading-text="loadText" id="importDataTable" title="导入数据表(默认保存在私有数据集中)"
                  :visible.sync="dialogBigFormVisible" width="40%">
         <el-form :model="bigDialogForm" ref="bigDialogFormRef" :rules="bigDialogForm.rules" label-width="110px">
           <el-form-item label="选择数据表" prop="filesInfo">
@@ -24,7 +268,7 @@
           </el-form-item>
 
           <el-form-item label="数据表名称" prop="tableName">
-            <el-input v-model="bigDialogForm.tableName" placeholder="请输入数据表名称"></el-input>
+            <el-input v-model="bigDialogForm.tableName" placeholder="请输入数据表名称" @blur="checkRepeat"></el-input>
           </el-form-item>
 <!--          <el-form-item label="涉及疾病" prop="dataDisease">-->
 <!--            <el-input v-model="dialogForm.dataDisease" :disabled="true" style="width: 150px"></el-input>-->
@@ -62,7 +306,7 @@
           </div>
         </el-dialog>
       </el-dialog>
-
+      <!--  顶部数据集上传==============================================================================    -->
       <hr class="hr-dashed" />
 
       <el-input placeholder="输入关键字进行过滤" v-model="filterText">
@@ -185,12 +429,12 @@
         </span>
       </el-dialog>
     </div>
-    <el-dialog title="新增数据集" :visible.sync="dialogDataVisible" width="1150px">
+    <el-dialog title="新增数据集" :visible.sync="dialogDataVisible" width="1150px" :before-close="handleClose">
       <div class="addDataClass">
         <div class="addDataBaseInfo">
           <i class="el-icon-s-data"></i>
           <span class="titleText">数据集：</span>
-          <el-input v-model="addDataForm.dataName" placeholder="请输入数据集名称"></el-input>
+          <el-input v-model="addDataForm.dataName" placeholder="请输入数据集名称" @blur="checkRepeatAddDataForm"></el-input>
         </div>
         <div class="addDataBaseInfo">
           <i class="el-icon-user-solid"></i>
@@ -207,11 +451,16 @@
           <span class="titleText">所属类别：</span>
           <span class="belongType">{{ showFeatureDataForm.classPath }}</span> -->
         </div>
+        <span v-if="nodeData.status == '1'">共享用户名单：{{ share_username }}</span>
+        <el-button v-if="nodeData.status == '1'" @click="shareUserSelectDialog = true">选择共享用户</el-button>
       </div>
       <div class="addDataClass" style="margin-top: 20px">
         <div class="addDataTitle">
-          <i class="el-icon-connection"></i>&nbsp;&nbsp;特征选择
+          <div><i class="el-icon-connection"></i>&nbsp;&nbsp;特征选择</div>
+          <el-button type="primary" plain @click="getSelectItems"
+          >查看历史筛选条件</el-button>
         </div>
+
         <div style="margin-top: 20px">
           <el-button type="primary" plain icon="el-icon-plus" style="margin-right: 8px"
                      @click="putToAddDataForm">添加新条件</el-button>
@@ -277,7 +526,7 @@
             display: flex;
             justify-content: center;
           ">
-          <button class="cool-button" @click="submitCharacterCondition">
+          <button class="cool-button" @click="submitCharacterCondition();checkRepeatAddDataForm">
             筛选病例
           </button>
         </div>
@@ -294,8 +543,9 @@
       </div>
 
       <span slot="footer" class="dialog-footer">
+        <div style="color: #939393" v-if="addDataForm.dataName === ''">请输入数据集名称</div>
         <el-button @click="cleanDataInput()">取 消</el-button>
-        <el-button type="primary" @click="addTable()">新建表</el-button>
+        <el-button type="primary" v-if="addTableData.length > 0 && addDataForm.dataName !== ''" @click="addTable()">新建表</el-button>
       </span>
       <el-dialog title="特征选择" :visible.sync="characterVisible" width="50%" append-to-body>
         <el-container>
@@ -345,7 +595,7 @@
         </el-form-item>
 
         <el-form-item label="数据表名称" prop="tableName">
-          <el-input v-model="dialogForm.tableName" placeholder="请输入数据表名称"></el-input>
+          <el-input v-model="dialogForm.tableName" @blur="checkRepeat" placeholder="请输入数据表名称"></el-input>
         </el-form-item>
         <el-form-item label="涉及疾病" prop="dataDisease">
           <el-input v-model="dialogForm.dataDisease" :disabled="true" style="width: 150px"></el-input>
@@ -398,11 +648,21 @@
             showDataForm.classPath
           }}</span> -->
             <el-button type="success" size="mini" class="change_btn"
-                       v-if="nodeData.uid === loginUserID && nodeData.status == '0'" @click="changeStatus()">转为共享</el-button>
+                       v-if="nodeData.uid === loginUserID && nodeData.status == '0'"
+                       @click="TableshareUserSelectDialog = true">转为共享</el-button>
             <el-button type="success" size="mini" class="change_btn"
-                       v-if="nodeData.uid === loginUserID && nodeData.status == '1'" @click="changeStatus()">转为私有</el-button>
-            <el-button type="primary" @click="csvDialogVisible = true" size="mini" v-if="showDataForm.tableName"
-                       class="csv_btn">导出数据</el-button>
+                       v-if="nodeData.uid === loginUserID && nodeData.status == '1'" @click="changeToPrivate()">转为私有</el-button>
+            <el-button type="warning" size="mini" class="change_status_btn"
+                       v-if="nodeData.uid === loginUserID && nodeData.status == '1'"
+                       @click="changeShareStatus()">更改共享人员</el-button>
+            <el-button type="success" @click="csvDialogVisible = true"  style="position: absolute;right: 18%;top: 5%;"  size="mini"
+                       v-if="tableData.length && nodeData.status == '0' && nodeData.isUpload=='1'">允许下载</el-button>
+            <el-button type="primary" @click="applyDownload()"  style="position: absolute;right: 18%;top: 5%;"  size="mini"
+                       v-else-if="tableData.length && downloadStatus == '0'">申请下载</el-button>
+            <el-button type="warning" @click="waitingCheck()"  style="position: absolute;right: 18%;top: 5%;"  size="mini"
+                       v-else-if="tableData.length && downloadStatus == '1'">等待审核</el-button>
+            <el-button type="success" @click="csvDialogVisible = true" style="position: absolute;right: 18%;top: 5%;"  size="mini"
+                       v-else-if="tableData.length && downloadStatus == '2'">允许下载</el-button>
           </p>
         </div>
         <!-- 显示表数据 -->
@@ -446,6 +706,42 @@
           <el-button type="primary" @click="toXLSX">确 定</el-button>
         </span>
       </el-dialog>
+
+      <!-- 上传数据选择共享用户对话框 -->
+      <el-dialog title="请选择要共享的用户" :visible.sync="shareUserSelectDialog" width="40%">
+        <div style="text-align: center">
+          <el-transfer style="text-align: left; display: inline-block" v-model="share_uid_list" filterable
+                       filter-placeholder="请输入用户名称" :titles="['未共享用户', '以共享用户']" :filter-method="filterMethod"
+                       :data="all_uid_list">
+            <el-button class="transfer-footer" slot="left-footer" size="small" @click="cancelShare()">取消</el-button>
+            <el-button class="transfer-footer" slot="right-footer" size="small" @click="Share()">完成</el-button>
+          </el-transfer>
+        </div>
+      </el-dialog>
+
+      <!-- 单独表进行共享用户对话框 -->
+      <el-dialog title="请选择要共享的用户" :visible.sync="TableshareUserSelectDialog" width="40%">
+        <div style="text-align: center">
+          <el-transfer style="text-align: left; display: inline-block" v-model="share_uid_list" filterable
+                       filter-placeholder="请输入用户名称" :titles="['未共享用户', '以共享用户']" :filter-method="filterMethod"
+                       :data="all_uid_list">
+            <el-button class="transfer-footer" slot="left-footer" size="small" @click="cancelShare()">取消</el-button>
+            <el-button class="transfer-footer" slot="right-footer" size="small" @click="compeleteShare()">完成</el-button>
+          </el-transfer>
+        </div>
+      </el-dialog>
+
+      <!-- 单独表进行共享用户更改对话框 -->
+      <el-dialog title="请进行共享用户更改" :visible.sync="TableshareUserChangeDialog" width="40%">
+        <div style="text-align: center">
+          <el-transfer style="text-align: left; display: inline-block" v-model="share_uid_list" filterable
+                       filter-placeholder="请输入用户名称" :titles="['未共享用户', '以共享用户']" :filter-method="filterMethod"
+                       :data="all_uid_list">
+            <el-button class="transfer-footer" slot="left-footer" size="small" @click="cancelShare()">取消</el-button>
+            <el-button class="transfer-footer" slot="right-footer" size="small" @click="compeleteShare()">完成</el-button>
+          </el-transfer>
+        </div>
+      </el-dialog>
     </div>
   </div>
 </template>
@@ -483,6 +779,11 @@ export default {
     // 获取列表长度
     length() {
       return this.tableData.length || 0;
+    },
+    maxConditions() {
+      return this.filterConditionsData.reduce((max, item) => {
+        return Math.max(max, item.filterCondition.length);
+      }, 0);
     },
   },
   mounted() {
@@ -675,6 +976,58 @@ export default {
           ],
         },
       },
+      /*申请下载*/
+      nodeid:"",
+      downloadStatus: "0",
+      /*允许用户下载*/
+      uid_list: '',
+      all_uid_list: [],
+      share_uid_list: [],
+      shareUserSelectDialog: false,
+      share_username: '',
+      TableshareUserSelectDialog: false,
+      TableshareUserChangeDialog: false,
+      uploadDataDialogVisible: false,
+      is_share: false,
+      /*大纳排*/
+      dialogBigDataVisible:false,
+      addBigDataForm: {
+        dataName: "",
+        createUser: "",
+        createTime: "",
+        path: "",
+        characterList: [
+          {
+            opt: "",
+            characterId: -1,
+            featureName: "",
+            chName: "",
+            type: "",
+            unit: "",
+            range: "",
+            button: "点击选择特征",
+            value: "",
+            computeOpt: "",
+          },
+        ],
+      },
+      // 新增纳排按钮
+      filterDataDialogVisible:false,
+      dialogSelectItemsVisible: false,
+      filterConditionsData: [],
+      optMap: {
+        0: "AND",
+        1: "OR",
+        2: "NOT",
+      },
+      optValueMap: {
+        "AND":0,
+        "OR": 1,
+        "NOT": 2,
+      },
+      is_after_filterd:false,
+      selectedOptions: [],
+      addDataLoading: false,
     };
   },
 
@@ -734,6 +1087,7 @@ export default {
       });
     }, 200);
     this.getCatgory();
+    this.getUserList();
   },
 
   methods: {
@@ -792,6 +1146,7 @@ export default {
             this.selectedFields = [];
           }
       );
+      this.allowDownload()
     },
     formatCSVValue(value) {
       // 处理特殊字符
@@ -877,7 +1232,7 @@ export default {
           oldObj.range = a.range;
           oldObj.button = a.chName;
           oldObj.value = "";
-          oldObj.opt = a.opt;
+          // oldObj.opt = a.opt;
         }
       }
       this.addDataForm.characterList[index] = oldObj;
@@ -949,6 +1304,7 @@ export default {
       });
     },
     uploadFile() {
+      this.checkRepeat()
       if (this.$refs["uploadRef"].uploadFiles.length < 1) {
         this.$message({
           showClose: true,
@@ -986,6 +1342,7 @@ export default {
 
     },
     bigUploadFile() {
+      this.checkRepeat()
       if (this.$refs["uploadRef"].uploadFiles.length < 1) {
         this.$message({
           showClose: true,
@@ -1117,6 +1474,8 @@ export default {
     },
     changeData(data) {
       if (data.isLeafs == 1) {
+        this.nodeid = data.id;
+        this.getCheckApprove()
         this.showDataForm.featureNum = "";
         this.showDataForm.sampleNum = "";
         //获取描述信息
@@ -1126,6 +1485,7 @@ export default {
         this.tableData = [];
         this.getTableData(data.id, data.label);
         this.nodeData = data;
+
         console.log(this.nodeData);
       }
     },
@@ -1225,9 +1585,17 @@ export default {
     },
     cleanDataInput() {
       this.dialogDataVisible = false;
+      this.share_uid_list = [];
+      this.share_username = '';
+      this.uid_list = '';
+      this.filterDataDialogVisible = false;
+      this.selectedOptions = [];
+      this.is_after_filterd = false;
+      this.is_share=false;
     },
     addTable() {
       // 创建表
+      this.checkRepeatAddDataForm()
       this.diseaseName = this.addDataForm.dataName;
       this.dialogDataVisible = false;
       let filterConditions = {};
@@ -1244,7 +1612,11 @@ export default {
       };
       this.$axios(this.options).then((res) => {
         this.getCatgory();
+        this.share_uid_list = [];
+        this.share_username = '';
+        this.uid_list = '';
       });
+      this.is_after_filterd = false;
     },
     putToAddDataForm() {
       let number = -Math.floor(Math.random() * 100);
@@ -1275,10 +1647,21 @@ export default {
       this.characterOptItem = item;
     },
     submitCharacterCondition() {
-      console.log("this.addDataForm.characterList");
-      console.log(this.addDataForm.characterList);
+      if(this.addDataForm.characterList[0].value === ''|| this.addDataForm.characterList[0].featureName === '' || this.addDataForm.characterList[0].computeOpt === '' ){
+        this.$message.error("请输入完整的筛选条件")
+        return;
+      }
+      this.showAddTableData = true;
+      this.addDataLoading = true;
       let filterConditions = {};
-      filterConditions.addDataForm = this.addDataForm;
+      const tempData=this.addDataForm.characterList.map((item)=>{
+        return{
+          ...item,
+          opt:isNaN(item.opt)?this.optValueMap[item.opt]:item.opt
+        }
+      });
+      const tempAddDataForm={...this.addDataForm,characterList:tempData}
+      filterConditions.addDataForm = tempAddDataForm
       filterConditions.nodeData = this.nodeData;
       this.options = {
         method: "post",
@@ -1292,18 +1675,23 @@ export default {
       this.$axios(this.options)
           .then((res) => {
             this.addTableData = res.data;
-            console.log("数据:");
-            console.log(this.addTableData);
-            this.showAddTableData = true;
+            if(this.addTableData.length==0){
+              this.is_after_filterd = false;
+            }
+            else{
+              this.is_after_filterd = true;
+            }
+            // console.log("数据:");
+            // console.log(this.addTableData);
+            // this.showAddTableData = true;
+            this.addDataLoading = false;
           })
           .catch((error) => {
             this.$message.error("获取数据失败");
             console.log("获取数据失败" + error);
+            this.addDataLoading = false;
           });
       let s = JSON.stringify(this.addDataForm.characterList, null, 2);
-      console.log("this.addDataForm:");
-      console.log(this.addDataForm);
-      console.log(s);
     },
     getNowDateFormat() {
       const currentDate = new Date();
@@ -1477,6 +1865,530 @@ export default {
         }
       })
     },
+    /*申请下载*/
+    getCheckApprove(){
+      getRequest(`/api/sysManage/getCheckApprove`,{
+        id: this.nodeid,
+        username: sessionStorage.getItem("user")
+      }).then((res) => {
+        if (res.code == 200) {
+          // console.log("ret data", res.data);
+          this.downloadStatus = res.data;
+          // console.log(res.data);
+        }
+      });
+    },
+
+    applyDownload(){
+      getRequest(`/api/sysManage/applyCheckApprove`,{
+        id: this.nodeid,
+        username: sessionStorage.getItem("user")
+      }).then((res) => {
+        if (res.code == 200) {
+          this.downloadStatus=res.data;
+          // console.log("ret data", res.data);
+          this.$message({
+            showClose: true,
+            type: "success",
+            message: res.msg,
+          });
+          // console.log(res.data);
+        }
+      });
+    },
+    waitingCheck(){
+      this.$message({
+        showClose: true,
+        type: "warning",
+        message: `申请还在审核中……，请尽快联系管理员审核`,
+      });
+    },
+    allowDownload(){
+      getRequest(`/api/sysManage/allowCheckApprove`,{
+        id: this.nodeid,
+        username: sessionStorage.getItem("user")
+      }).then((res) => {
+        if (res.code == 200) {
+          // console.log("ret data", res.data);
+          this.downloadStatus=res.data;
+          this.$message({
+            showClose: true,
+            type: "success",
+            message: res.msg,
+          });
+          // console.log(res.data);
+        }
+      });
+    },
+    /*检查表名是否重复*/
+    checkRepeat(){
+      let tablename =  this.bigDialogForm.tableName === '' ? this.dialogForm.tableName : this.bigDialogForm.tableName;
+      console.log(tablename)
+      getRequest(`/TableData/checkRepeat/${tablename}`).then(res => {
+        if(res.code == 200){
+          if(res.data){
+            this.bigDialogForm.tableName = ''
+            this.dialogForm.tableName = ''
+            this.$message({
+              type: "warning",
+              message: `表名${tablename}已存在，请重新输入`})
+          }
+
+        }
+      })
+    },
+    checkRepeatAddDataForm(){
+      let tablename =  this.addBigDataForm.dataName === '' ? this.addDataForm.dataName : this.addBigDataForm.dataName;
+      console.log(tablename)
+      getRequest(`/TableData/checkRepeat/${tablename}`).then(res => {
+        if(res.code == 200){
+          if(res.data){
+            this.addBigDataForm.dataName = ''
+            this.addDataForm.dataName = ''
+            this.$message({
+              type: "warning",
+              message: `表名${tablename}已存在，请重新输入`})
+          }
+
+        }
+      })
+    },
+    /*共享用户*/
+    getUserList() {
+      getRequest(`/user/getTransferUserList?uid=${this.loginUserID}`)
+          .then((response) => {
+            if (response.code == 200) {
+              this.all_uid_list = response.data
+              console.log(this.all_uid_list);
+            }
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+    },
+    filterMethod(query, item) {
+      return item.label.indexOf(query) > -1;
+    },
+    cancelShare() {
+      this.shareUserSelectDialog = false;
+      this.TableshareUserChangeDialog = false;
+      this.TableshareUserSelectDialog = false;
+      this.uid_list = '';
+      this.is_share = false;
+    },
+    Share() {
+      this.uid_list = this.share_uid_list.join(",");
+      this.shareUserSelectDialog = false;
+      var username_list = [];
+      for (var user of this.all_uid_list) {
+        if (this.share_uid_list.includes(user.key)) {
+          username_list.push(user.label);
+        }
+
+      }
+      console.log(this.uid_list);
+      console.log(this.share_uid_list);
+      this.share_username = username_list.join(",");
+
+    },
+    compeleteShare() {
+      this.uid_list = this.share_uid_list.join(",");
+      postRequest("/api/category/changeToShare", {
+        nodeid: this.nodeData.id,
+        uid_list: this.uid_list,
+      }).then((res) => {
+        if (res.code == 200) {
+          this.$message.success("分享成功");
+          this.TableshareUserSelectDialog = false;
+          this.TableshareUserChangeDialog = false;
+          this.share_uid_list = [];
+          this.uid_list = '';
+          this.getCatgory();
+        } else {
+          this.$message.error("分享失败");
+        }
+      });
+    },
+    changeToPrivate() {
+      console.log(this.nodeData);
+      postRequest("/api/category/changeToPrivate", {
+        nodeid: this.nodeData.id
+      })
+          .then((res) => {
+            if (res.code == 200) {
+              this.$message.success("转为私有成功");
+              this.getCatgory();
+              this.getTableDescribe(this.nodeData.id, this.nodeData.label);
+              this.nodeData.status = "0";
+            } else {
+              this.$message.error("转为私有失败");
+            }
+          }).catch((error) => {
+        console.log(error);
+      });
+    },
+    changeShareStatus() {
+      this.TableshareUserChangeDialog = true;
+      postRequest("/api/category/getNodeInfo", {
+        nodeid: this.nodeData.id,
+        uid: this.loginUserID,
+      })
+          .then((res) => {
+            if (res.code == 200) {
+              this.$message.success("转为私有成功");
+              this.share_uid_list = res.data;
+            } else {
+              this.$message.error("转为私有失败");
+            }
+          }).catch((error) => {
+        console.log(error);
+      });
+    },
+    handleClose(){
+      this.addTableData = []
+      this.dialogDataVisible=false
+    },
+    //*
+    openFileterAddDataForm() {
+      this.addDataForm = {
+        dataName: "",
+        uid: sessionStorage.getItem("uid"),
+        username: sessionStorage.getItem("user"),
+        createUser: sessionStorage.getItem("user"),
+        isUpload: "0",
+        isFilter: "1",
+        uid_list: this.uid_list,
+        characterList: [
+          {
+            opt: "",
+            characterId: -1,
+            featureName: "",
+            chName: "",
+            type: "",
+            unit: "",
+            range: "",
+            button: "点击选择特征",
+            value: "",
+            computeOpt: "",
+          },
+        ],
+      };
+      this.showAddTableData = false;
+      this.showFeatureDataForm.createUse = sessionStorage.getItem("user");
+      this.showFeatureDataForm.createTime = this.getNowDateFormat();
+    },
+    is_share_change() {
+      this.shareUserSelectDialog = this.is_share;
+      if (this.is_share == false) {
+        this.cancelShare();
+      }
+    },
+    //历史纳排记录
+    getSelectItems() {
+      console.log("in");
+      getRequest("/TableData/getFilterConditionInfos").then((res) => {
+        this.dialogSelectItemsVisible = true;
+        var reg = /^"|"$|'|'/g;
+        const filterTableData = res.data.map((item) => {
+          return {
+            filterCondition: item.filterDataCols.map((item) => {
+              return {
+                ...item,
+                button: item.chName,
+                showOpt: this.optMap[item.opt],
+                value: item.value.replace(reg, ""),
+              };
+            }),
+            user: item.filterDataInfo.username,
+            time: item.filterDataInfo.filterTime,
+          };
+        });
+        this.filterConditionsData = filterTableData;
+      });
+      console.log("filterConditionsData", this.filterConditionsData);
+    },
+    submitCharacterConditionWithNodeId() {
+      // console.log("this.addDataForm.characterList");
+      // console.log(this.addDataForm.characterList);
+      // console.log(this.addDataForm.characterList);
+      console.log("submitCharacterConditionWithNodeId")
+      console.log("this.addDataForm.characterList.value" )
+      console.log(this.addDataForm.characterList[0] )
+      if(this.addDataForm.characterList[0].value === ''|| this.addDataForm.characterList[0].featureName === '' || this.addDataForm.characterList[0].computeOpt === '' ){
+        this.$message.error("请输入完整的筛选条件")
+        return;
+      }
+      if(this.selectedOptions.length < 0){
+        this.$message.error("请先选择病种")
+        return;
+      }else {
+        console.log("this.selectedOptions");
+        console.log(this.selectedOptions);
+        this.showAddTableData = true;
+        this.addDataLoading = true;
+        let filterConditions = {};
+        const tempData=this.addDataForm.characterList.map((item)=>{
+          return{
+            ...item,
+            opt:isNaN(item.opt)?this.optValueMap[item.opt]:item.opt
+          }
+        });
+        const tempAddDataForm={...this.addDataForm,characterList:tempData}
+        filterConditions.addDataForm = tempAddDataForm
+        filterConditions.nodeData = this.nodeData;
+        filterConditions.nodeid = this.selectedOptions[this.selectedOptions.length-1];
+        console.log(filterConditions);
+        console.log(filterConditions.nodeid);
+        this.options = {
+          method: "post",
+          data: filterConditions,
+          url: "/TableData/getFilterDataByConditionsByDieaseId",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        };
+        // console.log("请求参数：" + JSON.stringify(filterConditions));
+        this.$axios(this.options)
+            .then((res) => {
+              this.addTableData = res.data;
+              if(this.addTableData.length==0){
+                this.is_after_filterd = false;
+              }
+              else{
+                this.is_after_filterd = true;
+              }
+              // console.log("数据:");
+              // console.log(this.addTableData);
+              // this.showAddTableData = true;
+              this.addDataLoading = false;
+            })
+            .catch((error) => {
+              this.$message.error("获取数据失败");
+              console.log("获取数据失败" + error);
+              this.addDataLoading = false;
+            });
+        let s = JSON.stringify(this.addDataForm.characterList, null, 2);
+      }
+    },
+    userUpRequest(data) {
+      if (this.selectedOptions.length < 1) {
+        this.$message({
+          type: "warning",
+          message: "请选择该数据表应该属于什么病种",
+        });
+        return;
+      }
+      if (this.selectedOptions.length === 1 && this.selectedOptions[0] === '14') {
+        console.log("开始上传文件");
+        const payload = new FormData();
+        const fileSize = data.file.size;
+
+        const fileSizeInMB = (fileSize / 100000).toFixed(2)
+        payload.append("file", data.file);
+        payload.append("newName", this.dialogForm.tableName);
+        payload.append("disease", "多疾病");
+        payload.append("user", sessionStorage.getItem("user"));
+        payload.append("uid", sessionStorage.getItem("uid"));
+        payload.append("parentId", this.selectedOptions[0]);
+        payload.append("parentType", "多疾病");
+        if (this.is_share == true) {
+          payload.append("status", "1");
+        } else {
+          payload.append("status", "0");
+        }
+
+        payload.append(
+            "size",
+            fileSizeInMB
+        );
+        payload.append("is_upload", "1");
+        payload.append("is_filter", "0");
+        payload.append("uid_list", this.uid_list);
+        this.options = {
+          method: "post",
+          data: payload,
+          url: "api/dataTable/parseAndUpload",
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        };
+        this.$axios(this.options).then((res) => {
+          console.log(this.options.data.get("uid"));
+          // 返回表头信息
+          this.loading = false;
+          if (res?.code == "200") {
+            this.$message({
+              showClose: true,
+              type: "success",
+              message: "解析成功",
+            });
+            let featureList = res.data.featureList;
+            this.compelete_userId = res.data.userId;
+            this.compelete_node = res.data.node;
+            this.compelete_size = res.data.size;
+            this.compelete_tableDescribe = res.data.tableDescribe;
+            console.log(featureList);
+            //把特征存为map的键
+            for (const item of featureList) {
+              this.$set(this.featuresMap, item, "diagnosis");
+            }
+            this.featuresVision = true;
+            this.uploadDataDialogVisible = false;
+            this.getCatgory();
+            this.share_uid_list = [];
+            this.share_username = '';
+            this.uid_list = '';
+            this.is_share = false;
+            this.dialogForm = {
+              filesInfo: [],
+              tableName: "",
+              isOnly: true,
+              dataDisease: "",
+              featuresNum: 1,
+              fields: [{ name: "", type: "" }],
+
+            }
+          } else {
+            this.$message({
+              showClose: true,
+              type: "error",
+              message: "解析失败",
+            });
+          }
+        });
+      }
+      else {
+        console.log("开始上传文件");
+
+        const fileSize = data.file.size;
+
+        const fileSizeInMB = (fileSize / 100000).toFixed(2)
+        console.log("fileSize", fileSize, fileSizeInMB);
+
+        const payload = new FormData();
+        payload.append("file", data.file);
+        payload.append("pid", this.pid);
+        payload.append("tableName", this.dialogForm.tableName);
+        payload.append("userName", sessionStorage.getItem("user"));
+
+        payload.append("ids", this.selectedOptions)
+
+        payload.append("uid", sessionStorage.getItem("uid"));
+        if (this.is_share == true) {
+          payload.append("tableStatus", "1");
+        } else {
+          payload.append("tableStatus", "0");
+        }
+        payload.append("tableSize", fileSizeInMB);
+        payload.append("current_uid", sessionStorage.getItem("uid"));
+        payload.append("uid_list", this.uid_list);
+        this.options = {
+          method: "post",
+          data: payload,
+          url: "/api/uploadDataTable",
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        };
+        this.$axios(this.options).then((res) => {
+          // 返回表头信息
+          this.loading = false;
+          console.log(res);
+          if (res?.code == "200") {
+            this.$message({
+              showClose: true,
+              type: "success",
+              message: "解析成功",
+            });
+
+            this.uploadDataDialogVisible = false;
+            this.getCatgory();
+            this.share_uid_list = [];
+            this.share_username = '';
+            this.uid_list = '';
+            this.is_share = false;
+            this.dialogForm = {
+              filesInfo: [],
+              tableName: "",
+              isOnly: true,
+              dataDisease: "",
+              featuresNum: 1,
+              fields: [{ name: "", type: "" }],
+
+            }
+          } else {
+            this.$message({
+              showClose: true,
+              type: "error",
+              message: "解析失败",
+            });
+          }
+        });
+      }
+    },
+    addUserFilterTable(){
+      // 创建表
+      this.checkRepeatAddDataForm()
+      this.addDataForm.uid_list = this.uid_list,
+          this.diseaseName = this.addDataForm.dataName;
+      this.dialogDataVisible = false;
+      let filterConditions = {};
+      filterConditions.addDataForm = this.addDataForm;
+      filterConditions.nodeid = this.selectedOptions[this.selectedOptions.length - 1];
+      if(this.is_share == true){
+        filterConditions.status = "1";
+      }else{
+        filterConditions.status = "0";
+      }
+
+
+      const tempData=this.addDataForm.characterList.map((item)=>{
+        return{
+          ...item,
+          opt:isNaN(item.opt)?this.optValueMap[item.opt]:item.opt
+        }
+      });
+      const tempAddDataForm={...this.addDataForm,characterList:tempData}
+      filterConditions.addDataForm = tempAddDataForm;
+      filterConditions.nodeData = this.nodeData;
+      console.log(filterConditions);
+      this.options = {
+        method: "post",
+        data: filterConditions,
+        url: "/TableData/createFilterBtnTable",
+        headers: {
+          "Content-Type": "application/json",
+          "uid": this.loginUserID,
+          "username": sessionStorage.getItem("user"),
+          "role": sessionStorage.getItem("userrole")
+        },
+      };
+
+      this.$axios(this.options).then((res) => {
+        this.getCatgory();
+        this.share_uid_list = [];
+        this.share_username = '';
+        this.uid_list = '';
+        this.filterDataDialogVisible = false;
+        this.selectedOptions = [];
+        this.is_after_filterd = false;
+        this.is_share=false;
+      });
+
+
+    },
+    handleFilterClick(row) {
+      const tempColumn = row.filterCondition.map((item) => {
+        return {
+          ...item,
+          opt: item.showOpt,
+        };
+      });
+      this.addDataForm.characterList = tempColumn;
+      this.dialogSelectItemsVisible = false;
+    },
+
+
   },
 };
 </script>
@@ -1779,5 +2691,9 @@ h3 {
   align-content: flex-start;
   height: 500px;
   overflow: auto;
+}
+.bigData{
+
+
 }
 </style>

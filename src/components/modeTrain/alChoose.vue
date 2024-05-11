@@ -28,7 +28,7 @@
          </div>
        </div>
        <!--  算法选择详情（所需超参）：占80%     -->
-       <div class="small-div right">
+       <div class="small-div right" style="height: 65vh">
          <!--   标签选择     -->
          <div>
            <h1 v-if="selectedAlgorithms.length > 0"
@@ -59,113 +59,115 @@
                style="margin-left: 20px;margin-top: 10px">
              请输入算法所需超参数：
            </h1>
-           <div style="margin-top: 10px;margin-left: 20px">
-             <el-row v-for="(param, index) in myParameters" :key="index" :gutter="20" style="margin-bottom: 5px">
-               <el-col v-for="(value, key) in param" :span="3" :key="key">
-                 <label>{{ key }}:</label>
-               </el-col>
-               <el-col v-for="(value, key) in param" :span="8" :key="key">
-                 <!-- Check if the value is a boolean -->
-                 <template v-if="param[key] === 'true' || param[key] === 'false'">
-                   <el-radio-group v-model="param[key]" :disabled="isPrompt">
-                     <el-radio label="true">True</el-radio>
-                     <el-radio label="false">False</el-radio>
-                   </el-radio-group>
-                 </template>
-                 <template v-else-if="key === 'subsample'">
-                   <el-slider
-                       v-model="param[key]"
-                       :disabled="isPrompt"
-                       :min="0.1"
-                       :max="1"
-                       :step="0.1"
-                       show-input-controls
-                       show-input
-                       controls-position="bottom"
+           <div style="margin-top: 10px;margin-left: 20px;">
+             <div class="alPara">
+               <el-row v-for="(param, index) in myParameters" :key="index" :gutter="20" style="margin-bottom: 5px">
+                 <el-col v-for="(value, key) in param" :span="3" :key="key">
+                   <label>{{ key }}:</label>
+                 </el-col>
+                 <el-col v-for="(value, key) in param" :span="9" :key="key">
+                   <!-- Check if the value is a boolean -->
+                   <template v-if="param[key] === 'true' || param[key] === 'false'">
+                     <el-radio-group v-model="param[key]" :disabled="isPrompt">
+                       <el-radio label="true">True</el-radio>
+                       <el-radio label="false">False</el-radio>
+                     </el-radio-group>
+                   </template>
+                   <template v-else-if="key === 'subsample'">
+                     <el-slider
+                         v-model="param[key]"
+                         :disabled="isPrompt"
+                         :min="0.1"
+                         :max="1"
+                         :step="0.1"
+                         show-input-controls
+                         show-input
+                         controls-position="bottom"
 
-                   ></el-slider>
-                 </template>
-                 <template v-else-if="key === 'colsample_bytree'">
-                   <el-slider
-                       v-model="param[key]"
-                       :disabled="isPrompt"
-                       :min="0.1"
-                       :max="1"
-                       :step="0.1"
-                       show-input-controls
-                       show-input
-                       controls-position="bottom"
+                     ></el-slider>
+                   </template>
+                   <template v-else-if="key === 'colsample_bytree'">
+                     <el-slider
+                         v-model="param[key]"
+                         :disabled="isPrompt"
+                         :min="0.1"
+                         :max="1"
+                         :step="0.1"
+                         show-input-controls
+                         show-input
+                         controls-position="bottom"
 
-                   ></el-slider>
-                 </template>
-                 <template v-else-if="key === 'learning_rate'">
-                   <el-slider
-                       v-model="param[key]"
-                       :disabled="isPrompt"
-                       :min="0.001"
-                       :max="1"
-                       :step="0.001"
-                       show-input-controls
-                       show-input
-                       controls-position="bottom"
+                     ></el-slider>
+                   </template>
+                   <template v-else-if="key === 'learning_rate'">
+                     <el-slider
+                         v-model="param[key]"
+                         :disabled="isPrompt"
+                         :min="0.001"
+                         :max="1"
+                         :step="0.001"
+                         show-input-controls
+                         show-input
+                         controls-position="bottom"
 
-                   ></el-slider>
-                 </template>
-                 <template v-else-if="key === 'tol'">
-                   <el-slider
-                       v-model="param[key]"
-                       :disabled="isPrompt"
-                       :min="0.001"
-                       :max="1"
-                       :step="0.001"
-                       show-input-controls
-                       show-input
-                       controls-position="bottom"
+                     ></el-slider>
+                   </template>
+                   <template v-else-if="key === 'tol'">
+                     <el-slider
+                         v-model="param[key]"
+                         :disabled="isPrompt"
+                         :min="0.001"
+                         :max="1"
+                         :step="0.001"
+                         show-input-controls
+                         show-input
+                         controls-position="bottom"
 
-                   ></el-slider>
-                 </template>
-                 <template v-else-if="param[key] === 'l1' || param[key] === 'l2' || param[key] === 'elasticnet' || param[key] === 'none' && electionAl === 'LR'">
-                   <el-radio-group v-model="param[key]" :disabled="isPrompt">
-                     <el-radio label="l1">l1</el-radio>
-                     <el-radio label="l2">l2</el-radio>
-                     <el-radio label="elasticnet">elasticnet</el-radio>
-                     <el-radio label="none">none</el-radio>
-                   </el-radio-group>
-                 </template>
-                 <template v-else-if="key === 'splitter'">
-                   <el-radio-group v-model="param[key]" :disabled="isPrompt">
-                     <el-radio label="best">best</el-radio>
-                     <el-radio label="random">random</el-radio>
-                   </el-radio-group>
-                 </template>
-                 <template v-else-if="param[key] === 'newton-cg' || param[key] === 'lbfgs' || param[key] === 'liblinear' || param[key] === 'sag' || param[key] === 'saga'">
-                   <el-radio-group v-model="param[key]" :disabled="isPrompt">
-                     <el-radio label="newton-cg">newton-cg</el-radio>
-                     <el-radio label="lbfgs">lbfgs</el-radio>
-                     <el-radio label="liblinear">liblinear</el-radio>
-                     <el-radio label="sag">sag</el-radio>
-                     <el-radio label="saga">saga</el-radio>
-                   </el-radio-group>
-                 </template>
-                 <template v-else-if="param[key] === 'gini' || param[key] === 'entropy'">
-                   <el-radio-group v-model="param[key]" :disabled="isPrompt">
-                     <el-radio label="gini">gini</el-radio>
-                     <el-radio label="entropy">entropy</el-radio>
-                   </el-radio-group>
-                 </template>
-                 <template v-else>
-                   <el-input  @keydown.enter.native="onEnterKey"  @keydown="validateInput($event)" v-validate-number :disabled="isPrompt" v-model="param[key]" placeholder="请输入" />
+                     ></el-slider>
+                   </template>
+                   <template v-else-if="param[key] === 'l1' || param[key] === 'l2' || param[key] === 'elasticnet' || param[key] === 'none' && electionAl === 'LR'">
+                     <el-radio-group v-model="param[key]" :disabled="isPrompt">
+                       <el-radio label="l1">l1</el-radio>
+                       <el-radio label="l2">l2</el-radio>
+                       <el-radio label="elasticnet">elasticnet</el-radio>
+                       <el-radio label="none">none</el-radio>
+                     </el-radio-group>
+                   </template>
+                   <template v-else-if="key === 'splitter'">
+                     <el-radio-group v-model="param[key]" :disabled="isPrompt">
+                       <el-radio label="best">best</el-radio>
+                       <el-radio label="random">random</el-radio>
+                     </el-radio-group>
+                   </template>
+                   <template v-else-if="param[key] === 'newton-cg' || param[key] === 'lbfgs' || param[key] === 'liblinear' || param[key] === 'sag' || param[key] === 'saga'">
+                     <el-radio-group v-model="param[key]" :disabled="isPrompt">
+                       <el-radio label="newton-cg">newton-cg</el-radio>
+                       <el-radio label="lbfgs">lbfgs</el-radio>
+                       <el-radio label="liblinear">liblinear</el-radio>
+                       <el-radio label="sag">sag</el-radio>
+                       <el-radio label="saga">saga</el-radio>
+                     </el-radio-group>
+                   </template>
+                   <template v-else-if="param[key] === 'gini' || param[key] === 'entropy'">
+                     <el-radio-group v-model="param[key]" :disabled="isPrompt">
+                       <el-radio label="gini">gini</el-radio>
+                       <el-radio label="entropy">entropy</el-radio>
+                     </el-radio-group>
+                   </template>
+                   <template v-else>
+                     <el-input  @keydown.enter.native="onEnterKey"  @keydown="validateInput($event)" v-validate-number :disabled="isPrompt" v-model="param[key]" placeholder="请输入" />
 
-                 </template>
-               </el-col>
-               <el-col v-for="(value, key) in myMeaning[index]" :span="8" :key="key">
-                 <span>{{ value }}</span>
-               </el-col>
-             </el-row>
-             <h1 v-if="isPrompt">所有算法超参以保存，不可再修改参数</h1>
-             <div>
-               <h1>选择参数<span style="font-size: 15px;color: #868585">（该参数作为后续任务调用的结果展示）</span></h1>
-               <h2>人群均值前百分比</h2>
+                   </template>
+                 </el-col>
+                 <el-col v-for="(value, key) in myMeaning[index]" :span="8" :key="key">
+                   <span>{{ value }}</span>
+                 </el-col>
+               </el-row>
+               <h1 v-if="isPrompt">所有算法超参以保存，不可再修改参数</h1>
+             </div>
+             <div class="averChoose">
+               <div>选择参数<span style="font-size: 15px;color: #868585">（该参数作为后续任务调用的结果展示）</span></div>
+               <div>人群均值前百分比</div>
                <div class="block">
                  <el-slider
                      v-model="pvalue"
@@ -174,7 +176,7 @@
                  >
                  </el-slider>
                </div>
-               <h2>人群均值后百分比</h2>
+               <div>人群均值后百分比</div>
                <div class="block">
                  <el-slider
                      v-model="bvalue"
@@ -533,7 +535,7 @@ export default {
 }
 
 .small-div {
-  height: 60vh; /* 或者适应你的实际高度需求 */
+  height: 70vh; /* 或者适应你的实际高度需求 */
 
 }
 
@@ -561,5 +563,14 @@ export default {
 
 .item {
   white-space: nowrap;
+}
+.alPara{
+  height: 30vh;
+  overflow-y: scroll;
+}
+.averChoose{
+  margin: 10px 0px;
+  color: #252525;
+  font-size: 16px;
 }
 </style>

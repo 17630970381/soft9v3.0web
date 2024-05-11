@@ -54,9 +54,9 @@
                 </el-table-column>
                 <el-table-column prop="tableSize" label="数据表大小" width="100">
                 </el-table-column>
-              <el-table-column prop="checkApproving" label="申请用户" width="100">
+              <el-table-column prop="checkApproving" label="申请下载用户" width="100">
               </el-table-column>
-              <el-table-column prop="checkApproved" label="已批准用户" width="100">
+              <el-table-column prop="checkApproved" label="已批准下载用户" width="100">
               </el-table-column>
 
                 <el-table-column label="操作">
@@ -174,7 +174,7 @@
                 class="custom-table"
                 :header-cell-style="headerCellStyle"
                 ref="scrollTable"
-                height="700vh"
+                height="600"
             >
               <el-table-column
                   v-for="(value, key) in tableData[0]"
@@ -238,6 +238,7 @@
                 <el-input
                     v-model="dialogForm.tableName"
                     placeholder="请输入数据表名称"
+                    @blur="checkRepeat"
                 ></el-input>
                 </el-form-item>
                 <el-form-item label="请选择病种">
@@ -266,7 +267,7 @@
                 </el-form-item>
                 
                 <el-form-item label="数据表名称" label-width="120">
-                    <el-input v-model="adminDataManageForm.tableName" autocomplete="off" size="medium"></el-input>
+                    <el-input v-model="adminDataManageForm.tableName" autocomplete="off" size="medium" @blur="checkRepeat"></el-input>
                 </el-form-item>
                 <el-form-item label="用户名称" label-width="120">
                     <el-input v-model="adminDataManageForm.createUser" autocomplete="off" disabled size="medium"></el-input>
@@ -316,7 +317,7 @@
             </el-form>
             <div slot="footer" class="dialog-footer">
                 <el-button @click="editAdminDataManageVisible = false">取 消</el-button>
-                <el-button type="primary" @click="confirmEditAdminDataManage()">确 定</el-button>
+                <el-button type="primary" @click="checkRepeatAdminDataManageForm()">确 定</el-button>
             </div>
         </el-dialog>
 
@@ -587,7 +588,7 @@ export default {
                     this.total = res.data.total;
                     this.adminDataManageList = res.data.list; 
                 }else{
-                    console.logt("res", res.data)
+                    console.log("res", res.data)
                 }
             })
         },
@@ -703,6 +704,7 @@ export default {
             
             },
         uploadFile() {
+            this.checkRepeat()
             if (this.selectedOptions.length < 1){
                 this.$message({
                     type: "warning",
@@ -785,7 +787,7 @@ export default {
             this.options = {
                 method: "post",
                 data: filterConditions,
-                url: "api/createTable",
+                url: "TableData/createTable",
                 headers: {
                 "Content-Type": "application/json",
                 },
@@ -937,7 +939,7 @@ export default {
 
       selectTableByid(){
         this.selectTableLoading=true;
-        getTableData("/api/getTableData", this.tid, this.tname)
+        getTableData("/TableData/getTableData", this.tid, this.tname)
             .then((res) => {
               if (res.code == 200) {
                 this.selectTableVisible = true;
@@ -996,19 +998,37 @@ export default {
           }
         })
       },
-      confirmUsenames(type){
-        if (this.multipleSelection.length < 1){ // 自定义状态码
+      confirmUsenames(type) {
+        if (this.multipleSelection.length < 1) {
+          // 自定义状态码
           this.$message({
             type: "warning",
             message: "请选择至少一个用户进行审批",
           });
           return;
         }
-        this.multipleLoding=true;
-        this.multipleSelection.forEach(
-            selection => this.updateCheckApprove(selection.username, type)
-        )
-        this.multipleLoding=false;
+        this.multipleLoding = true;
+
+        let usernames = [];
+        this.multipleSelection.forEach((selection) =>
+            usernames.push(selection.username)
+        );
+
+        getRequest(`/api/sysManage/updateCheckApproves`, {
+          id: this.tid,
+          multipleSelection: usernames.join(","),
+          type: type,
+        }).then((res) => {
+          if (res.code == 200) {
+            console.log("res.data:", res.data);
+            this.getCheckDataById(this.tid, this.tname);
+            this.getAllAdminDataTable();
+          } else {
+            this.$message.error("获取用户信息失败");
+            this.getAllAdminDataTable();
+          }
+        });
+        this.multipleLoding = false;
       },
       toggleSelection(rows) {
         if (rows) {
@@ -1022,6 +1042,44 @@ export default {
       handleSelectionChange(val) {
         this.multipleSelection = val;
       },
+      /*检查表名是否重复*/
+      checkRepeat(){
+        this.adminDataManageForm
+        let tablename = this.dialogForm.tableName
+        getRequest(`/TableData/checkRepeat/${tablename}`).then(res => {
+          if(res.code == 200){
+            if(res.data){
+              this.dialogForm.tableName = ''
+              this.$message({
+                type: "warning",
+                message: `表名${tablename}已存在，请重新输入`})
+            }
+
+          }
+        })
+      },
+      checkRepeatAdminDataManageForm(){
+        const oldTableName = this.oldTableName
+        const tablename = this.adminDataManageForm.tableName
+        if(oldTableName !== tablename){
+          getRequest(`/TableData/checkRepeat/${tablename}`).then(res => {
+            if(res.code == 200){
+              if(res.data){
+                this.adminDataManageForm.tableName = oldTableName
+                this.$message({
+                  type: "warning",
+                  message: `表名${tablename}已存在，请重新输入`})
+              }else {
+                this.confirmEditAdminDataManage()
+              }
+
+            }
+          })
+        }else {
+          this.confirmEditAdminDataManage()
+        }
+
+      }
     },
 
 };

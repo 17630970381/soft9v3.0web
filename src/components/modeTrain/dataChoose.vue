@@ -1,7 +1,7 @@
 
 <template>
   <div>
-    <div style="border-bottom: #868585 solid 1px; padding-bottom: 10px">
+    <div>
       <el-steps :active="active">
         <el-step title="基本信息" icon="el-icon-edit"></el-step>
         <el-step title="特征选择" icon="el-icon-picture"></el-step>
@@ -10,102 +10,113 @@
       </el-steps>
     </div>
     <!--  选择数据  -->
-    <div style="margin: 5px 0;">
-      <el-form :rules="rules" :model="formData" label-width="100px" style="width: 70%;margin-top: 10px">
-      <div style="display: flex">
-        <el-form-item prop="modelname" label="任务名:" style="margin-right: 20px;">
-          <el-input v-model="formData.modelname" style="width: 100%; font-size: 18px;"></el-input>
-        </el-form-item>
-        <el-form-item label="负责人:" prop="assignee">
-          <el-input v-model="formData.assignee" disabled style="width: 100%; font-size: 18px;"></el-input>
-        </el-form-item>
+    <el-card class="card" :body-style="{ padding: '0px'}">
+      <div slot="header" class="clearfix">
+        <span class="lineStyle">▍</span><span>任务信息</span>
       </div>
-    </el-form>
+      <div class="quickEntryBox">
+        <div style="margin: 5px 0;">
+          <el-form :rules="rules" :model="formData" label-width="100px" style="width: 70%;margin-top: 20px">
+            <div style="display: flex">
+              <el-form-item prop="modelname" label="任务名:" style="margin-right: 20px;">
+                <el-input v-model="formData.modelname" style="width: 100%; font-size: 18px;"></el-input>
+              </el-form-item>
+              <el-form-item label="负责人:" prop="assignee">
+                <el-input v-model="formData.assignee" disabled style="width: 100%; font-size: 18px;"></el-input>
+              </el-form-item>
+            </div>
+          </el-form>
 
-    </div>
-    <h3>选择数据集：</h3>
-    <div class="container" >
-
-     <div class="left">
-<!--       <div style="text-align: center;margin-bottom: 20px;">-->
-<!--         <h1 style="margin-top: 10px">点击表名，即可查看数据</h1>-->
-<!--       </div>-->
-<!--       <div v-for="(item, index) in tableNameList" :key="index"-->
-<!--            style="display: block;margin-right: 2px;margin-top: 5px;text-align: right;">-->
-<!--        <el-card style="border-radius: 20px"-->
-<!--                 :class="{ 'selected-item': item === tableName }"-->
-<!--                 @click.native="getData(item)">{{ item }}</el-card>-->
-<!--      </div>-->
-     <div>
-       <el-card style="text-align: center;font-size: 20px;
-                        border-bottom: #868585 dashed 1px;font-weight: bold;background: #c5c5c5">数据集列表</el-card>
-     </div>
-      <div style="text-align: center;margin: 20px 0;border-bottom: #868585 dashed 1px">
-        <h3>选择下方数据集名称，可查看数据</h3>
+        </div>
       </div>
-       <el-tree :data="treeData"
+    </el-card>
 
-                :check-on-click-node="true"
-                :highlight-current="true"
-                @node-click="handleNodeClick">
-         <template slot-scope="{ node, data }">
-          <span class="custom-node">{{ data.label }} <template v-if="node.childNodes && node.childNodes.length">
+    <el-card class="card">
+      <div slot="header" class="clearfix">
+        <span class="lineStyle">▍</span><span>选择数据集</span>
+      </div>
+      <div class="container" >
+
+        <div class="left">
+          <!--       <div style="text-align: center;margin-bottom: 20px;">-->
+          <!--         <h1 style="margin-top: 10px">点击表名，即可查看数据</h1>-->
+          <!--       </div>-->
+          <!--       <div v-for="(item, index) in tableNameList" :key="index"-->
+          <!--            style="display: block;margin-right: 2px;margin-top: 5px;text-align: right;">-->
+          <!--        <el-card style="border-radius: 20px"-->
+          <!--                 :class="{ 'selected-item': item === tableName }"-->
+          <!--                 @click.native="getData(item)">{{ item }}</el-card>-->
+          <!--      </div>-->
+
+          <div class="tipInfo">
+            <h3>可选数据</h3>
+          </div>
+          <hr class="hr-dashed" />
+          <el-tree :data="treeData"
+                   :check-on-click-node="true"
+                   :highlight-current="true"
+                   @node-click="handleNodeClick">
+            <span slot-scope="{ node, data }">
+          <span class="custom-tree-node"  :class="{'nodeLabel': data.label.length <= 12, 'scrolling-nodeLabel': data.label.length > 12}">
+            {{ data.label }} <template v-if="node.childNodes && node.childNodes.length">
           (数据集数量：{{ node.childNodes.length }})
           </template>
           </span>
-         </template>
-       </el-tree>
+            </span>
+          </el-tree>
 
-     </div>
-      <div class="right">
-          <div class="describe_content">
-            <i class="el-icon-folder"></i> 数据集名称:<span style="font-weight:bold;font-size:18px;color:#252525">{{ tableName }}</span>
-            <p style="margin-top:0.5%">
-              <i class="el-icon-user"></i>创建人: <span>{{ operators }}</span>
-              <i class="el-icon-time"></i>创建时间: <span>{{time}}</span>
-              <i class="el-icon-folder-opened"></i>所属疾病: <span>{{ formData.diseasename }}</span>
-              <i class="el-icon-finished"></i> 样本个数:<span>{{ sampleNum }}</span>
-              <i class="el-icon-finished"></i> 特征个数:<span>{{ featureNum }}</span>
-            </p>
-          </div>
+        </div>
+        <div class="right">
+          <el-card shadow="never" :body-style="{ padding: '0px'}" style="border:0px;margin-top: -20px;">
 
-        <div v-loading="getData_loading" element-loading-text="拼命加载中"
-             element-loading-spinner="el-icon-loading"
-             element-loading-background="rgba(0, 0, 0, 0.05)"
-
-            class="tablePlaceholder" v-if="tableData.length <1 && !getData_loading">请在左侧选择数据</div>
-
-
-        <el-table
-            :data="tableData"
-            v-if="dataTableVision"
-            style="width: 100%"
-            :header-cell-style="{ backgroundColor: '#c1c1c5', color: 'black', fontWeight: 'bold'}"
-            border
-            stripe
-            height="780"
-
-        >
-          <el-table-column type="index"> </el-table-column>
-          <!--                  v-for="(key, index) in Object.keys(tableData[0])"-->
-          <el-table-column
-              :width="colWidth"
-              v-for="(value, key) in tableData[0]"
-              :key="index"
-              :label="key"
-              :prop="key"
-              :sortable="isSortable(key)"
-          >
-            <template slot-scope="scope">
-              <div class="cell" :title="scope.row[key]">{{ scope.row[key] }}</div>
-            </template>
-          </el-table-column>
-        </el-table>
+            <div slot="header" class="describe_content">
+              <i class="el-icon-folder"></i> 数据集名称:<span style="font-weight:bold;font-size:18px;color:#252525">{{ tableName }}</span>
+              <p style="margin-top:0.5%">
+                <i class="el-icon-user"></i>创建人: <span>{{ operators }}</span>
+                <i class="el-icon-time"></i>创建时间: <span>{{time}}</span>
+                <i class="el-icon-folder-opened"></i>所属疾病: <span>{{ formData.diseasename }}</span>
+                <i class="el-icon-finished"></i> 样本个数:<span>{{ sampleNum }}</span>
+                <i class="el-icon-finished"></i> 特征个数:<span>{{ featureNum }}</span>
+              </p>
+            </div>
+            <div  v-loading="getData_loading" element-loading-text="拼命加载中"
+                  element-loading-background="rgba(179, 178, 178, 0.144)"
+                  element-loading-spinner="el-icon-loading">
+              <div class="tablePlaceholder" v-if="tableData.length <1 ">
+                <span v-show="!getData_loading">请在左侧选择数据进行预览</span>
+              </div>
 
 
+              <el-table
+                  :data="tableData"
+                  v-if="dataTableVision && tableData.length >0"
+                  :header-cell-style="{ backgroundColor: 'rgba(190,190,248,0.4)', color: 'black', fontWeight: 'bold'}"
+                  border
+                  stripe
+                  style="width: 100%"
+                  max-height="550"
+              >
+                <el-table-column type="index"> </el-table-column>
+                <!--                  v-for="(key, index) in Object.keys(tableData[0])"-->
+                <el-table-column
+                    v-for="(value, key) in tableData[0]"
+                    :key="index"
+                    :label="key"
+                    :prop="key"
+                    :sortable="isSortable(key)"
+                >
+                  <template slot-scope="scope">
+                    <div class="cell" :title="scope.row[key]">{{ scope.row[key] }}</div>
+                  </template>
+                </el-table-column>
+              </el-table>
 
+            </div>
+          </el-card>
+
+        </div>
       </div>
-    </div>
+    </el-card>
 
     <!-- 数据选择 -->
     <div style="text-align: center">
@@ -174,10 +185,10 @@ export default {
 
   methods: {
     getTree(){
-      if(localStorage.getItem("modelname") !== ''){
+      if(localStorage.getItem("modelname") !== null){
         this.formData.modelname = localStorage.getItem("modelname")
       }
-      getRequest('/DataManager/getDiseaseTableName').then(res=> {
+      getRequest(`/DataManager/getDiseaseTableName/${this.uid}`).then(res=> {
         if(res){
           this.transformToTree(res)
         }
@@ -375,23 +386,43 @@ export default {
 
 <style scoped>
 /*页面布局*/
+.card {
+  margin: 20px;
+  height: 100%;
+}
+
 .container {
   display: flex;
-  height: calc(100vh - 350px);
+  height: calc(100vh - 350px)
 }
 
 .left {
   flex: 10%;
   border-right: #868585 1px solid;
-
+  overflow: auto;
 }
 
 .right {
   flex: 80%;
-  overflow: auto;
-
+  //overflow: auto;
+  padding-left: 20px;
+  width: 1200px;
 }
 
+.lineStyle {
+  color: rgb(100, 172, 231);
+  font-weight: 40;
+}
+
+.tipInfo {
+  height: 30px;
+  text-align: center;
+}
+
+.hr-dashed {
+  border: 0;
+  border-top: 1px dashed #899bbb;
+}
 
 .describe_content {
   display: inline-block;
@@ -435,9 +466,9 @@ export default {
 
 
 .tablePlaceholder{
-  height: calc(100vh - 500px);
+  height: 550px;
   text-align: center;
-  line-height: 600px;
+  line-height: 560px;
   background-color: rgba(179, 178, 178, 0.144);
   font-weight: bold;
   color: rgba(58, 57, 57, 0.651);
@@ -448,5 +479,48 @@ export default {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+
+.custom-tree-node {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  padding-right: 8px;
+  overflow: hidden;
+}
+
+.custom-tree-node .left_span{
+  width: 12em;
+  overflow: hidden;
+}
+
+.nodeLabel, .scrolling-nodeLabel{
+  display: inline-block;
+  white-space: nowrap;  /* 禁止文本换行 */
+  box-sizing: border-box;  /* 边框和内填充的宽度也包含在width内 */
+}
+
+.scrolling-nodeLabel:hover{
+  position: relative;
+  overflow: hidden;
+  vertical-align: text-bottom;
+  animation: scrollText 3s linear infinite;  /* 动画持续时间和循环方式 */
+}
+
+@keyframes scrollText {
+  0% {
+    transform: translateX(0px);
+  }
+  12% {
+    transform: translateX(0px);
+  }
+  75% {
+    transform: translateX(calc(-100% + 12em));
+  }
+  100% {
+    transform: translateX(calc(-100% + 12em));
+  }
 }
 </style>

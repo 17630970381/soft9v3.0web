@@ -309,7 +309,6 @@ export default {
     },
     modelname(){
       return this.$store.state.modelname
-
     },
     maxValues() {
       const maxAccuracy = Math.max(...this.tableData1.map(item => item.accuracy));
@@ -438,6 +437,7 @@ export default {
       }
     },
     getModelDetail(){
+      console.log(this.modelname)
       getRequest(`/Model/getModelDetail/${this.modelname}`).then(res =>{
         console.log('getModelDetail')
         console.log(res)
@@ -625,7 +625,11 @@ export default {
     },
     /*获取详细数据*/
     getDetailData() {
+
         let modelname = this.modelname + this.electionAl
+        if(this.modelname.includes("多疾病")){
+          modelname = this.modelname
+        }
         console.log(modelname)
         getRequest(`/Detail/getAll/${modelname}`).then(res => {
           this.detailData = res

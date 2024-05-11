@@ -8,18 +8,17 @@
     <div style="margin-left: 5px;border-bottom: #868585 dashed 1px">
       <h3>任务总数：{{modelNum}}</h3>
     </div>
-    <div style="text-align: center;margin: 20px 0;border-bottom: #868585 dashed 1px">
-      <h3>选择下方任务列表名称，可查看任务详情</h3>
-    </div>
+
       <el-tree :data="treeData"
                :props="defaultProps"
                @node-click="handleNodeClick">
-        <template slot-scope="{ node, data }">
-          <span class="custom-node">{{ data.label }} <template v-if="node.childNodes && node.childNodes.length">
+        <span slot-scope="{ node, data }" class="custom-tree-node"  :class="{'nodeLabel': data.label.length <= 12, 'scrolling-nodeLabel': data.label.length > 12}">
+          <span class="custom-tree-node">{{ data.label }} <template v-if="node.childNodes && node.childNodes.length">
           (任务数量：{{ node.childNodes.length }})
           </template>
           </span>
-        </template>
+
+        </span>
       </el-tree>
   </div>
   <div class="right">
@@ -36,20 +35,20 @@
       <el-button @click="createNewModel" type="warning">创建新任务</el-button>
     </div>
     <!-- 模型展示 -->
-    <div>
+    <div style="height: 70vh">
       <div style="margin-top: 15px;display: flex;
   flex-wrap: wrap;" >
         <el-card v-for="(card, index) in mergedList" :key="index"
-                 style="width: 550px;height: 320px; margin-left: 30px;
+                 style="width: 400px;height: 300px; margin-left: 30px;
                margin-bottom: 10px;word-wrap: break-word;overflow: auto;">
-          <div style="font-size: 20px;margin-bottom: 10px">任务名称：<span style="font-weight: bold;">{{ card.modelname }}</span></div>
-          <div style="font-size: 20px;margin-bottom: 10px">所用算法：<span style="font-weight: bold;">{{ card.alname }}</span> </div>
-          <div style="font-size: 20px;margin-bottom: 10px">最高准确率：<span style="font-weight: bold;">{{ card.mostacc }}</span></div>
-          <div style="font-size: 20px;margin-bottom: 10px">创建人：<span style="font-weight: bold;">{{ card.publisher }} </span></div>
-          <div style="font-size: 20px;margin-bottom: 10px">涉及疾病：<span style="font-weight: bold;">{{ card.diseasename }} </span></div>
-          <div style="font-size: 20px;margin-bottom: 10px">所用数据集：<span style="font-weight: bold;">{{ card.tablename }} </span></div>
+          <div style="font-size: 18px;margin-bottom: 10px">任务名称：<span style="font-weight: bold;">{{ card.modelname }}</span></div>
+          <div style="font-size: 18px;margin-bottom: 10px">所用算法：<span style="font-weight: bold;">{{ card.alname }}</span> </div>
+          <div style="font-size: 18px;margin-bottom: 10px">最高准确率：<span style="font-weight: bold;">{{ card.mostacc }}</span></div>
+          <div style="font-size: 18px;margin-bottom: 10px">创建人：<span style="font-weight: bold;">{{ card.publisher }} </span></div>
+          <div style="font-size: 18px;margin-bottom: 10px">涉及疾病：<span style="font-weight: bold;">{{ card.diseasename }} </span></div>
+          <div style="font-size: 18px;margin-bottom: 10px">所用数据集：<span style="font-weight: bold;">{{ card.tablename }} </span></div>
           <div style="margin-top: 20px;text-align: center;">
-            <el-button @click="getDetail(card.modelname,card.diseasename)" type="primary">查看详情</el-button>
+            <el-button @click="getDetail(card.modelname,card.diseasename)" size="mini" type="primary">查看详情</el-button>
             <el-popconfirm
                 style="margin-left: 10px"
                 title="删除后无法恢复"
@@ -58,6 +57,7 @@
                 @confirm="deleteCard(card.modelname,card.publisher)"
             >
               <el-button slot="reference" type="danger"
+                         size="mini"
               >删除</el-button
               >
             </el-popconfirm>
@@ -94,7 +94,7 @@ export default {
      publisher:'',
      cardDataList:[],
      pageNum:1,
-     pageSize:8,
+     pageSize:6,
      total: 0,
      diseaseList:[],
      defaultProps: {
@@ -178,6 +178,8 @@ export default {
 
     },
     getDetail(modelname){
+      console.log("getDetail")
+      console.log(modelname)
       this.$store.commit("manageModelName",modelname)
       this.$router.replace('/detail')
     },
@@ -317,5 +319,49 @@ export default {
   overflow: hidden;
 
 }
+.custom-tree-node {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 15px;
+  padding-right: 8px;
+  overflow: hidden;
+}
+
+.custom-tree-node .left_span{
+  width: 12em;
+  overflow: hidden;
+}
+
+.nodeLabel, .scrolling-nodeLabel{
+  display: inline-block;
+  white-space: nowrap;  /* 禁止文本换行 */
+  box-sizing: border-box;  /* 边框和内填充的宽度也包含在width内 */
+}
+
+.scrolling-nodeLabel:hover{
+  position: relative;
+  overflow: hidden;
+  vertical-align: text-bottom;
+  animation: scrollText 3s linear infinite;  /* 动画持续时间和循环方式 */
+}
+
+@keyframes scrollText {
+  0% {
+    transform: translateX(0px);
+  }
+  12% {
+    transform: translateX(0px);
+  }
+  75% {
+    transform: translateX(calc(-100% + 12em));
+  }
+  100% {
+    transform: translateX(calc(-100% + 12em));
+  }
+}
+
+
 
 </style>

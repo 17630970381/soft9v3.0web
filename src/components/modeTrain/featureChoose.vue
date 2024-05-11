@@ -151,7 +151,10 @@ export default {
       }
       else if(this.target === ''){
         this.$message.error('请选择目标特征');
-      }else {
+      }else if(this.trainFea.length < 5){
+        this.$message.error('训练特征至少需要5个');
+      }
+      else {
         this.$store.dispatch('updateFeatureChooseData', dataToUpdate);
         this.$router.replace('/alChoose')
       }

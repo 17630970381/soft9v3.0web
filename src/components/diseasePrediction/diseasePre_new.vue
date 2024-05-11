@@ -1,347 +1,372 @@
 <template xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
 <div>
 <div class="container">
+<!--  -------------------------------------left-------------------------->
   <div class="left">
     <div style="margin-bottom: 10px">
       <el-card style="text-align: center;font-size: 20px;
-                        border-bottom: #868585 dashed 1px;font-weight: bold;background: #e7e7e7;">模型列表</el-card>
+                        border-bottom: #868585 dashed 1px;font-weight: bold;background: #e7e7e7;">可选模型列表
+        <div style="font-size: 16px;color: #656565">模型总数：{{modelNum}}</div></el-card>
     </div>
-    <div style="margin-left: 5px;border-bottom: #868585 dashed 1px">
-      <h3>模型总数：{{modelNum}}</h3>
-    </div>
-    <div style="text-align: center;margin: 20px 0;border-bottom: #868585 dashed 1px">
-      <h3>选择下方模型名称可进行疾病预测</h3>
-    </div>
+<!--    <div style="text-align: center;margin: 20px 0;border-bottom: #868585 dashed 1px">-->
+<!--      <h3>选择下方模型名称可进行疾病预测</h3>-->
+<!--    </div>-->
     <el-tree :data="treeData"
              :props="defaultProps"
              @node-click="handleNodeClick">
-      <template slot-scope="{ node, data }">
-          <span class="custom-node">{{ data.label }} <template v-if="node.childNodes && node.childNodes.length">
+      <span slot-scope="{ node, data }" class="custom-tree-node"  :class="{'nodeLabel': data.label.length <= 12, 'scrolling-nodeLabel': data.label.length > 12}">
+          <span class="custom-tree-node">{{ data.label }} <template v-if="node.childNodes && node.childNodes.length">
           (模型数量：{{ node.childNodes.length }})
           </template>
           </span>
-      </template>
+      </span>
     </el-tree>
   </div>
+
+<!--  -------------------------------------right------------------------->
   <div class="right">
-    <div style="margin-left: 20px; " v-if="modelSelected !== ''">
-      <el-button @click="Handle" >手动输入</el-button>
-      <el-button @click="Histories" :disabled="!isHaveHis">历史数据</el-button>
-<!--      <el-button @click="test">test</el-button>-->
-      <span v-if="!isHaveHis" style="color: #868585;font-size: 15px">(该任务所用参数不可调用历史数据)</span>
-    </div>
-    <div v-else style="display: flex;justify-content: center; align-items: center;">
-      <el-card style="text-align: center;border-radius: 20px;background: #76c9ee">
+<!--    <div style="margin-left: 20px; " v-if="modelSelected !== ''">-->
+<!--      <el-button @click="Handle" >手动输入</el-button>-->
+<!--      <el-button @click="Histories" :disabled="!isHaveHis">历史数据</el-button>-->
+<!--      <span v-if="!isHaveHis" style="color: #868585;font-size: 15px">(该任务所用参数不可调用历史数据)</span>-->
+<!--    </div>-->
+
+    <div class="placeholder" v-if="modelSelected === ''" style="width: 100%; align-items: center;">
         <h3>
             请现在左侧任务列表中选择模型，以此来进行疾病的预测
         </h3>
-      </el-card>
     </div>
-    <!-- 手动输入  -->
-    <div style="width: 100%" v-if="modelSelected !== '' && isHand">
-      <el-card style="margin-left: 20px;margin-top: 20px">
-        <div style="font-weight: bold;margin-bottom: 5px;font-size: 25px">模型详情</div>
-        <div style="font-size: 20px">当前选择模型：<span>{{modelSelected }}</span></div>
-        <div style="font-size: 20px">模型创建人：<span>{{modelDetail[0].publisher }}</span></div>
-        <div style="font-size: 20px">模型创建时间：<span>{{modelDetail[0].createtime }}</span></div>
-        <div style="font-size: 20px">模型所用算法：<span>{{modelDetail[0].al }}</span></div>
-        <div style="font-size: 20px">模型所用数据集：<span>{{modelDetail[0].tablename }}</span></div>
-      </el-card>
+    <el-tabs v-else v-model="activeName" type="card" @tab-click="handleClick">
+      <el-tab-pane label="手动输入" name="handle">
+        <!-- =============================手动输入  -->
+        <div style="width: 100%" v-if="modelSelected !== '' && isHand">
+          <el-card class="cardDiv" :body-style="{ padding: '5px' }" shadow="never">
+            <div slot="header" class="clearfix">
+              <span class="lineStyle">▍</span><span>模型详情</span>
+            </div>
+            <div class="modelInfoDiv">
+              <div>当前选择模型：<span>{{modelSelected }}</span></div>
+              <div>模型创建人：<span>{{modelDetail[0].publisher }}</span></div>
+              <div>模型创建时间：<span>{{modelDetail[0].createtime }}</span></div>
+              <div>模型所用算法：<span>{{modelDetail[0].al }}</span></div>
+              <div>模型所用数据集：<span>{{modelDetail[0].tablename }}</span></div>
+            </div>
 
-      <div style="margin-top: 10px;margin-left: 20px;">
-        <div style="font-weight: bold;margin-bottom: 5px;font-size: 25px">该模型指标：</div>
-        <el-table
-            :data="tableData"
-            stripe
-            :header-cell-style="{background:'#c0c0c0',color:'#fff'}"
-            style="width: 100%">
-          <el-table-column prop="accuracy" label="准确度(acc)"></el-table-column>
-          <el-table-column prop="precision" label="精确度(precision)"></el-table-column>
-          <el-table-column prop="recall" label="召回率(recall)"></el-table-column>
-          <el-table-column prop="f1Score" label="F1分数(F1-Score)"></el-table-column>
-        </el-table>
-      </div>
+          </el-card>
 
-      <div  class="container"
-            element-loading-text="正在调用模型进行预测，请稍后"
-            element-loading-spinner="el-icon-loading"
-            element-loading-background="rgba(0, 0, 0, 0.8)"
-            v-loading="loading"
-            style="margin-left: 20px">
-        <div class="smallLft" >
+          <el-card class="cardDiv" shadow="never" :body-style="{ padding: '10px' }">
+            <div slot="header" class="clearfix">
+              <span class="lineStyle">▍</span><span>模型指标</span>
+            </div>
+            <el-table
+                :data="tableData"
+                stripe
+                :header-cell-style="{ backgroundColor: 'rgba(190,190,248,0.4)', color: 'black', fontWeight: 'bold'}"
+                style="width: 100%">
+              <el-table-column prop="accuracy" label="准确度(acc)"></el-table-column>
+              <el-table-column prop="precision" label="精确度(precision)"></el-table-column>
+              <el-table-column prop="recall" label="召回率(recall)"></el-table-column>
+              <el-table-column prop="f1Score" label="F1分数(F1-Score)"></el-table-column>
+            </el-table>
+          </el-card>
 
-          <div
-              style="margin-top: 20px"
-          >
-            <div v-if="isHaveHis" style="height: calc(100vh - 620px);overflow-y: scroll">
-              <div v-for="(feature, index) in selectedAlgorithmFeatures" :key="index"
-                   style="margin-bottom: 10px;">
-                <label style="display: block">{{  getChName(feature.name) }}: </label>
-                <template v-if="getRangeByFeature(feature.name) == '{1,2}'">
-                  <el-radio-group v-model="feature.value">
-                    <el-radio label="1">男</el-radio>
-                    <el-radio label="2">女</el-radio>
-                  </el-radio-group>
-                </template>
-                <template v-else>
-                  <el-input  @keydown.enter.native="onEnterKey"  @keydown="validateInput($event)" :disabled="disabled" v-model="feature.value"  style="width: 70%" v-validate-number/>
-                  <span>{{getRangeByFeature(feature.name)}}</span>
-                </template>
-                <span  v-if="!isNumeric(feature.value)" style="color: red;margin-left: 5px">只能输入数字!</span>
+          <el-card class="cardDiv" shadow="never" :body-style="{ padding: '5px' }">
+            <div slot="header" class="clearfix">
+              <span class="lineStyle">▍</span><span>手动输入参数预测</span>
+            </div>
+            <div  class="container2"
+                  element-loading-text="正在调用模型进行预测，请稍后"
+                  element-loading-spinner="el-icon-loading"
+                  element-loading-background="rgba(179, 178, 178, 0.7)"
+                  v-loading="loading"
+                  style="margin-left: 20px">
+
+              <div class="smallLft" >
+
+                <div style="height: 100% ;overflow: auto">
+                  <div v-if="isHaveHis" style="width: 90%;overflow: auto">
+                    <div v-for="(feature, index) in selectedAlgorithmFeatures" :key="index"
+                         style="margin-bottom: 10px;">
+                      <label style="display: block">{{  getChName(feature.name) }}: </label>
+                      <template v-if="getRangeByFeature(feature.name) == '{1,2}'">
+                        <el-radio-group v-model="feature.value">
+                          <el-radio label="1">男</el-radio>
+                          <el-radio label="2">女</el-radio>
+                        </el-radio-group>
+                      </template>
+                      <template v-else>
+                        <el-input  @keydown.enter.native="onEnterKey"  @keydown="validateInput($event)" :disabled="disabled" v-model="feature.value"  style="width: 70%" v-validate-number/>
+                        <span>{{getRangeByFeature(feature.name)}}</span>
+                      </template>
+                      <span  v-if="!isNumeric(feature.value)" style="color: red;margin-left: 5px">只能输入数字!</span>
+                    </div>
+                  </div>
+                  <div v-else >
+                    <div v-for="(feature, index) in selectedAlgorithmFeatures" :key="index"
+                         style="margin-bottom: 10px;">
+                      <label style="display: block">{{feature.name }}:</label>
+                      <el-input @keydown.enter.native="onEnterKey"  @keydown="validateInput($event)" :disabled="disabled" v-model="feature.value"  style="width: 70%" v-validate-number/>
+                      <span  v-if="!isNumeric(feature.value)" style="color: red;margin-left: 5px">只能输入数字!</span>
+                    </div>
+                  </div>
+                  <div style="margin-top: 10px" v-if="predictionResult1.length <= 0">
+                    <el-button v-if="!alFlag" @click="saveData" type="primary">保存所输入数值</el-button>
+                    <el-button v-if="alFlag" @click="promptDta"  type="success">提交数据，开始预测</el-button>
+                  </div>
+                  <div>
+                    <el-button v-if="predictionResult1.length > 0" @click="reuse" type="success">再次调用</el-button>
+                  </div>
+                </div>
+              </div>
+              <div class="smallRight" style="overflow-y: auto">
+                <div v-if="predictionResult1.length > 0">
+                  <el-card v-if="modelDetail[0].diseasename === '多疾病' ">
+                    <div style="margin-bottom: 5px">该患者患有慢阻肺的概率为：{{ (predictionResult1[0][modelSelected][0] * 100).toFixed(2) + '%' }}</div>
+                    <div style="margin-bottom: 5px"> 该患者患有糖尿病的概率为：{{ (predictionResult1[0][modelSelected][1] * 100).toFixed(2) + '%' }}</div>
+                    <div style="text-align: center" v-if="predictionResult1[0][modelSelected][0] > 0.8 ||predictionResult1[0][modelSelected][0] > 0.8 "> 请及时就医</div>
+
+                  </el-card>
+                  <div v-else style="margin-left: 10px;margin-bottom: 10px;font-size: 1em">该患者患{{modelDetail[0].diseasename}}的概率为：
+                    <b>{{(predictionResult[modelSelected] * 100).toFixed(2) + '%'}}</b>
+                  </div>
+                  <div style="margin-left: 10px;overflow-y: auto">
+                    <el-table
+                        :data="detailData"
+                        stripe
+                        :header-cell-style="{ backgroundColor: 'rgba(190,190,248,0.4)', color: 'black', fontWeight: 'bold'}"
+                        style="width: 100%">
+                      <el-table-column
+                          prop="feature"
+                          label="特征"
+                      >
+                      </el-table-column>
+                      <el-table-column
+                          prop="importance"
+                          label="特征影响度">
+                      </el-table-column>
+                      <el-table-column
+                          prop="fpercentage"
+                          label="所选数据集前百分比">
+                      </el-table-column>
+                      <el-table-column
+                          prop="fvalue"
+                          label="前百分比平均值">
+                      </el-table-column>
+                      <el-table-column
+                          prop="bpercentage"
+                          label="所选数据集后百分比">
+                      </el-table-column>
+                      <el-table-column
+                          prop="bvalue"
+                          label="后百分比平均值">
+                      </el-table-column>
+                    </el-table>
+                  </div>
+                  <div style="margin-top: 20px">
+                    <div v-if="mergeData2.length > 0">
+                      <h1 style="margin-left: 10px;margin-bottom: 10px;color: red;font-size: 20px" >异常值提醒!!：</h1>
+                      <div  style="margin-left: 10px">
+                        <el-table
+                            :data="mergeData2"
+                            stripe
+                            :header-cell-style="{ backgroundColor: 'rgba(190,190,248,0.4)', color: 'black', fontWeight: 'bold'}"
+                            style="width: 100%">
+                          <el-table-column
+                              prop="feature"
+                              label="特征"
+                          >
+                          </el-table-column>
+                          <el-table-column
+                              prop="value"
+                              label="当前值">
+                          </el-table-column>
+                          <el-table-column
+                              prop="fvalue"
+                              label="前百分比平均值">
+                          </el-table-column>
+                          <el-table-column
+                              prop="bvalue"
+                              label="后百分比平均值">
+                          </el-table-column>
+                          <el-table-column prop="warning" label="异常值提示">
+                            <template slot-scope="{ row }">
+                              <span :style="{ color: row.warning === '该特征的值过高' ? 'red' : row.warning === '该特征的值过低' ? '#25bef5' : 'inherit' }">{{ row.warning }}</span>
+                            </template>
+                          </el-table-column>
+                        </el-table>
+                      </div>
+                    </div>
+                    <div v-else>
+                      <h1 style="margin-left: 10px;margin-bottom: 10px" >该患者无异常指标</h1>
+                    </div>
+                  </div>
+                </div>
+                <div v-else>
+                  <div style="display: flex; justify-content: center; align-items: center; height: 330px">
+                    <h3>
+                      预测结果将在此展示，请先输入左侧各参数的值，以此来进行预测
+                    </h3>
+                  </div>
+                </div>
               </div>
             </div>
-            <div v-else style="height: calc(100vh - 620px);overflow-y: scroll">
-              <div v-for="(feature, index) in selectedAlgorithmFeatures" :key="index"
-                   style="margin-bottom: 10px;">
-                <label style="display: block">{{feature.name }}:</label>
-                  <el-input @keydown.enter.native="onEnterKey"  @keydown="validateInput($event)" :disabled="disabled" v-model="feature.value"  style="width: 70%" v-validate-number/>
-                <span  v-if="!isNumeric(feature.value)" style="color: red;margin-left: 5px">只能输入数字!</span>
-              </div>
-            </div>
-            <div style="margin-top: 10px" v-if="predictionResult1.length <= 0">
-              <el-button v-if="!alFlag" @click="saveData" type="primary">保存所输入数值</el-button>
-              <el-button v-if="alFlag" @click="promptDta"  type="success">提交数据，开始预测</el-button>
-            </div>
-            <div>
-              <el-button v-if="predictionResult1.length > 0" @click="reuse" type="success">再次调用</el-button>
-            </div>
-          </div>
+          </el-card>
         </div>
-        <div class="smallRight" style="height: calc(100vh - 620px);overflow-y: auto">
-          <div v-if="predictionResult1.length > 0">
-              <el-card v-if="modelDetail[0].diseasename === '多疾病' ">
-                <div style="margin-bottom: 5px">该患者患有慢阻肺的概率为：{{ (predictionResult1[0][modelSelected][0] * 100).toFixed(2) + '%' }}</div>
-                <div style="margin-bottom: 5px"> 该患者患有糖尿病的概率为：{{ (predictionResult1[0][modelSelected][1] * 100).toFixed(2) + '%' }}</div>
-                <div style="text-align: center" v-if="predictionResult1[0][modelSelected][0] > 0.8 ||predictionResult1[0][modelSelected][0] > 0.8 "> 请及时就医</div>
+      </el-tab-pane>
 
-              </el-card>
-            <h1 v-else style="margin-left: 10px;margin-bottom: 10px">该患者患{{modelDetail[0].diseasename}}的概率为：{{(predictionResult[modelSelected] * 100).toFixed(2) + '%'}}</h1>
-            <div style="margin-left: 10px;overflow-y: auto">
-              <el-table
-                  :data="detailData"
-                  stripe
-                  :header-cell-style="{ backgroundColor: '#a8aaad', color: 'black', fontWeight: 'bold'}"
-                  style="width: 100%">
-                <el-table-column
-                    prop="feature"
-                    label="特征"
+      <el-tab-pane label="历史数据" name="history" :disabled="!isHaveHis">
+        <!--  ===========================历史数据  -->
+
+        <div class="hisDiv">
+          <el-button :disabled="multipleSelection.length <= 0"
+                     style="margin-left: 20px;margin-top: 20px" v-if="modelSelected !== '' && isAuto && historyData.length >0" type="warning"
+                     @click="batchPrediction">批量预测</el-button>
+          <el-button
+              style="margin-left: 10px;margin-top: 20px" v-if=" isAuto " type="success"
+              @click="conBatchPrediction">条件筛选</el-button>
+          <el-button style="margin-left: 18px;margin-top: 20px" v-if="Result.length > 0"
+                     @click="resultShow">结果展示</el-button>
+          <!--    <el-button @click="test">test</el-button>-->
+          <el-dialog
+              element-loading-text="正在筛选，请稍后"
+              element-loading-spinner="el-icon-loading"
+              element-loading-background="rgba(0, 0, 0, 0.8)"
+              v-loading="confilterLoding"
+              title="条件选择" :visible.sync="conBatchPredictionDialogTableVisible" width="50%">
+            <h3  style="margin-bottom: 10px;margin-left: 103px;font-size: 15px">每项均不是必选项</h3>
+            <el-form ref="form" :model="form" label-width="150px">
+              <el-form-item label="性别:"  >
+                <div>
+                  <el-radio-group v-model="form.sex">
+                    <el-radio label="男性">男</el-radio>
+                    <el-radio label="女性">女</el-radio>
+                  </el-radio-group>
+                </div>
+              </el-form-item>
+              <el-form-item label="出生日期范围:">
+                <el-date-picker
+                    style="width: 50%;"
+                    v-model="form.date"
+                    type="daterange"
+                    :picker-options="pickerOptions"
+                    range-separator="至"
+                    start-placeholder="开始日期"
+                    end-placeholder="结束日期"
+                    value-format="yyyy-MM-dd"
                 >
+                </el-date-picker>
+              </el-form-item>
+              <el-form-item label="民族:">
+                <el-checkbox-group v-model="form.nation">
+                  <el-checkbox v-for="item in nationName" :key="item" :label="item">
+                    {{ item }}
+                  </el-checkbox>
+                </el-checkbox-group>
+              </el-form-item>
+              <el-form-item label="婚姻状态:">
+                <el-checkbox-group v-model="form.maritalStatus">
+                  <el-checkbox v-for="item in maritalStatusName" :key="item" :label="item">
+                    {{ item }}
+                  </el-checkbox>
+                </el-checkbox-group>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="onSubmit">开始筛选</el-button>
+                <el-button type="warning" @click="cancel">取消</el-button>
+              </el-form-item>
+            </el-form>
+
+          </el-dialog>
+          <div style="width: 98%;margin-left: 20px;margin-top: 5px;height: calc(100vh - 250px);overflow: auto"
+               v-if="modelSelected !== '' && isAuto"
+               element-loading-text="正在获取数据，请稍后"
+               element-loading-spinner="el-icon-loading"
+               element-loading-background="rgba(0, 0, 0, 0.8)"
+               v-loading="loading2">
+            <div
+                element-loading-text="正在进行预测，请稍后"
+                element-loading-spinner="el-icon-loading"
+                element-loading-background="rgba(0, 0, 0, 0.8)"
+                v-loading="predictionLoding"
+            >
+              <div style="margin-bottom: 10px">
+                <el-input v-model="searchKeyword" style="width: 30%" placeholder="请输入患者ID进行搜索"></el-input>
+                <el-button style="margin-left: 10px" @click="searchTable">搜索</el-button>
+                <el-button @click="resetTable">重置</el-button>
+                <span style="font-weight: lighter;color: #9d9b9b">(搜索到的结果将展示在第一行)</span>
+              </div>
+              <div style="width: 100%;height: calc(100vh - 310px);overflow: auto">
+                <el-table :data="historyData"
+                          ref="multipleTable"
+                          tooltip-effect="dark"
+                          @selection-change="handleSelectionChange"
+                          :row-class-name="highlightRow"
+                          :header-cell-style="{ backgroundColor: '#cecece', color: 'black', fontWeight: 'bold' }">
+                  <el-table-column type="selection">
+                  </el-table-column>
+                  <el-table-column prop="patientId" label="患者ID">
+                  </el-table-column>
+                  <el-table-column prop="name" label="姓名"></el-table-column>
+                  <el-table-column prop="sexname" label="性别"></el-table-column>
+                  <el-table-column prop="birthdate" label="出生日期"></el-table-column>
+                  <el-table-column prop="nationname" label="民族"></el-table-column>
+                  <el-table-column prop="maritalstatusname" label="婚姻状况"></el-table-column>
+                  <el-table-column fixed="right" label="操作" >
+                    <template slot-scope="scope">
+                      <!-- 使用函数判断是否应该禁用按钮 -->
+                      <el-button
+                          type="primary"
+                          size="medium"
+                          :disabled="isButtonDisabled(scope.row.patientId)"
+                          v-if="!isButtonDisabled(scope.row.patientId)"
+                          @click="predictPatient(scope.row.patientId)"
+                      >
+                        预测此患者
+                      </el-button>
+                      <el-button
+                          type="success"
+                          size="medium"
+                          :disabled="true"
+                          v-if="isButtonDisabled(scope.row.patientId)"
+                      >
+                        此患者已完成预测
+                      </el-button>
+                    </template>
+                  </el-table-column>
+                </el-table>
+              </div>
+            </div>
+
+          </div>
+
+          <el-dialog title="结果展示" :visible.sync="dialogTableVisible" >
+            <el-button type="primary" style="margin-bottom: 10px" @click="downloadExcel">下载数据</el-button>
+            <div style="height: calc(100vh - 500px);overflow-y: auto">
+              <el-table :data="mergeData"
+                        :header-cell-style="{ backgroundColor: '#cecece', color: 'black', fontWeight: 'bold' }">
+                <el-table-column prop="patientId" label="患者ID"></el-table-column>
+                <el-table-column prop="name" label="姓名"></el-table-column>
+                <el-table-column prop="sexname" label="性别"></el-table-column>
+                <el-table-column :label="tag1">
+                  <template slot-scope="scope">{{ scope.row.values[0] }}</template>
                 </el-table-column>
-                <el-table-column
-                    prop="importance"
-                    label="特征影响度">
-                </el-table-column>
-                <el-table-column
-                    prop="fpercentage"
-                    label="所选数据集前百分比">
-                </el-table-column>
-                <el-table-column
-                    prop="fvalue"
-                    label="前百分比平均值">
-                </el-table-column>
-                <el-table-column
-                    prop="bpercentage"
-                    label="所选数据集后百分比">
-                </el-table-column>
-                <el-table-column
-                    prop="bvalue"
-                    label="后百分比平均值">
+                <el-table-column :label="tag2">
+                  <template slot-scope="scope">{{ scope.row.values[1] }}</template>
                 </el-table-column>
               </el-table>
             </div>
-            <div style="margin-top: 20px">
-              <div v-if="mergeData2.length > 0">
-                <h1 style="margin-left: 10px;margin-bottom: 10px;color: red;font-size: 20px" >异常值提醒!!：</h1>
-                <div  style="margin-left: 10px">
-                  <el-table
-                      :data="mergeData2"
-                      stripe
-                      :header-cell-style="{ backgroundColor: '#a8aaad', color: 'black', fontWeight: 'bold'}"
-                      style="width: 100%">
-                    <el-table-column
-                        prop="feature"
-                        label="特征"
-                    >
-                    </el-table-column>
-                    <el-table-column
-                        prop="value"
-                        label="当前值">
-                    </el-table-column>
-                    <el-table-column
-                        prop="fvalue"
-                        label="前百分比平均值">
-                    </el-table-column>
-                    <el-table-column
-                        prop="bvalue"
-                        label="后百分比平均值">
-                    </el-table-column>
-                    <el-table-column prop="warning" label="异常值提示">
-                      <template slot-scope="{ row }">
-                        <span :style="{ color: row.warning === '该特征的值过高' ? 'red' : row.warning === '该特征的值过低' ? '#25bef5' : 'inherit' }">{{ row.warning }}</span>
-                      </template>
-                    </el-table-column>
-                  </el-table>
-                </div>
-              </div>
-              <div v-else>
-                <h1 style="margin-left: 10px;margin-bottom: 10px" >该患者无异常指标</h1>
-              </div>
+            <div style="text-align: center">
+              <el-button  @click="conPre" type="success">继续预测</el-button>
             </div>
-          </div>
-          <div v-else>
-          <el-card style="display: flex; justify-content: center; align-items: center; height: calc(100vh - 620px)">
-            <h3>
-              预测结果将在此展示，请先输入左侧各参数的值，以此来进行预测
-            </h3>
-          </el-card>
+          </el-dialog>
         </div>
-        </div>
-      </div>
+      </el-tab-pane>
+    </el-tabs>
 
-    </div>
 
-    <!--  历史数据  -->
 
-    <el-button :disabled="multipleSelection.length <= 0"
-        style="margin-left: 20px;margin-top: 20px" v-if="modelSelected !== '' && isAuto && historyData.length >0" type="warning"
-       @click="batchPrediction">批量预测</el-button>
-    <el-button
-               style="margin-left: 10px;margin-top: 20px" v-if=" isAuto " type="success"
-               @click="conBatchPrediction">条件筛选</el-button>
-    <el-button style="margin-left: 18px;margin-top: 20px" v-if="Result.length > 0"
-               @click="resultShow">结果展示</el-button>
-<!--    <el-button @click="test">test</el-button>-->
-    <el-dialog
-        element-loading-text="正在筛选，请稍后"
-        element-loading-spinner="el-icon-loading"
-        element-loading-background="rgba(0, 0, 0, 0.8)"
-        v-loading="confilterLoding"
-        title="条件选择" :visible.sync="conBatchPredictionDialogTableVisible" width="80%">
-      <h3  style="margin-bottom: 10px;margin-left: 103px;font-size: 15px">每项均不是必选项</h3>
-      <el-form ref="form" :model="form" label-width="150px">
-        <el-form-item label="性别:"  >
-          <div>
-            <el-radio-group v-model="form.sex">
-              <el-radio label="男性">男</el-radio>
-              <el-radio label="女性">女</el-radio>
-            </el-radio-group>
-          </div>
-        </el-form-item>
-        <el-form-item label="出生日期范围:">
-          <el-date-picker
-              style="width: 50%;"
-              v-model="form.date"
-              type="daterange"
-              :picker-options="pickerOptions"
-              range-separator="至"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-              value-format="yyyy-MM-dd"
-              >
-          </el-date-picker>
-        </el-form-item>
-        <el-form-item label="民族:">
-          <el-checkbox-group v-model="form.nation">
-            <el-checkbox v-for="item in nationName" :key="item" :label="item">
-              {{ item }}
-            </el-checkbox>
-          </el-checkbox-group>
-        </el-form-item>
-        <el-form-item label="婚姻状态:">
-          <el-checkbox-group v-model="form.maritalStatus">
-            <el-checkbox v-for="item in maritalStatusName" :key="item" :label="item">
-              {{ item }}
-            </el-checkbox>
-          </el-checkbox-group>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="onSubmit">开始筛选</el-button>
-          <el-button type="warning" @click="cancel">取消</el-button>
-        </el-form-item>
-      </el-form>
 
-    </el-dialog>
-    <div style="width: 98%;margin-left: 20px;margin-top: 5px;height: calc(100vh - 250px);overflow: auto" v-if="modelSelected !== '' && isAuto"
-         element-loading-text="正在获取数据，请稍后"
-         element-loading-spinner="el-icon-loading"
-         element-loading-background="rgba(0, 0, 0, 0.8)"
-         v-loading="loading2">
-      <div
-          element-loading-text="正在进行预测，请稍后"
-          element-loading-spinner="el-icon-loading"
-          element-loading-background="rgba(0, 0, 0, 0.8)"
-          v-loading="predictionLoding"
-      >
-       <div style="margin-bottom: 10px">
-         <el-input v-model="searchKeyword" style="width: 30%" placeholder="请输入患者ID进行搜索"></el-input>
-         <el-button style="margin-left: 10px" @click="searchTable">搜索</el-button>
-         <el-button @click="resetTable">重置</el-button>
-         <span style="font-weight: lighter;color: #9d9b9b">(搜索到的结果将展示在第一行)</span>
-       </div>
-       <div style="width: 100%;height: calc(100vh - 310px);overflow: auto">
-         <el-table :data="historyData"
-                   ref="multipleTable"
-                   tooltip-effect="dark"
-                   @selection-change="handleSelectionChange"
-                   :row-class-name="highlightRow"
-                   :header-cell-style="{ backgroundColor: '#cecece', color: 'black', fontWeight: 'bold' }">
-           <el-table-column type="selection">
-           </el-table-column>
-           <el-table-column prop="patientId" label="患者ID">
-           </el-table-column>
-           <el-table-column prop="name" label="姓名"></el-table-column>
-           <el-table-column prop="sexname" label="性别"></el-table-column>
-           <el-table-column prop="birthdate" label="出生日期"></el-table-column>
-           <el-table-column prop="nationname" label="民族"></el-table-column>
-           <el-table-column prop="maritalstatusname" label="婚姻状况"></el-table-column>
-           <el-table-column fixed="right" label="操作" >
-             <template slot-scope="scope">
-               <!-- 使用函数判断是否应该禁用按钮 -->
-               <el-button
-                   type="primary"
-                   size="medium"
-                   :disabled="isButtonDisabled(scope.row.patientId)"
-                   v-if="!isButtonDisabled(scope.row.patientId)"
-                   @click="predictPatient(scope.row.patientId)"
-               >
-                 预测此患者
-               </el-button>
-               <el-button
-                   type="success"
-                   size="medium"
-                   :disabled="true"
-                   v-if="isButtonDisabled(scope.row.patientId)"
-               >
-                 此患者已完成预测
-               </el-button>
-             </template>
-           </el-table-column>
-         </el-table>
-       </div>
-      </div>
 
-    </div>
-
-      <el-dialog title="结果展示" :visible.sync="dialogTableVisible" >
-        <el-button type="primary" style="margin-bottom: 10px" @click="downloadExcel">下载数据</el-button>
-        <div style="height: calc(100vh - 500px);overflow-y: auto">
-          <el-table :data="mergeData"
-                    :header-cell-style="{ backgroundColor: '#cecece', color: 'black', fontWeight: 'bold' }">
-            <el-table-column prop="patientId" label="患者ID"></el-table-column>
-            <el-table-column prop="name" label="姓名"></el-table-column>
-            <el-table-column prop="sexname" label="性别"></el-table-column>
-            <el-table-column :label="tag1">
-              <template slot-scope="scope">{{ scope.row.values[0] }}</template>
-            </el-table-column>
-            <el-table-column :label="tag2">
-              <template slot-scope="scope">{{ scope.row.values[1] }}</template>
-            </el-table-column>
-          </el-table>
-        </div>
-        <div style="text-align: center">
-          <el-button  @click="conPre" type="success">继续预测</el-button>
-        </div>
-      </el-dialog>
    </div>
   </div>
 </div>
@@ -392,6 +417,7 @@ export default {
       },
       modelNum: 0,
       /*模型调用 手动输入*/
+      activeName:"handle",
       isHand:true,
       selectedAlgorithmFeatures:[],
       loading:false,
@@ -812,6 +838,14 @@ export default {
 
     },
     /*调整手动输入和历史输入*/
+    handleClick(tabpane){
+      console.log(tabpane)
+      if(tabpane.label==='手动输入'){
+        this.Handle();
+      }else{
+        this.Histories();
+      }
+    },
     Handle(){
       this.isHand = true
       this.isAuto = false
@@ -831,6 +865,11 @@ export default {
           this.isHaveHis = true
         }else {
           this.isHaveHis = false
+          this.$message.warning({
+            showClose: true,
+            message: '该任务所用参数不可调用历史数据',
+            type: 'warning'
+          })
         }
       })
     },
@@ -1076,7 +1115,12 @@ export default {
 <style scoped>
 .container {
   display: flex;
+  height: 830px;
+}
 
+.container2 {
+  display: flex;
+  height: 330px;
 }
 
 .left {
@@ -1090,6 +1134,7 @@ export default {
 .right {
   flex: 80%;
   overflow: auto;
+  margin-left: 20px;
 }
 .custom-node {
   /* 添加您想要的自定义字体样式 */
@@ -1126,4 +1171,77 @@ export default {
   background: #f0f9eb !important;
 }
 
+.placeholder {
+  height: 100%;
+  text-align: center;
+  line-height: 600px;
+  background-color: rgba(179, 178, 178, 0.144);
+  font-weight: bold;
+  color: rgba(58, 57, 57, 0.651);
+  user-select: none;
+}
+
+.modelInfoDiv{
+  margin-left: 20px;
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+}
+
+
+.lineStyle {
+  color: rgb(100, 172, 231);
+  font-weight: 40;
+}
+
+.cardDiv{
+  margin-top: 15px;
+}
+
+.clearfix{
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.custom-tree-node {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  padding-right: 8px;
+  overflow: hidden;
+}
+
+.custom-tree-node .left_span{
+  width: 12em;
+  overflow: hidden;
+}
+
+.nodeLabel, .scrolling-nodeLabel{
+  display: inline-block;
+  white-space: nowrap;  /* 禁止文本换行 */
+  box-sizing: border-box;  /* 边框和内填充的宽度也包含在width内 */
+}
+
+.scrolling-nodeLabel:hover{
+  position: relative;
+  overflow: hidden;
+  vertical-align: text-bottom;
+  animation: scrollText 3s linear infinite;  /* 动画持续时间和循环方式 */
+}
+
+@keyframes scrollText {
+  0% {
+    transform: translateX(0px);
+  }
+  12% {
+    transform: translateX(0px);
+  }
+  75% {
+    transform: translateX(calc(-100% + 12em));
+  }
+  100% {
+    transform: translateX(calc(-100% + 12em));
+  }
+}
 </style>

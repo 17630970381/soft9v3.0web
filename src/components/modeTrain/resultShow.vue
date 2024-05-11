@@ -258,6 +258,7 @@ export default {
 
   },
   beforeDestroy() {
+    // this.removeWithoutSave()
     localStorage.removeItem('modelname');
   },
 
@@ -270,6 +271,8 @@ export default {
 
   },
   methods: {
+    /*不保存模型时，在刷新页面后，删除存储的模型和图片*/
+
     load(){
       this.activeIndex = this.selectedAlgorithms[0]
       this.electionAl = this.selectedAlgorithms[0]
