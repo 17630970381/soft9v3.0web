@@ -28,7 +28,7 @@
           </div>
           <div class="left-align" style="margin-top: 20px;display: flex; flex-wrap: wrap;">
             <el-radio-group v-model="target" >
-              <el-radio v-for="feature in fea" :key="feature" :label="feature" style="display: inline-block;" >
+              <el-radio v-for="feature in targetFea" :key="feature" :label="feature" style="display: inline-block;" >
                 <span style="width: 240px; height: 20px; display: inline-block; line-height: 20px;
  overflow: hidden; white-space: nowrap; text-overflow: ellipsis;" :title="feature">{{ feature }}</span>
                 <el-progress :percentage="featuresMissingRate[feature]"
@@ -114,6 +114,7 @@ export default {
       trainFea: [],
       selectAll: false, // 全选状态
       fea:[],
+      targetFea:[],
       keyFea:'',
       searchTF:''
     }
@@ -128,6 +129,7 @@ export default {
 
   created() {
     this.getFea(this.tableName)
+    this.getTarget(this.tableName)
   },
   methods: {
     getFea(tableName){
@@ -135,6 +137,12 @@ export default {
         this.fea = res
       })
       this.getMissingRates(this.tableName)
+
+    },
+    getTarget(tableName){
+      getRequest(`/Model/getTargetByTableNam/${tableName}`).then(res => {
+        this.targetFea = res
+      })
     },
     toAlChoose() {
       const dataToUpdate = {

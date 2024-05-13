@@ -173,6 +173,7 @@
                      v-model="pvalue"
                      show-input
                      :max="50"
+                     :min="5"
                  >
                  </el-slider>
                </div>
@@ -181,7 +182,8 @@
                  <el-slider
                      v-model="bvalue"
                      show-input
-                     :max="50">
+                     :max="50"
+                 :min="5">
                  </el-slider>
                </div>
              </div>

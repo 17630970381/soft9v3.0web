@@ -10,7 +10,11 @@
       </el-steps>
     </div>
 
-    <div element-loading-text="正在保存模型，请稍后"
+    <div v-if="resultData.length < 0">
+      您选择的特征无法进行训练，请重新选择
+    </div>
+
+    <div v-else element-loading-text="正在保存模型，请稍后"
          element-loading-spinner="el-icon-loading"
          element-loading-background="rgba(0, 0, 0, 0.8)"
          v-loading="saveLoding"
@@ -274,6 +278,7 @@ export default {
     /*不保存模型时，在刷新页面后，删除存储的模型和图片*/
 
     load(){
+      console.log(this.resultData)
       this.activeIndex = this.selectedAlgorithms[0]
       this.electionAl = this.selectedAlgorithms[0]
       console.log(this.electionAl)
