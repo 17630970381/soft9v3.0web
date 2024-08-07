@@ -36,3 +36,11 @@ export const resetForm = {
       }
     }
   }
+
+  export const getImageSrc = {
+    methods: {
+        getImageSrc(dynamicVariable, picName) {
+            return `/static/${dynamicVariable}/${picName}`;
+        }
+    }
+}

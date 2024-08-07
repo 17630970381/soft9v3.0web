@@ -236,7 +236,12 @@ const routes = [
         meta: { roles: ['0'] },
       },
       //系统管理结束
-
+      {
+        path: '/upload',
+        name: 'upload',
+        component: () => import("@/components/yolo/upload.vue"),
+        meta: { roles: ['0'] },
+      },
     ],
   },
 
@@ -244,6 +249,7 @@ const routes = [
 ];
 const whiteList = ['/login', '/register', '/unauthorized','/forget']
 const router = new VueRouter({
+  // base:'/software9/',
   routes
  })
 router.beforeEach((to, from, next) => {

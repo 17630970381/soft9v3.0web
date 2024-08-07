@@ -147,13 +147,13 @@ export default {
   },
   data(){
     return {
-      url: '' //设置文档网络地址，可以是相对地址
+      url: '/static/softInfo.pdf' //设置文档网络地址，可以是相对地址
     }
   },
   created(){
-    getRequest("/File/getIntroFile").then((res) => {
-      this.url = res
-    });
+    // getRequest("/File/getIntroFile").then((res) => {
+    //   this.url = res
+    // });
     localStorage.removeItem('modelname');
   }
 }

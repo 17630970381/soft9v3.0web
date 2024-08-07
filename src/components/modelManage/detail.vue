@@ -485,6 +485,15 @@ export default {
             this.isRF = tempDy
           }
           this.dynamicVariable.push(tempDy)
+          // const parts = this.pictureUrl.split('/');
+          // if(item.al === 'RF'){
+          //   this.isRF = parts.pop()
+          // }
+          console.log("this.isRF")
+          console.log(this.isRF)
+          // this.dynamicVariable = parts.pop()
+          console.log("this.dynamicVariable")
+          console.log(this.dynamicVariable)
         }
 
         // this.pictureUrl = res[0].picture

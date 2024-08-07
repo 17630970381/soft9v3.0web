@@ -50,15 +50,25 @@
             <span style="font-weight: lighter;color: #9d9b9b">(搜索到的特征将被置于第一个特征的位置)</span>
           </div>
 
-          <div class="left-align" style="margin-top: 20px;display: flex; flex-wrap: wrap;">
+          <div  class="left-align" style="margin-top: 20px;display: flex; flex-wrap: wrap;">
             <el-checkbox-group v-model="trainFea">
-              <el-checkbox  v-for="feature in availableFeatures" :key="feature"  :label="feature" :disabled="target === ''" style="display: inline-block;">
-                <span style="width: 240px; height: 20px; display: inline-block; line-height: 20px;
-                  overflow: hidden; white-space: nowrap; text-overflow: ellipsis;" :title="feature">{{ feature }}</span>
-                <el-progress   :percentage="featuresMissingRate[feature]"
-                               :format="format"
-                               :color="getProgressStatus(featuresMissingRate[feature])"
-                             style="width: 100%;"></el-progress>
+              <el-checkbox
+                  v-for="feature in availableFeatures"
+                  :key="feature"
+                  :label="feature"
+                  :disabled="target === ''"
+                  v-if="featuresMissingRate[feature] >= 50"
+                  style="display: inline-block;"
+              >
+      <span style="width: 240px; height: 20px; display: inline-block; line-height: 20px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;" :title="feature">
+        {{ feature }}
+      </span>
+                <el-progress
+                    :percentage="featuresMissingRate[feature]"
+                    :format="format"
+                    :color="getProgressStatus(featuresMissingRate[feature])"
+                    style="width: 100%;"
+                ></el-progress>
               </el-checkbox>
             </el-checkbox-group>
           </div>

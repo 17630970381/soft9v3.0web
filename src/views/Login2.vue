@@ -92,7 +92,7 @@
               </el-form-item>
               <el-form-item prop="code">
                 <div class="input-with-image">
-                  <el-input style="width: 280px; margin-right: 5px;" type="text" v-model="loginForm.code" placeholder="点击图片更换验证码"
+                  <el-input style="width: 240px; margin-right: 5px; " type="text" v-model="loginForm.code" placeholder="点击图片更换验证码"
                             @keydown.enter.native="submitlogin"></el-input>
                   <img style="height: 38px" :src="captchaUrl" @click="updateCaptcha">
                 </div>
@@ -223,7 +223,7 @@ export default {
 
   data() {
     return {
-      captchaUrl: '/captcha?time'+ new Date(),
+      captchaUrl: `api/common/kaptcha?timestamp=${new Date().getTime()}`,
       loginForm: {
         username: "",
         password: "",
@@ -291,6 +291,7 @@ export default {
         .replace(/\//g, "-")
         .replace(", ", " ");
     },
+
     getNotification() {
       getRequest("notice/queryNotices").then((res) => {
         if (res) {
@@ -308,9 +309,12 @@ export default {
       this.dialogVisible = false;
       done(); // 必须调用 done()，否则对话框不会关闭
     },
+    // updateCaptcha() {
+    //
+    //   this.captchaUrl = 'api/captcha?time'+ new Date()
+    // },
     updateCaptcha() {
-
-      this.captchaUrl = '/captcha?time'+ new Date()
+      this.captchaUrl = `api/common/kaptcha?timestamp=${new Date().getTime()}`;
     },
 
     submitlogin() {

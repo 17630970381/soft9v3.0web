@@ -194,6 +194,12 @@ export default {
               roles: ["0", "1"],
               icon: "el-icon-s-custom",
             },
+            {
+              name: "upload",
+              path: "/upload",
+              roles: ["0", "1"],
+              icon: "el-icon-s-custom",
+            },
           ]
         },
 

@@ -1,12 +1,13 @@
 const { defineConfig } = require("@vue/cli-service");
 
 module.exports = defineConfig({
+  // publicPath: '/software9/',
   transpileDependencies: true,
   lintOnSave: false,
 
   devServer: {
-    host: "10.16.49.224",
-    port: 8080,
+    // host: "10.16.48.219",
+    // port: 8080,
     // 代理配置
     proxy: {
       "/echarts": {
@@ -17,20 +18,22 @@ module.exports = defineConfig({
       },
       "/api": {
         // target:"http://10.16.58.159:8189",
-        target: "http://10.16.49.224:8082", // 我们要代理的地址，实验室地址
+        target: "http://localhost:9090", // 我们要代理的地址，实验室地址
+        // target: "http://10.16.49.224:9090", // 我们要代理的地址，实验室地址
         // 是否跨域 需要设置此值为true 才可以让本地服务代理我们发出请求
         pathRewrite: {
           "^/api": "",
         },
       },
-      "/":{
-        target: "http://10.16.49.224:8082", // 我们要代理的地址，实验室地址
-        // 是否跨域 需要设置此值为true 才可以让本地服务代理我们发出请求
-        pathRewrite: {
-          "^/": "/",
-        },
-        ws: false,
-      }
+      // "/":{
+      //   // target: "http://10.16.48.219:8082", // 我们要代理的地址，实验室地址
+      //   target: "http://localhost:9090", // 我们要代理的地址，实验室地址
+      //   // 是否跨域 需要设置此值为true 才可以让本地服务代理我们发出请求
+      //   pathRewrite: {
+      //     "^/": "/",
+      //   },
+      //   ws: false,
+      // }
     },
   },
 });
